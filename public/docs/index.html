@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Data Sources — Sales Clarity v2</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#060609;color:#e8e8f0;font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased;font-size:14px;padding:24px;line-height:1.7}
+.page{max-width:900px;margin:0 auto}
+a.back{color:#6366f1;font-size:.85rem;text-decoration:none;font-weight:600;display:inline-block;margin-bottom:24px}
+h1{font-size:1.5rem;font-weight:800;margin-bottom:6px}
+.sub{color:rgba(255,255,255,.25);font-size:.85rem;margin-bottom:32px}
+h2{font-size:1.05rem;font-weight:800;margin:28px 0 12px;display:flex;align-items:center;gap:8px}
+.card{background:#101018;border:1px solid rgba(255,255,255,.05);border-radius:10px;padding:16px 18px;margin-bottom:10px}
+.card h3{font-size:.88rem;font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.card p{color:rgba(255,255,255,.4);font-size:.82rem;margin-bottom:4px}
+.src{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:#6366f1;background:rgba(99,102,241,.08);padding:2px 8px;border-radius:4px;display:inline-block;margin-top:4px}
+.tag{display:inline-block;font-size:.6rem;font-weight:600;padding:2px 6px;border-radius:3px;margin-left:4px}
+.tag-live{background:rgba(34,197,94,.1);color:#22c55e}
+.tag-new{background:rgba(59,130,246,.1);color:#3b82f6}
+.tag-partial{background:rgba(245,158,11,.1);color:#f59e0b}
+table{width:100%;border-collapse:collapse;font-size:.82rem;margin:14px 0}
+th{padding:10px 12px;text-align:left;font-size:.65rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.2);border-bottom:2px solid rgba(255,255,255,.05)}
+td{padding:8px 12px;border-bottom:1px solid rgba(255,255,255,.03);color:rgba(255,255,255,.4)}
+td:first-child{font-weight:600;color:rgba(255,255,255,.6)}
+.note{background:#101018;border:1px solid rgba(255,255,255,.05);border-radius:10px;padding:14px 16px;margin:14px 0;font-size:.82rem;color:rgba(255,255,255,.35)}
+.note strong{color:rgba(255,255,255,.6)}
+</style>
+</head>
+<body>
+<div class="page">
+<a href="/" class="back">← Back to Dashboard</a>
+<h1>📖 Data Source Documentation</h1>
+<p class="sub">Sales Clarity v2 — Updated March 24, 2026. Where every piece of data comes from.</p>
+
+<h2>🔄 Data Flow Architecture</h2>
+<div class="note"><strong>Feed = Booked Opportunities (not raw calls).</strong> Each row in the Live Feed is a unique prospect who was booked as an opportunity in Close.com. Deduplicated by lead name. Enriched with LeadFi data + call duration from the longest call to that lead. Paginated up to 500 records per request.</div>
+
+<h2>📊 KPI Cards</h2>
+<table>
+<thead><tr><th>KPI</th><th>Source</th><th>How Calculated</th><th>Status</th></tr></thead>
+<tbody>
+<tr><td>Show Rate</td><td>Close.com Opps + Calls</td><td>Demos (calls >5min) / Booked opps (status=Scheduled)</td><td><span class="tag tag-live">Live</span></td></tr>
+<tr><td>Close Rate</td><td>Slack + Close.com</td><td>Payments ≥$2K / Demos (calls >5min). High-ticket only.</td><td><span class="tag tag-live">Live</span></td></tr>
+<tr><td>EP/Call</td><td>Slack + Close.com</td><td>HT cash / Demos (5min+)</td><td><span class="tag tag-live">Live</span></td></tr>
+<tr><td>Cash Collected (gross)</td><td>Slack #successful-payments</td><td>Sum of all payment amounts in date range</td><td><span class="tag tag-live">Live</span></td></tr>
+<tr><td>Revenue Per Lead</td><td>Slack + Close.com</td><td>Total Cash / Total Booked Opps</td><td><span class="tag tag-new">New</span></td></tr>
+<tr><td>Set Rate</td><td>Close.com Calls</td><td>Sets (calls >30s) / Total Dials</td><td><span class="tag tag-new">New</span></td></tr>
+<tr><td>CS 650+ Rate</td><td>Close.com LeadFi</td><td>Leads with CS ≥650 / Leads with CS data</td><td><span class="tag tag-live">Live</span></td></tr>
+<tr><td>Calls</td><td>Close.com Activity/Call</td><td>Total call activities in date range</td><td><span class="tag tag-live">Live</span></td></tr>
+</tbody>
+</table>
+
+<h2>📋 Live Feed Columns</h2>
+<table>
+<thead><tr><th>Column</th><th>Source</th><th>How Pulled</th><th>Status</th></tr></thead>
+<tbody>
+<tr><td>Date / Time</td><td>Close.com</td><td>opportunity → date_created</td><td><span class="tag tag-live">Live</span></td></tr>
+<tr><td>Prospect</td><td>Close.com</td><td>opportunity → lead_name (deduplicated)</td><td><span class="tag tag-live">Live</span></td></tr>
+<tr><td>Rep</td><td>Close.com</td><td>opportunity → user_name (assigned closer)</td><td><span class="tag tag-live">Live</span></td></tr>
+<tr><td>Type</td><td>Close.com Calls</td><td>Longest call to lead: >5min=Demo, >2min=Show, >30s=Set, else=Short/Scheduled</td><td><span class="tag tag-new">New: 5min threshold</span></td></tr>
+<tr><td>Duration</td><td>Close.com Calls</td><td>Longest call duration to that lead_id</td><td><span class="tag tag-live">Live</span></td></tr>
+<tr><td>Credit Score</td><td>Close.com → LeadFi</td><td>lead → custom["Credit Score"]</td><td><span class="tag tag-live">Live</span></td></tr>
+<tr><td>Income</td><td>Close.com → LeadFi</td><td>lead → custom["Income Estimate"]</td><td><span class="tag tag-live">Live</span></td></tr>
+<tr><td>Available Credit</td><td>Close.com → LeadFi</td><td>lead → custom["Available Credit"]</td><td><span class="tag tag-new">New</span></td></tr>
+<tr><td>DTI</td><td>Close.com → LeadFi</td><td>lead → custom["DTI"]</td><td><span class="tag tag-new">New</span></td></tr>
+<tr><td>Credit Frozen?</td><td>Close.com → LeadFi</td><td>lead → custom["Credit Frozen?"]</td><td><span class="tag tag-new">New</span></td></tr>
+<tr><td>Source</td><td>Close.com → Pre-filled Calendly URL</td><td>Parsed: sl= param (ig→Instagram, fb→Facebook), fbclid→Meta, gclid→Google, ttclid→TikTok, utm_source</td><td><span class="tag tag-new">New</span></td></tr>
+<tr><td>Campaign</td><td>Close.com → Pre-filled Calendly URL</td><td>Parsed: utm_campaign from Calendly URL</td><td><span class="tag tag-new">New</span></td></tr>
+<tr><td>Setter</td><td>Close.com → LeadFi</td><td>lead → custom["appointment_user_fullname"]</td><td><span class="tag tag-new">New</span></td></tr>
+<tr><td>Status</td><td>Close.com</td><td>opportunity → status_label + lead → status_label</td><td><span class="tag tag-live">Live</span></td></tr>
+<tr><td>Notes</td><td>Close.com Calls</td><td>call → note (first 200 chars, AI transcription)</td><td><span class="tag tag-live">Live</span></td></tr>
+<tr><td>Recording</td><td>Close.com Calls</td><td>call → recording_url (🎙️ if exists)</td><td><span class="tag tag-live">Live</span></td></tr>
+</tbody>
+</table>
+
+<h2>🏆 Leaderboard</h2>
+<div class="card">
+<h3>Sorted by Net Cash <span class="tag tag-new">Changed</span></h3>
+<p>Was sorted by show rate. Now sorted by total cash collected per rep (Hormozi: cash is what matters).</p>
+<p>Includes: Calls, Demos (5m+), Show%, Closes, Close%, Cash, EP/Call, Top Source per rep.</p>
+</div>
+
+<h2>🔌 API Architecture</h2>
+<table>
+<thead><tr><th>Source</th><th>What It Provides</th><th>Auth</th><th>Pagination</th><th>Status</th></tr></thead>
+<tbody>
+<tr><td>Close.com Opportunities</td><td>Booked calls (the feed)</td><td>Basic Auth (API Key)</td><td>Up to 500 (paginated)</td><td><span class="tag tag-live">Live</span></td></tr>
+<tr><td>Close.com Calls</td><td>Call duration, recordings, notes</td><td>Basic Auth</td><td>Up to 500 (paginated)</td><td><span class="tag tag-live">Live</span></td></tr>
+<tr><td>Close.com Leads</td><td>LeadFi enrichment (CS, income, DTI, etc.)</td><td>Basic Auth</td><td>60 lead cache per request</td><td><span class="tag tag-live">Live</span></td></tr>
+<tr><td>Slack #successful-payments</td><td>Payment amounts, names, emails</td><td>User Token (xoxp-)</td><td>100 messages</td><td><span class="tag tag-live">Live</span></td></tr>
+<tr><td>Slack #closed-deals</td><td>Deal closures, rep attribution</td><td>User Token</td><td>100 messages</td><td><span class="tag tag-live">Live</span></td></tr>
+<tr><td>Hyros</td><td>Revenue attribution (via flow.aicommerce.co)</td><td>API-Key header</td><td>Paginated</td><td><span class="tag tag-partial">Separate dashboard</span></td></tr>
+<tr><td>GHL Calendars</td><td>35 calendars found, events returning empty</td><td>Bearer PIT</td><td>—</td><td><span class="tag tag-partial">Permissions issue</span></td></tr>
+<tr><td>Calendly</td><td>Org-level events (mostly internal meetings)</td><td>Bearer PAT</td><td>—</td><td><span class="tag tag-partial">Sales calls not here</span></td></tr>
+</tbody>
+</table>
+
+<h2>🔍 Source Parsing Logic</h2>
+<div class="card">
+<h3>How Source Attribution Works</h3>
+<p>Each lead's "Pre-filled Calendly" custom field in Close.com contains a URL with tracking parameters. The API parses these in order:</p>
+<p>1. <code>sl=</code> param → fb=Facebook, ig=Instagram, tt=TikTok, gg=Google, yt=YouTube, em=Email, org=Organic</p>
+<p>2. <code>utm_source=</code> param → direct value</p>
+<p>3. <code>fbclid</code> in URL → "Meta"</p>
+<p>4. <code>gclid</code> in URL → "Google"</p>
+<p>5. <code>ttclid</code> in URL → "TikTok"</p>
+<p>6. Campaign from <code>utm_campaign</code> param</p>
+<div class="src">Example: ?sl=ig&fbclid=IwZXh0... → Source: "Instagram"</div>
+</div>
+
+<h2>📝 Key Changes from v1</h2>
+<div class="card">
+<h3>What Changed (March 24, 2026)</h3>
+<p>• Feed now shows <strong>booked opportunities</strong> (not raw call logs) — one row per prospect, deduplicated</p>
+<p>• <strong>Pagination</strong> added — up to 500 opps + 500 calls (was 50/30)</p>
+<p>• Demo threshold changed from <strong>2min → 5min</strong> for accurate show/close rates</p>
+<p>• Added columns: <strong>Available Credit, DTI, Credit Frozen, Source, Campaign, Setter</strong></p>
+<p>• Added KPIs: <strong>Revenue Per Lead, Set Rate</strong></p>
+<p>• Cash label clarified as <strong>"gross"</strong></p>
+<p>• Leaderboard sorted by <strong>cash</strong> (was show rate) + added Top Source column</p>
+<p>• <strong>Source filter</strong> dropdown added next to Rep filter</p>
+<p>• Source parsing from Close.com "Pre-filled Calendly" custom field</p>
+</div>
+
+<p style="color:rgba(255,255,255,.1);font-size:.72rem;text-align:center;margin-top:32px">Sales Clarity v2 · Built by Corvin 🦅 · March 2026</p>
+</div>
+</body>
+</html>

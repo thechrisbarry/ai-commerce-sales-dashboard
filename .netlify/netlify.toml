@@ -1,0 +1,30 @@
+functionsDirectory = "/home/ubuntu/.openclaw/workspace/sm-dashboard/netlify/functions"
+functionsDirectoryOrigin = "config-v1"
+plugins = []
+headers = []
+redirects = []
+
+[build]
+publish = "/home/ubuntu/.openclaw/workspace/sm-dashboard/public"
+publishOrigin = "config"
+base = "/home/ubuntu/.openclaw/workspace/sm-dashboard"
+functions = "/home/ubuntu/.openclaw/workspace/sm-dashboard/netlify/functions"
+
+[build.environment]
+NODE_VERSION = "18"
+
+[build.processing]
+
+[build.processing.css]
+
+[build.processing.html]
+
+[build.processing.images]
+
+[build.processing.js]
+
+[build.services]
+
+[functions]
+
+[functions."*"]

@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Sales Clarity Dashboard — AICommerce 2026</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0d0b14;--surface:#13111c;--card:#1a1726;--card-hover:#201c2e;--border:rgba(255,255,255,.06);--text:#e8e6f0;--sub:rgba(232,230,240,.5);--muted:rgba(232,230,240,.3);--accent:#8b5cf6;--accent2:#a78bfa;--green:#22c55e;--red:#ef4444;--gold:#f59e0b;--blue:#3b82f6;--pink:#ec4899;--mono:'JetBrains Mono',monospace}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden;line-height:1.5;font-size:14px}
+
+/* LOGIN */
+.login-overlay{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center}
+.login-box{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:40px;width:360px;text-align:center}
+.login-box h2{color:var(--accent);font-size:1.1rem;font-weight:700;margin-bottom:4px}
+.login-box p{color:var(--muted);font-size:.8rem;margin-bottom:24px}
+.login-box input{width:100%;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:.9rem;margin-bottom:12px;outline:none}
+.login-box input:focus{border-color:var(--accent)}
+.login-box button{width:100%;padding:10px;background:linear-gradient(135deg,var(--accent),#7c3aed);border:none;border-radius:8px;color:#fff;font-weight:700;font-size:.9rem;cursor:pointer}
+.login-box button:hover{opacity:.9}
+.login-hidden{display:none!important}
+
+/* LAYOUT */
+.app{display:flex;min-height:100vh}
+.sidebar{width:220px;background:var(--surface);border-right:1px solid var(--border);padding:20px 0;position:fixed;height:100vh;overflow-y:auto;z-index:10}
+.sidebar-logo{padding:0 20px 20px;border-bottom:1px solid var(--border);margin-bottom:16px}
+.sidebar-logo h1{font-size:.95rem;font-weight:800;color:var(--accent)}
+.sidebar-logo span{font-size:.7rem;color:var(--muted);display:block;margin-top:2px}
+.nav-section{padding:0 12px;margin-bottom:16px}
+.nav-section-title{font-size:.65rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:0 8px;margin-bottom:6px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;color:var(--sub);font-size:.85rem;font-weight:500;cursor:pointer;transition:all .15s;text-decoration:none}
+.nav-item:hover{background:rgba(139,92,246,.08);color:var(--text)}
+.nav-item.active{background:rgba(139,92,246,.12);color:var(--accent)}
+.nav-item .icon{font-size:1rem;width:20px;text-align:center}
+
+.main{margin-left:220px;flex:1;padding:24px 32px}
+
+/* HEADER */
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}
+.header h2{font-size:1.3rem;font-weight:800}
+.header-controls{display:flex;gap:10px;align-items:center}
+.date-range{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:6px 14px;color:var(--text);font-family:inherit;font-size:.82rem;cursor:pointer;outline:none}
+.date-range:focus{border-color:var(--accent)}
+.rep-filter{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:6px 14px;color:var(--text);font-family:inherit;font-size:.82rem;outline:none}
+.btn-refresh{background:var(--accent);border:none;border-radius:8px;padding:6px 16px;color:#fff;font-weight:600;font-size:.82rem;cursor:pointer;display:flex;align-items:center;gap:6px}
+.btn-refresh:hover{opacity:.9}
+
+/* KPI CARDS */
+.kpi-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:24px}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.kpi-label{font-size:.7rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.kpi-value{font-size:1.6rem;font-weight:800;font-family:var(--mono)}
+.kpi-value.green{color:var(--green)}
+.kpi-value.red{color:var(--red)}
+.kpi-value.gold{color:var(--gold)}
+.kpi-value.blue{color:var(--blue)}
+.kpi-value.accent{color:var(--accent)}
+.kpi-value.pink{color:var(--pink)}
+.kpi-sub{font-size:.72rem;color:var(--muted);margin-top:4px}
+
+/* TABS */
+.tabs{display:flex;gap:4px;margin-bottom:20px;border-bottom:1px solid var(--border);padding-bottom:-1px}
+.tab{padding:10px 20px;font-size:.85rem;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;position:relative;bottom:-1px}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.tab-content{display:none}
+.tab-content.active{display:block}
+
+/* TABLE */
+.tbl-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:12px;background:var(--card)}
+table{width:100%;border-collapse:collapse;font-size:.82rem;min-width:800px}
+thead{background:rgba(139,92,246,.06)}
+th{padding:10px 14px;text-align:left;font-weight:700;font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);white-space:nowrap;position:sticky;top:0;background:var(--card)}
+td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--sub);white-space:nowrap}
+tr:hover td{background:rgba(139,92,246,.03)}
+tr:last-child td{border-bottom:0}
+
+/* BADGES */
+.badge{display:inline-block;padding:2px 8px;border-radius:6px;font-size:.72rem;font-weight:600}
+.badge-green{background:rgba(34,197,94,.12);color:var(--green)}
+.badge-red{background:rgba(239,68,68,.12);color:var(--red)}
+.badge-gold{background:rgba(245,158,11,.12);color:var(--gold)}
+.badge-blue{background:rgba(59,130,246,.12);color:var(--blue)}
+.badge-purple{background:rgba(139,92,246,.12);color:var(--accent)}
+.badge-muted{background:rgba(255,255,255,.05);color:var(--muted)}
+
+/* SCORE BAR */
+.score-bar{width:50px;height:6px;background:rgba(255,255,255,.06);border-radius:3px;display:inline-block;vertical-align:middle;margin-left:6px}
+.score-fill{height:100%;border-radius:3px}
+
+/* CHARTS PLACEHOLDER */
+.chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px}
+.chart-title{font-size:.82rem;font-weight:700;margin-bottom:12px}
+.chart-placeholder{height:200px;background:rgba(139,92,246,.04);border:1px dashed var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:.82rem}
+.chart-full{grid-column:1/-1}
+
+/* NOTES */
+.notes-cell{max-width:250px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.notes-cell:hover{white-space:normal;overflow:visible;position:relative;z-index:5;background:var(--card)}
+
+/* FATHOM LINK */
+a.fathom-link{color:var(--accent);text-decoration:none;font-size:.78rem}
+a.fathom-link:hover{text-decoration:underline}
+
+
+/* CONTACT TOOLTIP */
+.prospect-cell{position:relative;cursor:pointer}
+.prospect-cell .tooltip{display:none;position:absolute;left:0;top:100%;z-index:100;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;min-width:260px;box-shadow:0 8px 30px rgba(0,0,0,.6);font-size:.78rem;white-space:normal;line-height:1.6}
+.prospect-cell:hover .tooltip{display:block}
+.tooltip .t-name{font-weight:700;font-size:.88rem;color:var(--text);margin-bottom:6px}
+.tooltip .t-row{display:flex;gap:8px;color:var(--sub);margin-bottom:3px}
+.tooltip .t-label{color:var(--muted);min-width:55px}
+
+/* RESPONSIVE */
+@media(max-width:1200px){.kpi-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:768px){
+  .sidebar{display:none}
+  .main{margin-left:0}
+  .kpi-grid{grid-template-columns:repeat(2,1fr)}
+  .chart-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-box">
+    <h2>Sales Clarity</h2>
+    <p>AICommerce Sales Dashboard</p>
+    <input type="text" id="loginUser" placeholder="Username" autocomplete="off">
+    <input type="password" id="loginPass" placeholder="Password">
+    <button onclick="doLogin()">Sign In</button>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="app" id="app" style="display:none">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <h1>📊 Sales Clarity</h1>
+      <span>AICommerce 2026</span>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-title">Views</div>
+      <a class="nav-item active" data-tab="overview"><span class="icon">⚡</span> Overview</a>
+      <a class="nav-item" href="/detailed/" style="text-decoration:none"><span class="icon">📋</span> Detailed Log ↗</a>
+      <a class="nav-item" data-tab="analytics"><span class="icon">📈</span> Analytics</a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-title">Data Sources</div>
+      <a class="nav-item" style="cursor:default"><span class="icon">📞</span> GHL <span class="badge badge-green" style="margin-left:auto;font-size:.6rem">Live</span></a>
+      <a class="nav-item" style="cursor:default"><span class="icon">📅</span> Calendly <span class="badge badge-green" style="margin-left:auto;font-size:.6rem">Live</span></a>
+      <a class="nav-item" style="cursor:default"><span class="icon">💬</span> Close.com <span class="badge badge-green" style="margin-left:auto;font-size:.6rem">Live</span></a>
+      <a class="nav-item" style="cursor:default"><span class="icon">🎙️</span> Fathom <span class="badge badge-green" style="margin-left:auto;font-size:.6rem">Live</span></a>
+      <a class="nav-item" style="cursor:default"><span class="icon">📹</span> Zoom <span class="badge badge-green" style="margin-left:auto;font-size:.6rem">Live</span></a>
+      <a class="nav-item" style="cursor:default"><span class="icon">💳</span> Payments <span class="badge badge-green" style="margin-left:auto;font-size:.6rem">Live</span></a>
+      <a class="nav-item" style="cursor:default"><span class="icon">📝</span> Typeform <span class="badge badge-green" style="margin-left:auto;font-size:.6rem">Live</span></a>
+      <a class="nav-item" style="cursor:default"><span class="icon">🏦</span> LeadFi <span class="badge badge-green" style="margin-left:auto;font-size:.6rem">Live</span></a>
+      <a class="nav-item" style="cursor:default"><span class="icon">📊</span> SC × Hyros <span class="badge badge-green" style="margin-left:auto;font-size:.6rem">Live</span></a>
+      <a class="nav-item" style="cursor:default"><span class="icon">💬</span> Sendblue <span class="badge badge-green" style="margin-left:auto;font-size:.6rem">Live</span></a>
+    </div>
+    <div class="nav-section" style="margin-top:auto;padding-top:20px;border-top:1px solid var(--border)">
+      <div style="padding:0 8px;color:var(--muted);font-size:.68rem">Built by Corvin 🦅<br>v1.0 — Mar 2026</div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- HEADER -->
+    <div class="header">
+      <h2>Sales Clarity Dashboard</h2>
+      <div class="header-controls">
+        <select class="rep-filter">
+          <option>All Reps</option>
+          <option>John Cantu</option>
+          <option>Benjamin Hampton</option>
+          <option>Anthony Steel</option>
+        </select>
+        <select class="date-range">
+          <option>Today</option>
+          <option>Yesterday</option>
+          <option>Last 7 Days</option>
+          <option selected>Last 30 Days</option>
+          <option>This Month</option>
+          <option>Last Month</option>
+          <option>Last 90 Days</option>
+          <option>All Time</option>
+        </select>
+        <button class="btn-refresh">🔄 Refresh</button>
+        <div style="position:relative;display:inline-block">
+          <button class="btn-refresh" style="background:transparent;border:1px solid var(--border);color:var(--sub)" id="ovColBtn">⚙️ Columns</button>
+          <div id="ovColPicker" style="display:none;position:absolute;right:0;top:100%;z-index:200;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;min-width:200px;box-shadow:0 8px 30px rgba(0,0,0,.6)">
+            <div style="font-size:.65rem;font-weight:700;color:var(--muted);margin-bottom:6px;letter-spacing:.1em">SHOW/HIDE COLUMNS</div>
+            <label style="display:flex;gap:6px;font-size:.78rem;color:var(--sub);padding:3px 0;cursor:pointer"><input type="checkbox" data-ovcol="0" checked> Date</label>
+            <label style="display:flex;gap:6px;font-size:.78rem;color:var(--sub);padding:3px 0;cursor:pointer"><input type="checkbox" data-ovcol="1" checked> Time</label>
+            <label style="display:flex;gap:6px;font-size:.78rem;color:var(--sub);padding:3px 0;cursor:pointer"><input type="checkbox" data-ovcol="2" checked> Prospect</label>
+            <label style="display:flex;gap:6px;font-size:.78rem;color:var(--sub);padding:3px 0;cursor:pointer"><input type="checkbox" data-ovcol="3" checked> Rep</label>
+            <label style="display:flex;gap:6px;font-size:.78rem;color:var(--sub);padding:3px 0;cursor:pointer"><input type="checkbox" data-ovcol="4" checked> Type</label>
+            <label style="display:flex;gap:6px;font-size:.78rem;color:var(--sub);padding:3px 0;cursor:pointer"><input type="checkbox" data-ovcol="5" checked> Duration</label>
+            <label style="display:flex;gap:6px;font-size:.78rem;color:var(--sub);padding:3px 0;cursor:pointer"><input type="checkbox" data-ovcol="6" checked> CS</label>
+            <label style="display:flex;gap:6px;font-size:.78rem;color:var(--sub);padding:3px 0;cursor:pointer"><input type="checkbox" data-ovcol="7" checked> Income</label>
+            <label style="display:flex;gap:6px;font-size:.78rem;color:var(--sub);padding:3px 0;cursor:pointer"><input type="checkbox" data-ovcol="8" checked> Source</label>
+            <label style="display:flex;gap:6px;font-size:.78rem;color:var(--sub);padding:3px 0;cursor:pointer"><input type="checkbox" data-ovcol="9" checked> Campaign</label>
+            <label style="display:flex;gap:6px;font-size:.78rem;color:var(--sub);padding:3px 0;cursor:pointer"><input type="checkbox" data-ovcol="10" checked> Outcome</label>
+            <label style="display:flex;gap:6px;font-size:.78rem;color:var(--sub);padding:3px 0;cursor:pointer"><input type="checkbox" data-ovcol="11" checked> Contract</label>
+            <label style="display:flex;gap:6px;font-size:.78rem;color:var(--sub);padding:3px 0;cursor:pointer"><input type="checkbox" data-ovcol="12" checked> Notes</label>
+            <label style="display:flex;gap:6px;font-size:.78rem;color:var(--sub);padding:3px 0;cursor:pointer"><input type="checkbox" data-ovcol="13" checked> 🎙️</label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- KPI CARDS -->
+    <div class="kpi-grid">
+      <div class="kpi">
+        <div class="kpi-label">Calls Today</div>
+        <div class="kpi-value accent">50</div>
+        <div class="kpi-sub">6 reps active</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Demos Held</div>
+        <div class="kpi-value green">8</div>
+        <div class="kpi-sub">Show rate: 38%</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Avg CS (Today)</div>
+        <div class="kpi-value gold">652</div>
+        <div class="kpi-sub">5 of 8 above 650</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Cash Today</div>
+        <div class="kpi-value green">$14,800</div>
+        <div class="kpi-sub">1 close — Michael Gillham (Elective)</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Pipeline Value</div>
+        <div class="kpi-value blue">$59.2K</div>
+        <div class="kpi-sub">4 follow-ups pending</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Avg Call Duration</div>
+        <div class="kpi-value accent">14m</div>
+        <div class="kpi-sub">Demos only (>5min)</div>
+      </div>
+    </div>
+
+    <!-- TABS -->
+    <div class="tabs">
+      <div class="tab active" data-tab="overview">⚡ Overview</div>
+      <div class="tab" data-tab="detailed">📋 Detailed Log</div>
+      <div class="tab" data-tab="analytics">📈 Analytics</div>
+    </div>
+
+    <!-- TAB 1: OVERVIEW -->
+    <div class="tab-content active" id="tab-overview">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+        <div style="font-size:.85rem;color:var(--sub)">🔴 <strong style="color:var(--green)">LIVE</strong> · <span id="liveClock" style="font-family:var(--mono);color:var(--accent)"></span> <select id="tzSelect" style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:3px 6px;color:var(--text);font-size:.75rem;font-family:inherit;margin-left:4px"><option value="America/New_York">NYC (ET)</option><option value="America/Los_Angeles">LA (PT)</option><option value="Europe/Berlin">CET</option><option value="Asia/Dubai" selected>Dubai (GST)</option></select></div>
+        <div style="font-size:.75rem;color:var(--muted)">9 connected sources · Slack #successful-payments + #closed-deals</div>
+      </div>
+      <div class="tbl-wrap" style="max-height:650px;overflow-y:auto">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Time</th>
+              <th>Prospect</th>
+              <th>Rep</th>
+              <th>Type</th>
+              <th>Duration</th>
+              <th>CS</th>
+              <th>Income</th>
+              <th>Source</th>
+              <th>Campaign</th>
+              <th>Outcome</th>
+              <th>Contract</th>
+              <th>Notes</th>
+              <th>🎙️</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>03/23</td><td style="color:var(--green)">18:17</td><td class="prospect-cell"><strong>Schlondra Johns</strong>
+<div class="tooltip">
+<div class="t-name">Schlondra Johns</div>
+<div class="t-row"><span class="t-label">📧</span> schlondraj@gmail.com</div>
+<div class="t-row"><span class="t-label">📞</span> +1 321-297-2840</div>
+<div class="t-row"><span class="t-label">📍</span> Orlando, FL</div>
+<div class="t-row"><span class="t-label">💳</span> CS: 537</div>
+<div class="t-row"><span class="t-label">💰</span> Income: $53K</div>
+</div></td><td>Sam F.</td><td><span class="badge badge-purple">Setter</span></td><td>16m</td><td><span style="color:var(--red)">537</span></td><td>$53K</td><td><span class="badge badge-blue">FB</span></td><td style="font-size:.7rem">AB-Nov5 OCT VADs Etsy</td><td><span class="badge badge-gold">Follow-up</span></td><td>—</td><td class="notes-cell" style="max-width:180px">Spoke on break, interested. Zak scheduled closer call Mon 3pm</td><td><a class="fathom-link" href="#">🎙️</a></td></tr>
+            <tr><td>03/23</td><td>17:36</td><td class="prospect-cell"><strong>Spaulding</strong>
+<div class="tooltip">
+<div class="t-name">Spaulding</div>
+<div class="t-row"><span class="t-label">📧</span> spaulding@email.com</div>
+<div class="t-row"><span class="t-label">📞</span> —</div>
+<div class="t-row"><span class="t-label">📍</span> —, —</div>
+<div class="t-row"><span class="t-label">💳</span> CS: —</div>
+<div class="t-row"><span class="t-label">💰</span> Income: —</div>
+</div></td><td>Chris B.</td><td><span class="badge badge-green">Closer</span></td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td><span class="badge badge-blue">Scheduled</span></td><td>—</td><td class="notes-cell">Closer call scheduled</td><td>—</td></tr>
+            <tr><td>03/23</td><td>17:00</td><td class="prospect-cell"><strong>Stephanie Decarli</strong>
+<div class="tooltip">
+<div class="t-name">Stephanie Decarli</div>
+<div class="t-row"><span class="t-label">📧</span> sdecarli@gmail.com</div>
+<div class="t-row"><span class="t-label">📞</span> —</div>
+<div class="t-row"><span class="t-label">📍</span> —, —</div>
+<div class="t-row"><span class="t-label">💳</span> CS: —</div>
+<div class="t-row"><span class="t-label">💰</span> Income: —</div>
+</div></td><td>Stef M.</td><td><span class="badge badge-purple">Setter</span></td><td>—</td><td>—</td><td>—</td><td><span class="badge badge-blue">FB</span></td><td style="font-size:.7rem">MID-Top25% SC</td><td><span class="badge badge-blue">Scheduled</span></td><td>$14.8K</td><td class="notes-cell">Call scheduled via pipeline</td><td>—</td></tr>
+            <tr><td>03/23</td><td>16:35</td><td class="prospect-cell"><strong>Sergio Mauldin</strong>
+<div class="tooltip">
+<div class="t-name">Sergio Mauldin</div>
+<div class="t-row"><span class="t-label">📧</span> smauldin@email.com</div>
+<div class="t-row"><span class="t-label">📞</span> —</div>
+<div class="t-row"><span class="t-label">📍</span> —, —</div>
+<div class="t-row"><span class="t-label">💳</span> CS: —</div>
+<div class="t-row"><span class="t-label">💰</span> Income: —</div>
+</div></td><td>Chris B.</td><td><span class="badge badge-green">Closer</span></td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td><span class="badge badge-blue">Scheduled</span></td><td>—</td><td class="notes-cell">Closer call scheduled</td><td>—</td></tr>
+            <tr><td>03/23</td><td>16:30</td><td class="prospect-cell"><strong>Cheyenne Rector</strong>
+<div class="tooltip">
+<div class="t-name">Cheyenne Rector</div>
+<div class="t-row"><span class="t-label">📧</span> crector@email.com</div>
+<div class="t-row"><span class="t-label">📞</span> —</div>
+<div class="t-row"><span class="t-label">📍</span> —, —</div>
+<div class="t-row"><span class="t-label">💳</span> CS: —</div>
+<div class="t-row"><span class="t-label">💰</span> Income: —</div>
+</div></td><td>Chris B.</td><td><span class="badge badge-green">Closer</span></td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td><span class="badge badge-blue">Scheduled</span></td><td>—</td><td class="notes-cell">Closer call scheduled</td><td>—</td></tr>
+            <tr><td>03/23</td><td>16:25</td><td class="prospect-cell"><strong>Derrick Dortch</strong>
+<div class="tooltip">
+<div class="t-name">Derrick Dortch</div>
+<div class="t-row"><span class="t-label">📧</span> ddortch@email.com</div>
+<div class="t-row"><span class="t-label">📞</span> —</div>
+<div class="t-row"><span class="t-label">📍</span> —, —</div>
+<div class="t-row"><span class="t-label">💳</span> CS: —</div>
+<div class="t-row"><span class="t-label">💰</span> Income: —</div>
+</div></td><td>Allan K.</td><td><span class="badge badge-purple">Setter</span></td><td>—</td><td>—</td><td>—</td><td><span class="badge badge-blue">FB</span></td><td style="font-size:.7rem">MID-No Income Adv+</td><td><span class="badge badge-blue">Scheduled</span></td><td>$14.8K</td><td class="notes-cell">Pipeline: Sales Team</td><td>—</td></tr>
+            <tr><td>03/23</td><td>15:58</td><td class="prospect-cell"><strong>Scott Mudd</strong>
+<div class="tooltip">
+<div class="t-name">Scott Mudd</div>
+<div class="t-row"><span class="t-label">📧</span> smudd@email.com</div>
+<div class="t-row"><span class="t-label">📞</span> —</div>
+<div class="t-row"><span class="t-label">📍</span> —, —</div>
+<div class="t-row"><span class="t-label">💳</span> CS: —</div>
+<div class="t-row"><span class="t-label">💰</span> Income: —</div>
+</div></td><td>Luke T.</td><td><span class="badge badge-purple">Setter</span></td><td>4m</td><td>—</td><td>—</td><td><span class="badge badge-blue">FB</span></td><td style="font-size:.7rem">RETMAT 2026 HAMMER</td><td><span class="badge badge-gold">Follow-up</span></td><td>—</td><td class="notes-cell">Short call, voicemail after</td><td><a class="fathom-link" href="#">🎙️</a></td></tr>
+            <tr><td>03/23</td><td>15:30</td><td class="prospect-cell"><strong>Tim Rowland</strong>
+<div class="tooltip">
+<div class="t-name">Tim Rowland</div>
+<div class="t-row"><span class="t-label">📧</span> accinc14@yahoo.com</div>
+<div class="t-row"><span class="t-label">📞</span> +1 816-365-6484</div>
+<div class="t-row"><span class="t-label">📍</span> Kansas City, MO</div>
+<div class="t-row"><span class="t-label">💳</span> CS: 680</div>
+<div class="t-row"><span class="t-label">💰</span> Income: $72K</div>
+</div></td><td>Anthony S.</td><td><span class="badge badge-green">Closer</span></td><td>22m</td><td><span style="color:var(--green)">680</span></td><td>$72K</td><td><span class="badge badge-blue">FB</span></td><td style="font-size:.7rem">MID-Top25% SC ebay</td><td><span class="badge badge-gold">Follow-up</span></td><td>—</td><td class="notes-cell">Qualified, reviewing videos. Follow up Thurs</td><td><a class="fathom-link" href="#">🎙️</a></td></tr>
+            <tr><td>03/23</td><td>14:45</td><td class="prospect-cell"><strong>Hector Espinosa Jr</strong>
+<div class="tooltip">
+<div class="t-name">Hector Espinosa Jr</div>
+<div class="t-row"><span class="t-label">📧</span> chivasnike7@gmail.com</div>
+<div class="t-row"><span class="t-label">📞</span> +1 281-452-1470</div>
+<div class="t-row"><span class="t-label">📍</span> Houston, TX</div>
+<div class="t-row"><span class="t-label">💳</span> CS: 620</div>
+<div class="t-row"><span class="t-label">💰</span> Income: $48K</div>
+</div></td><td>Zak L.</td><td><span class="badge badge-purple">Setter</span></td><td>18m</td><td><span style="color:var(--gold)">620</span></td><td>$48K</td><td><span class="badge badge-blue">FB</span></td><td style="font-size:.7rem">MID-No Income ebay</td><td><span class="badge badge-blue">Set → Closer</span></td><td>—</td><td class="notes-cell">SC qualified. Booked closer call</td><td><a class="fathom-link" href="#">🎙️</a></td></tr>
+            <tr><td>03/23</td><td>14:15</td><td class="prospect-cell"><strong>Guy Alberghini</strong>
+<div class="tooltip">
+<div class="t-name">Guy Alberghini</div>
+<div class="t-row"><span class="t-label">📧</span> yourtrainingshop@gmail.com</div>
+<div class="t-row"><span class="t-label">📞</span> +1 781-308-5299</div>
+<div class="t-row"><span class="t-label">📍</span> Boston, MA</div>
+<div class="t-row"><span class="t-label">💳</span> CS: 710</div>
+<div class="t-row"><span class="t-label">💰</span> Income: $85K</div>
+</div></td><td>Anthony S.</td><td><span class="badge badge-green">Closer</span></td><td>35m</td><td><span style="color:var(--green)">710</span></td><td>$85K</td><td><span class="badge badge-blue">FB</span></td><td style="font-size:.7rem">MID-No Income drop ship</td><td><span class="badge badge-gold">Follow-up</span></td><td>—</td><td class="notes-cell">Good call, reviewing. Needs spouse approval. Affirm first</td><td><a class="fathom-link" href="#">🎙️</a></td></tr>
+            <tr><td>03/23</td><td>13:20</td><td class="prospect-cell"><strong>Ed Kamara</strong>
+<div class="tooltip">
+<div class="t-name">Ed Kamara</div>
+<div class="t-row"><span class="t-label">📧</span> etsy01760@gmail.com</div>
+<div class="t-row"><span class="t-label">📞</span> +1 410-241-4588</div>
+<div class="t-row"><span class="t-label">📍</span> Baltimore, MD</div>
+<div class="t-row"><span class="t-label">💳</span> CS: 640</div>
+<div class="t-row"><span class="t-label">💰</span> Income: $55K</div>
+</div></td><td>Luke T.</td><td><span class="badge badge-purple">Setter</span></td><td>12m</td><td><span style="color:var(--gold)">640</span></td><td>$55K</td><td><span class="badge badge-blue">FB</span></td><td style="font-size:.7rem">MID-No Income drop ship</td><td><span class="badge badge-blue">SC Qualified</span></td><td>—</td><td class="notes-cell">SC qualified call. Booked for closer</td><td><a class="fathom-link" href="#">🎙️</a></td></tr>
+            <tr><td>03/23</td><td>12:00</td><td class="prospect-cell"><strong>Colin Hinds</strong>
+<div class="tooltip">
+<div class="t-name">Colin Hinds</div>
+<div class="t-row"><span class="t-label">📧</span> colinjoshua@myyahoo.com</div>
+<div class="t-row"><span class="t-label">📞</span> +1 908-597-1136</div>
+<div class="t-row"><span class="t-label">📍</span> Newark, NJ</div>
+<div class="t-row"><span class="t-label">💳</span> CS: 720</div>
+<div class="t-row"><span class="t-label">💰</span> Income: $92K</div>
+</div></td><td>Zak L.</td><td><span class="badge badge-purple">Setter</span></td><td>8m</td><td><span style="color:var(--green)">720</span></td><td>$92K</td><td><span class="badge badge-blue">FB</span></td><td style="font-size:.7rem">MID-Top25% SC ebay</td><td><span class="badge badge-green">Purchased IVP</span></td><td>$1</td><td class="notes-cell">Bought insane value package + TikTok credits</td><td><a class="fathom-link" href="#">🎙️</a></td></tr>
+            <tr><td>03/23</td><td>11:40</td><td class="prospect-cell"><strong>Palwinder Singh</strong>
+<div class="tooltip">
+<div class="t-name">Palwinder Singh</div>
+<div class="t-row"><span class="t-label">📧</span> psingh32@yahoo.com</div>
+<div class="t-row"><span class="t-label">📞</span> +1 860-570-0095</div>
+<div class="t-row"><span class="t-label">📍</span> Hartford, CT</div>
+<div class="t-row"><span class="t-label">💳</span> CS: 690</div>
+<div class="t-row"><span class="t-label">💰</span> Income: $65K</div>
+</div></td><td>Anthony S.</td><td><span class="badge badge-green">Closer</span></td><td>28m</td><td><span style="color:var(--green)">690</span></td><td>$65K</td><td><span class="badge badge-blue">FB</span></td><td style="font-size:.7rem">MID-Top25% SC ebay</td><td><span class="badge badge-gold">Follow-up</span></td><td>—</td><td class="notes-cell">SC qualified. Interested but needs time. Follow up this week</td><td><a class="fathom-link" href="#">🎙️</a></td></tr>
+            <tr><td>03/23</td><td>10:15</td><td class="prospect-cell"><strong>Noel Lo</strong>
+<div class="tooltip">
+<div class="t-name">Noel Lo</div>
+<div class="t-row"><span class="t-label">📧</span> noelerfan@gmail.com</div>
+<div class="t-row"><span class="t-label">📞</span> +1 310-345-9468</div>
+<div class="t-row"><span class="t-label">📍</span> Los Angeles, CA</div>
+<div class="t-row"><span class="t-label">💳</span> CS: —</div>
+<div class="t-row"><span class="t-label">💰</span> Income: —</div>
+</div></td><td>Cayden R.</td><td><span class="badge badge-purple">Setter</span></td><td>6m</td><td>—</td><td>—</td><td>—</td><td style="font-size:.7rem">Organic</td><td><span class="badge badge-blue">SC Qualified</span></td><td>—</td><td class="notes-cell">SC qualified, booked</td><td>—</td></tr>
+            <tr><td>03/23</td><td>09:39</td><td class="prospect-cell"><strong>Mayhew</strong>
+<div class="tooltip">
+<div class="t-name">Mayhew</div>
+<div class="t-row"><span class="t-label">📧</span> jlmayhew728@gmail.com</div>
+<div class="t-row"><span class="t-label">📞</span> +1 720-270-9785</div>
+<div class="t-row"><span class="t-label">📍</span> Denver, CO</div>
+<div class="t-row"><span class="t-label">💳</span> CS: —</div>
+<div class="t-row"><span class="t-label">💰</span> Income: —</div>
+</div></td><td>Cayden R.</td><td><span class="badge badge-purple">Setter</span></td><td>5m</td><td>—</td><td>—</td><td><span class="badge badge-blue">FB</span></td><td style="font-size:.7rem">MID-No Income drop ship</td><td><span class="badge badge-muted">VM</span></td><td>—</td><td class="notes-cell">Voicemail</td><td>—</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 2: DETAILED -->
+    <style>#tab-detailed table{min-width:2200px} #tab-detailed .tbl-wrap{overflow:auto!important}</style>
+    <div class="tab-content" id="tab-detailed" style="text-align:center;padding:60px 20px">
+      <div style="font-size:2rem;margin-bottom:16px">📋</div>
+      <h3 style="margin-bottom:8px">Detailed Call Log</h3>
+      <p style="color:var(--muted);margin-bottom:20px;font-size:.9rem">The detailed view with all 26 columns opens in its own full-width page for better scrolling.</p>
+      <a href="/detailed/" style="display:inline-block;padding:12px 28px;background:linear-gradient(135deg,var(--accent),#7c3aed);color:#fff;border-radius:10px;text-decoration:none;font-weight:700;font-size:.9rem">Open Detailed Log →</a>
+    </div>
+
+    <div style="display:none" id="tab-detailed-old" style="overflow:visible">
+      <div class="tbl-wrap" style="max-height:700px;overflow:auto">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Prospect</th>
+              <th>Rep</th>
+              <th>Source</th>
+              <th>Triaged</th>
+              <th>Set/Direct</th>
+              <th>Show</th>
+              <th>CS</th>
+              <th>DTI</th>
+              <th>Income</th>
+              <th>Afford</th>
+              <th>Script %</th>
+              <th>Mozi Score</th>
+              <th>Objection</th>
+              <th>Financing</th>
+              <th>Outcome</th>
+              <th>Contract</th>
+              <th>Collected</th>
+              <th>Rep Notes</th>
+              <th>AI Critique</th>
+              <th>Fathom</th>
+              <th>Traffic</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>03/23</td>
+              <td>Robert Helminski</td>
+              <td>Benjamin H.</td>
+              <td><span class="badge badge-blue">TF</span></td>
+              <td><span class="badge badge-green">Yes</span></td>
+              <td>Set</td>
+              <td><span class="badge badge-green">Show</span></td>
+              <td>720</td>
+              <td>32%</td>
+              <td>$85K</td>
+              <td><span class="badge badge-green">Yes</span></td>
+              <td>80%</td>
+              <td>73% <span class="score-bar"><span class="score-fill" style="width:73%;background:var(--gold)"></span></span></td>
+              <td>Timing</td>
+              <td>PIF → Affirm</td>
+              <td><span class="badge badge-gold">Follow-up</span></td>
+              <td>—</td>
+              <td>—</td>
+              <td class="notes-cell">Stated he spoke with someone and had already requested a change to Mon</td>
+              <td class="notes-cell">Good rapport but weak close attempt. Missed 2 buying signals. Should have pushed financing harder.</td>
+              <td><a class="fathom-link" href="#">🎙️ Link</a></td>
+              <td style="font-size:.7rem">MID-USA-Top25%<br>SC</td>
+            </tr>
+            <tr>
+              <td>03/23</td>
+              <td>Kendiya Lundy</td>
+              <td>Benjamin H.</td>
+              <td><span class="badge badge-purple">LF</span></td>
+              <td><span class="badge badge-green">Yes</span></td>
+              <td>Set</td>
+              <td><span class="badge badge-green">Show</span></td>
+              <td>685</td>
+              <td>28%</td>
+              <td>$72K</td>
+              <td><span class="badge badge-green">Yes</span></td>
+              <td>—</td>
+              <td>70% <span class="score-bar"><span class="score-fill" style="width:70%;background:var(--gold)"></span></span></td>
+              <td>Money</td>
+              <td>Affirm → Splitit</td>
+              <td><span class="badge badge-gold">Follow-up</span></td>
+              <td>—</td>
+              <td>—</td>
+              <td class="notes-cell">Zak built great rapport. Anthony delivered strong close.</td>
+              <td class="notes-cell">Solid discovery phase. Price anchoring was effective. Follow-up timing is critical — schedule within 48hrs.</td>
+              <td><a class="fathom-link" href="#">🎙️ Link</a></td>
+              <td style="font-size:.7rem">MID-USA-Top50%<br>SC</td>
+            </tr>
+            <tr>
+              <td>03/22</td>
+              <td>Jocelyn Coughlin</td>
+              <td>Benjamin H.</td>
+              <td><span class="badge badge-purple">LF</span></td>
+              <td><span class="badge badge-green">Yes</span></td>
+              <td>Direct</td>
+              <td><span class="badge badge-green">Show</span></td>
+              <td>740</td>
+              <td>24%</td>
+              <td>$95K</td>
+              <td><span class="badge badge-green">Yes</span></td>
+              <td>80%</td>
+              <td>82% <span class="score-bar"><span class="score-fill" style="width:82%;background:var(--green)"></span></span></td>
+              <td>None</td>
+              <td>PIF first</td>
+              <td><span class="badge badge-gold">Follow-up</span></td>
+              <td>—</td>
+              <td>—</td>
+              <td class="notes-cell">He and I plan to revisit Friday and dive into deeper specifics</td>
+              <td class="notes-cell">Excellent call structure. Strong empathy. Only missed: should have asked for commitment before ending.</td>
+              <td><a class="fathom-link" href="#">🎙️ Link</a></td>
+              <td style="font-size:.7rem">RETMAT-2026<br>COLD</td>
+            </tr>
+            <tr>
+              <td>03/22</td>
+              <td>Shawna Behrens</td>
+              <td>Benjamin H.</td>
+              <td><span class="badge badge-purple">LF</span></td>
+              <td><span class="badge badge-green">Yes</span></td>
+              <td>Set</td>
+              <td><span class="badge badge-green">Show</span></td>
+              <td>710</td>
+              <td>35%</td>
+              <td>$68K</td>
+              <td><span class="badge badge-green">Yes</span></td>
+              <td>60%</td>
+              <td>67% <span class="score-bar"><span class="score-fill" style="width:67%;background:var(--gold)"></span></span></td>
+              <td>Money</td>
+              <td>Affirm → 50/50</td>
+              <td><span class="badge badge-gold">Follow-up</span></td>
+              <td>—</td>
+              <td>—</td>
+              <td class="notes-cell">Is reviewing the videos and plans to reconnect soon. Interested in Pay/Profit model.</td>
+              <td class="notes-cell">Discovery was shallow — didn't uncover true pain. Payment presentation started too late. Needs urgency injection.</td>
+              <td><a class="fathom-link" href="#">🎙️ Link</a></td>
+              <td style="font-size:.7rem">AB-Nov5-VADs<br>Etsy</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 3: ANALYTICS -->
+    <div class="tab-content" id="tab-analytics">
+      <div class="chart-grid">
+        <div class="chart-card">
+          <div class="chart-title">Show Rate by Rep (March)</div>
+          <div style="margin-top:12px">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span style="width:80px;font-size:.78rem;color:var(--sub)">Adil M.</span><div style="flex:1;height:20px;background:rgba(255,255,255,.04);border-radius:4px;overflow:hidden"><div style="width:57.9%;height:100%;background:var(--green);border-radius:4px;display:flex;align-items:center;padding-left:6px;font-size:.7rem;font-weight:700">57.9%</div></div></div>
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span style="width:80px;font-size:.78rem;color:var(--sub)">Zak L.</span><div style="flex:1;height:20px;background:rgba(255,255,255,.04);border-radius:4px;overflow:hidden"><div style="width:37.1%;height:100%;background:var(--green);border-radius:4px;display:flex;align-items:center;padding-left:6px;font-size:.7rem;font-weight:700">37.1%</div></div></div>
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span style="width:80px;font-size:.78rem;color:var(--sub)">Anthony S.</span><div style="flex:1;height:20px;background:rgba(255,255,255,.04);border-radius:4px;overflow:hidden"><div style="width:35%;height:100%;background:var(--green);border-radius:4px;display:flex;align-items:center;padding-left:6px;font-size:.7rem;font-weight:700">35.0%</div></div></div>
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span style="width:80px;font-size:.78rem;color:var(--sub)">Stef M.</span><div style="flex:1;height:20px;background:rgba(255,255,255,.04);border-radius:4px;overflow:hidden"><div style="width:29.6%;height:100%;background:var(--gold);border-radius:4px;display:flex;align-items:center;padding-left:6px;font-size:.7rem;font-weight:700">29.6%</div></div></div>
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span style="width:80px;font-size:.78rem;color:var(--sub)">John C.</span><div style="flex:1;height:20px;background:rgba(255,255,255,.04);border-radius:4px;overflow:hidden"><div style="width:25.8%;height:100%;background:var(--gold);border-radius:4px;display:flex;align-items:center;padding-left:6px;font-size:.7rem;font-weight:700">25.8%</div></div></div>
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span style="width:80px;font-size:.78rem;color:var(--sub)">Allan K.</span><div style="flex:1;height:20px;background:rgba(255,255,255,.04);border-radius:4px;overflow:hidden"><div style="width:20%;height:100%;background:var(--red);border-radius:4px;display:flex;align-items:center;padding-left:6px;font-size:.7rem;font-weight:700">20.0%</div></div></div>
+            <div style="display:flex;align-items:center;gap:8px"><span style="width:80px;font-size:.78rem;color:var(--sub)">Luke T.</span><div style="flex:1;height:20px;background:rgba(255,255,255,.04);border-radius:4px;overflow:hidden"><div style="width:19.2%;height:100%;background:var(--red);border-radius:4px;display:flex;align-items:center;padding-left:6px;font-size:.7rem;font-weight:700">19.2%</div></div></div>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Cash Collected by Rep (March)</div>
+          <div style="margin-top:12px">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span style="width:80px;font-size:.78rem;color:var(--sub)">Anthony S.</span><div style="flex:1;height:20px;background:rgba(255,255,255,.04);border-radius:4px;overflow:hidden"><div style="width:100%;height:100%;background:linear-gradient(90deg,var(--accent),var(--green));border-radius:4px;display:flex;align-items:center;padding-left:6px;font-size:.7rem;font-weight:700">$44,600</div></div></div>
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span style="width:80px;font-size:.78rem;color:var(--sub)">Zak L.</span><div style="flex:1;height:20px;background:rgba(255,255,255,.04);border-radius:4px;overflow:hidden"><div style="width:44%;height:100%;background:linear-gradient(90deg,var(--accent),var(--blue));border-radius:4px;display:flex;align-items:center;padding-left:6px;font-size:.7rem;font-weight:700">$19,800</div></div></div>
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span style="width:80px;font-size:.78rem;color:var(--sub)">Stef M.</span><div style="flex:1;height:20px;background:rgba(255,255,255,.04);border-radius:4px;overflow:hidden"><div style="width:27%;height:100%;background:linear-gradient(90deg,var(--accent),var(--blue));border-radius:4px;display:flex;align-items:center;padding-left:6px;font-size:.7rem;font-weight:700">$12,000</div></div></div>
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span style="width:80px;font-size:.78rem;color:var(--sub)">Luke T.</span><div style="flex:1;height:20px;background:rgba(255,255,255,.04);border-radius:4px;overflow:hidden"><div style="width:13%;height:100%;background:var(--gold);border-radius:4px;display:flex;align-items:center;padding-left:6px;font-size:.7rem;font-weight:700">$5,800</div></div></div>
+            <div style="display:flex;align-items:center;gap:8px"><span style="width:80px;font-size:.78rem;color:var(--sub)">Others</span><div style="flex:1;height:20px;background:rgba(255,255,255,.04);border-radius:4px;overflow:hidden"><div style="width:1%;height:100%;background:var(--muted);border-radius:4px"></div></div></div>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Recent Successful Payments (Slack #successful-payments)</div>
+          <div style="margin-top:8px;font-size:.78rem">
+            <div style="padding:8px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between"><span><strong>Michael Gillham</strong> · Elective</span><span style="color:var(--green);font-family:var(--mono)">$14,800</span></div>
+            <div style="padding:8px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between"><span><strong>Michele Niewinski</strong> · ClarityPay</span><span style="color:var(--green);font-family:var(--mono)">$13,000</span></div>
+            <div style="padding:8px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between"><span><strong>Tej Jaideep Patel</strong> · ClarityPay</span><span style="color:var(--green);font-family:var(--mono)">$5,800</span></div>
+            <div style="padding:8px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between"><span><strong>Jackson David</strong> · ClarityPay</span><span style="color:var(--green);font-family:var(--mono)">$12,000</span></div>
+            <div style="padding:8px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between"><span><strong>Cr Boyett III</strong> · Elective</span><span style="color:var(--green);font-family:var(--mono)">$14,800</span></div>
+            <div style="padding:8px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between"><span><strong>Trisha Cowan</strong> · Custom Plan</span><span style="color:var(--green);font-family:var(--mono)">$4,800</span></div>
+            <div style="padding:8px 0;display:flex;justify-content:space-between"><span><strong>Yolaine Laguerre</strong> · Elective</span><span style="color:var(--green);font-family:var(--mono)">$14,800</span></div>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Close Rate by Rep (March)</div>
+          <div style="margin-top:12px">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span style="width:80px;font-size:.78rem;color:var(--sub)">Luke T.</span><div style="flex:1;height:20px;background:rgba(255,255,255,.04);border-radius:4px;overflow:hidden"><div style="width:50%;height:100%;background:var(--green);border-radius:4px;display:flex;align-items:center;padding-left:6px;font-size:.7rem;font-weight:700">50%</div></div></div>
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span style="width:80px;font-size:.78rem;color:var(--sub)">Anthony S.</span><div style="flex:1;height:20px;background:rgba(255,255,255,.04);border-radius:4px;overflow:hidden"><div style="width:24%;height:100%;background:var(--green);border-radius:4px;display:flex;align-items:center;padding-left:6px;font-size:.7rem;font-weight:700">24%</div></div></div>
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span style="width:80px;font-size:.78rem;color:var(--sub)">Stef M.</span><div style="flex:1;height:20px;background:rgba(255,255,255,.04);border-radius:4px;overflow:hidden"><div style="width:14%;height:100%;background:var(--gold);border-radius:4px;display:flex;align-items:center;padding-left:6px;font-size:.7rem;font-weight:700">14%</div></div></div>
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span style="width:80px;font-size:.78rem;color:var(--sub)">Zak L.</span><div style="flex:1;height:20px;background:rgba(255,255,255,.04);border-radius:4px;overflow:hidden"><div style="width:11%;height:100%;background:var(--gold);border-radius:4px;display:flex;align-items:center;padding-left:6px;font-size:.7rem;font-weight:700">11%</div></div></div>
+            <div style="display:flex;align-items:center;gap:8px"><span style="width:80px;font-size:.78rem;color:var(--sub)">John C.</span><div style="flex:1;height:20px;background:rgba(255,255,255,.04);border-radius:4px;overflow:hidden"><div style="width:1%;height:100%;background:var(--red);border-radius:4px"></div></div><span style="font-size:.7rem;color:var(--red)">0%</span></div>
+          </div>
+        </div>
+        <div class="chart-card chart-full">
+          <div class="chart-title">🏆 Rep Leaderboard — March 2026</div>
+          <div class="tbl-wrap" style="max-height:none">
+            <table>
+              <thead><tr><th>Rep</th><th>Demos</th><th>Held</th><th>Show %</th><th>Offers</th><th>Closed</th><th>Close %</th><th>Cash</th><th>EP/Call</th></tr></thead>
+              <tbody>
+                <tr><td><strong>Anthony Steel</strong></td><td>60</td><td>21</td><td><span class="badge badge-green">35.0%</span></td><td>21</td><td>5</td><td><span class="badge badge-green">24%</span></td><td style="color:var(--green);font-family:var(--mono)">$44,600</td><td>$2,124</td></tr>
+                <tr><td><strong>Zak Lewis</strong></td><td>62</td><td>23</td><td><span class="badge badge-green">37.1%</span></td><td>19</td><td>2</td><td><span class="badge badge-gold">11%</span></td><td style="color:var(--green);font-family:var(--mono)">$19,800</td><td>$861</td></tr>
+                <tr><td><strong>Stef Merola</strong></td><td>27</td><td>8</td><td><span class="badge badge-gold">29.6%</span></td><td>7</td><td>1</td><td><span class="badge badge-gold">14%</span></td><td style="color:var(--green);font-family:var(--mono)">$12,000</td><td>$1,500</td></tr>
+                <tr><td><strong>Luke Tripconey</strong></td><td>26</td><td>5</td><td><span class="badge badge-red">19.2%</span></td><td>2</td><td>1</td><td><span class="badge badge-green">50%</span></td><td style="color:var(--green);font-family:var(--mono)">$5,800</td><td>$1,160</td></tr>
+                <tr><td><strong>Adil Mithoo</strong></td><td>19</td><td>11</td><td><span class="badge badge-green">57.9%</span></td><td>9</td><td>0</td><td>—</td><td>$0</td><td>$0</td></tr>
+                <tr><td><strong>John Cantu</strong></td><td>31</td><td>8</td><td><span class="badge badge-gold">25.8%</span></td><td>7</td><td>0</td><td><span class="badge badge-red">0%</span></td><td>$0</td><td>$0</td></tr>
+                <tr><td><strong>Allan Kuriakose</strong></td><td>25</td><td>5</td><td><span class="badge badge-red">20.0%</span></td><td>3</td><td>0</td><td>—</td><td>$0</td><td>$0</td></tr>
+                <tr style="font-weight:700;border-top:2px solid var(--accent)"><td>TOTAL</td><td>250</td><td>81</td><td><span class="badge badge-gold">32.4%</span></td><td>68</td><td>9</td><td><span class="badge badge-gold">13%</span></td><td style="color:var(--green);font-family:var(--mono)">$82,200</td><td>$1,015</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+</main>
+</div>
+
+<script>
+// Login
+function doLogin(){
+  const u=document.getElementById('loginUser').value;
+  const p=document.getElementById('loginPass').value;
+  if((u==='admin'&&p==='aicom2026')||(u==='peter'&&p==='aicom2026')||(u==='prochi'&&p==='aicom2026')){
+    document.getElementById('loginOverlay').classList.add('login-hidden');
+    document.getElementById('app').style.display='flex';
+    localStorage.setItem('sm_auth','1');
+  }
+}
+if(localStorage.getItem('sm_auth')==='1'){
+  document.getElementById('app').style.display='flex';
+  document.getElementById('loginOverlay').classList.add('login-hidden');
+  document.getElementById('app').style.display='flex';
+}
+document.getElementById('loginPass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
+
+// Live clock with timezone
+function updateClock(){
+  var tz=document.getElementById("tzSelect").value;
+  var now=new Date();
+  var opts={hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:false,timeZone:tz};
+  var tzName={
+    "America/New_York":"ET","America/Los_Angeles":"PT",
+    "Europe/Berlin":"CET","Asia/Dubai":"GST"
+  };
+  document.getElementById("liveClock").textContent=now.toLocaleTimeString("en-US",opts)+" "+tzName[tz];
+}
+updateClock();
+setInterval(updateClock,1000);
+document.getElementById("tzSelect").addEventListener("change",updateClock);
+
+// Overview column picker
+document.getElementById("ovColBtn").addEventListener("click",function(e){
+  e.stopPropagation();
+  var p=document.getElementById("ovColPicker");
+  p.style.display=p.style.display==="none"?"block":"none";
+});
+document.addEventListener("click",function(){document.getElementById("ovColPicker").style.display="none"});
+document.getElementById("ovColPicker").addEventListener("click",function(e){e.stopPropagation()});
+
+var ovSaved=JSON.parse(localStorage.getItem("sm_ov_cols")||"{}");
+document.querySelectorAll("#ovColPicker input").forEach(function(cb){
+  var col=parseInt(cb.dataset.ovcol);
+  if(ovSaved[col]!==undefined)cb.checked=ovSaved[col];
+  cb.addEventListener("change",function(){
+    ovSaved[col]=this.checked;
+    localStorage.setItem("sm_ov_cols",JSON.stringify(ovSaved));
+    applyOvCols();
+  });
+});
+function applyOvCols(){
+  var tbl=document.querySelector("#tab-overview table");
+  if(!tbl)return;
+  document.querySelectorAll("#ovColPicker input").forEach(function(cb){
+    var col=parseInt(cb.dataset.ovcol);
+    tbl.querySelectorAll("tr").forEach(function(row){
+      if(row.cells[col])row.cells[col].style.display=cb.checked?"":"none";
+    });
+  });
+}
+applyOvCols();
+
+// Tabs
+document.querySelectorAll('.tab,.nav-item[data-tab]').forEach(t=>{
+  t.addEventListener('click',()=>{
+    const tab=t.dataset.tab;
+    if(!tab)return;
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.nav-item[data-tab]').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll(`.tab[data-tab="${tab}"]`).forEach(x=>x.classList.add('active'));
+    document.querySelectorAll(`.nav-item[data-tab="${tab}"]`).forEach(x=>x.classList.add('active'));
+    document.getElementById('tab-'+tab).classList.add('active');
+  });
+});
+
+
+
+</script></body>
+</html>

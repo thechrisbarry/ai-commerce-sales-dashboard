@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Detailed Call Log — Sales Clarity</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0d0b14;--surface:#13111c;--card:#1a1726;--border:rgba(255,255,255,.06);--text:#e8e6f0;--sub:rgba(232,230,240,.5);--muted:rgba(232,230,240,.3);--accent:#8b5cf6;--green:#22c55e;--red:#ef4444;--gold:#f59e0b;--blue:#3b82f6;--mono:'JetBrains Mono',monospace}
+body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased;font-size:13px;padding:16px 20px}
+.hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:10px}
+.hdr h1{font-size:1.1rem;font-weight:800}
+.hl{display:flex;align-items:center;gap:12px}
+.hl a{color:var(--accent);font-size:.82rem;text-decoration:none;font-weight:600}
+.hr{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+select,input[type=date]{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:6px 10px;color:var(--text);font-family:inherit;font-size:.8rem;outline:none}
+.btn{background:var(--accent);border:none;border-radius:6px;padding:6px 14px;color:#fff;font-weight:600;font-size:.8rem;cursor:pointer}
+.tw{border:1px solid var(--border);border-radius:10px;background:var(--card);overflow:auto;max-height:calc(100vh - 90px)}
+table{border-collapse:collapse;font-size:.8rem;min-width:1200px;width:100%}
+thead{position:sticky;top:0;z-index:2}
+th{padding:8px 10px;text-align:left;font-weight:700;font-size:.68rem;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);background:var(--card);border-bottom:2px solid var(--border);white-space:nowrap}
+td{padding:7px 10px;border-bottom:1px solid var(--border);color:var(--sub);white-space:nowrap}
+tr:hover td{background:rgba(139,92,246,.03)}
+.b{display:inline-block;padding:2px 6px;border-radius:4px;font-size:.68rem;font-weight:600}
+.bg{background:rgba(34,197,94,.12);color:var(--green)}
+.br{background:rgba(239,68,68,.12);color:var(--red)}
+.by{background:rgba(245,158,11,.12);color:var(--gold)}
+.bb{background:rgba(59,130,246,.12);color:var(--blue)}
+.bp{background:rgba(139,92,246,.12);color:var(--accent)}
+.bm{background:rgba(255,255,255,.05);color:var(--muted)}
+.note{max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.total-row td{font-weight:700;color:var(--text);border-top:2px solid var(--accent);background:rgba(139,92,246,.03)}
+.avg-row td{font-weight:600;color:var(--accent);background:rgba(139,92,246,.02)}
+body.light{--bg:#f5f5f7;--surface:#fff;--card:#fff;--border:rgba(0,0,0,.08);--text:#1a1a2e;--sub:rgba(26,26,46,.6);--muted:rgba(26,26,46,.35)}
+body.light th{background:#fafafa;color:rgba(0,0,0,.45)}
+body.light td{color:rgba(0,0,0,.6)}
+body.light select,body.light input[type=date]{background:#fff;border-color:rgba(0,0,0,.1);color:#1a1a2e}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+<div class="hl"><h1>📋 Detailed Call Log</h1><a href="/">← Dashboard</a></div>
+<div class="hr">
+<select id="repF"><option>All Reps</option><option>Anthony Steel</option><option>Zak Lewis</option><option>Luke Tripconey</option><option>Sam Figueiredo</option><option>Cayden Raine</option><option>John Cantu</option><option>Allan Kuriakose</option><option>Stef Merola</option><option>Chris Barry</option><option>Adil Mithoo</option></select>
+<select id="qd">
+<option value="today">Today</option><option value="yesterday">Yesterday</option><option value="7d" selected>Last 7 Days</option><option value="30d">Last 30 Days</option><option value="mtd">This Month</option><option value="all">All Time</option><option value="custom">Custom</option>
+</select>
+<input type="date" id="df" style="display:none">
+<input type="date" id="dt" style="display:none">
+<button class="btn" id="rb">🔄 Refresh</button>
+<div style="position:relative;display:inline-block">
+<button class="btn" style="background:transparent;border:1px solid var(--border);color:var(--sub)" id="cb">⚙️ Columns</button>
+<div id="cp" style="display:none;position:absolute;right:0;top:100%;z-index:200;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 12px;min-width:220px;max-height:400px;overflow-y:auto;box-shadow:0 8px 30px rgba(0,0,0,.6)">
+<div style="font-size:.62rem;font-weight:700;color:var(--muted);margin-bottom:4px;letter-spacing:.1em">CORE</div>
+<label style="display:flex;gap:6px;font-size:.76rem;color:var(--sub);padding:2px 0;cursor:pointer"><input type="checkbox" data-c="0" checked> Date</label>
+<label style="display:flex;gap:6px;font-size:.76rem;color:var(--sub);padding:2px 0;cursor:pointer"><input type="checkbox" data-c="1" checked> Time</label>
+<label style="display:flex;gap:6px;font-size:.76rem;color:var(--sub);padding:2px 0;cursor:pointer"><input type="checkbox" data-c="2" checked> Prospect</label>
+<label style="display:flex;gap:6px;font-size:.76rem;color:var(--sub);padding:2px 0;cursor:pointer"><input type="checkbox" data-c="3" checked> Rep</label>
+<label style="display:flex;gap:6px;font-size:.76rem;color:var(--sub);padding:2px 0;cursor:pointer"><input type="checkbox" data-c="4" checked> Type</label>
+<label style="display:flex;gap:6px;font-size:.76rem;color:var(--sub);padding:2px 0;cursor:pointer"><input type="checkbox" data-c="5" checked> Duration</label>
+<div style="font-size:.62rem;font-weight:700;color:var(--muted);margin:6px 0 4px;letter-spacing:.1em">LEAD QUALITY</div>
+<label style="display:flex;gap:6px;font-size:.76rem;color:var(--sub);padding:2px 0;cursor:pointer"><input type="checkbox" data-c="6" checked> CS</label>
+<label style="display:flex;gap:6px;font-size:.76rem;color:var(--sub);padding:2px 0;cursor:pointer"><input type="checkbox" data-c="7" checked> Income</label>
+<div style="font-size:.62rem;font-weight:700;color:var(--muted);margin:6px 0 4px;letter-spacing:.1em">ATTRIBUTION</div>
+<label style="display:flex;gap:6px;font-size:.76rem;color:var(--sub);padding:2px 0;cursor:pointer"><input type="checkbox" data-c="8" checked> Source</label>
+<div style="font-size:.62rem;font-weight:700;color:var(--muted);margin:6px 0 4px;letter-spacing:.1em">OUTCOME</div>
+<label style="display:flex;gap:6px;font-size:.76rem;color:var(--sub);padding:2px 0;cursor:pointer"><input type="checkbox" data-c="9" checked> Outcome</label>
+<label style="display:flex;gap:6px;font-size:.76rem;color:var(--sub);padding:2px 0;cursor:pointer"><input type="checkbox" data-c="10" checked> Notes</label>
+<label style="display:flex;gap:6px;font-size:.76rem;color:var(--sub);padding:2px 0;cursor:pointer"><input type="checkbox" data-c="11" checked> Recording</label>
+</div>
+</div>
+<button class="btn" style="background:transparent;border:1px solid var(--border);color:var(--sub)" id="thm">🌙</button>
+</div>
+</div>
+
+<div class="tw">
+<table>
+<thead><tr><th>Date</th><th>Time</th><th>Prospect</th><th>Rep</th><th>Type</th><th>Dur</th><th>CS</th><th>Income</th><th>Source</th><th>Outcome</th><th>Notes</th><th>🎙️</th></tr></thead>
+<tbody id="tb"><tr><td colspan="12" style="text-align:center;padding:40px;color:var(--muted)">Loading live data...</td></tr></tbody>
+<tfoot id="tf"></tfoot>
+</table>
+</div>
+
+<script>
+// Date logic
+var df=document.getElementById('df'),dt=document.getElementById('dt'),qd=document.getElementById('qd');
+function setDates(){
+  var v=qd.value,now=new Date(),fmt=function(d){return d.toISOString().slice(0,10)};
+  dt.value=fmt(now);
+  if(v==='today')df.value=fmt(now);
+  else if(v==='yesterday'){var y=new Date(now);y.setDate(y.getDate()-1);df.value=fmt(y);dt.value=fmt(y)}
+  else if(v==='7d'){var w=new Date(now);w.setDate(w.getDate()-7);df.value=fmt(w)}
+  else if(v==='30d'){var m=new Date(now);m.setDate(m.getDate()-30);df.value=fmt(m)}
+  else if(v==='mtd')df.value=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-01';
+  else if(v==='all')df.value='2025-01-01';
+  if(v==='custom'){df.style.display='';dt.style.display=''}else{df.style.display='none';dt.style.display='none'}
+}
+setDates();
+qd.onchange=function(){setDates();load()};
+df.onchange=load;dt.onchange=load;
+document.getElementById('rb').onclick=load;
+document.getElementById('repF').onchange=load;
+
+
+// Column picker
+document.getElementById('cb').onclick=function(e){e.stopPropagation();document.getElementById('cp').style.display=document.getElementById('cp').style.display==='none'?'block':'none'};
+document.addEventListener('click',function(){document.getElementById('cp').style.display='none'});
+document.getElementById('cp').onclick=function(e){e.stopPropagation()};
+function applyCols(){var tbl=document.querySelector('table');document.querySelectorAll('#cp input').forEach(function(cb){var c=parseInt(cb.getAttribute('data-c'));tbl.querySelectorAll('tr').forEach(function(r){if(r.cells&&r.cells[c])r.cells[c].style.display=cb.checked?'':'none'})})}
+document.querySelectorAll('#cp input').forEach(function(cb){cb.onchange=function(){applyCols();localStorage.setItem('det_cols',JSON.stringify(Array.from(document.querySelectorAll('#cp input')).map(function(x){return x.checked})))}});
+try{var sc=JSON.parse(localStorage.getItem('det_cols')||'[]');if(sc.length)document.querySelectorAll('#cp input').forEach(function(cb,i){if(sc[i]!==undefined)cb.checked=sc[i]});applyCols()}catch(e){}
+
+// Theme
+document.getElementById('thm').onclick=function(){document.body.classList.toggle('light');this.textContent=document.body.classList.contains('light')?'🌑':'🌙';localStorage.setItem('det_theme',document.body.classList.contains('light')?'l':'d')};
+if(localStorage.getItem('det_theme')==='l'){document.body.classList.add('light');document.getElementById('thm').textContent='🌑'}
+
+async function load(){
+  try{
+    var r=await fetch('/.netlify/functions/api?from='+df.value+'&to='+dt.value);
+    var d=await r.json();
+    if(!d.calls)return;
+    var tb=document.getElementById('tb');tb.innerHTML='';
+    var tf=document.getElementById('tf');tf.innerHTML='';
+    var rep=document.getElementById('repF').value;
+    var totalDur=0,totalCS=0,csCount=0,totalInc=0,incCount=0,rowCount=0;
+
+    d.calls.forEach(function(c){
+      if(c.duration<5&&!c.lead)return;
+      var rn=c.rep||'Unknown';
+      if(rep!=='All Reps'&&rn.indexOf(rep.split(' ')[0])<0)return;
+      var date=new Date(c.date);
+      var ds=String(date.getMonth()+1).padStart(2,'0')+'/'+String(date.getDate()).padStart(2,'0');
+      var time=date.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:false,timeZone:'Asia/Dubai'});
+      var dur=c.duration>60?Math.floor(c.duration/60)+'m':c.duration+'s';
+      var name=c.lead?c.lead.name:'Unknown';
+      var cs=c.lead&&c.lead.cs?String(c.lead.cs):'';
+      var csC=c.lead&&c.lead.cs?(c.lead.cs>650?'color:var(--green)':c.lead.cs>600?'color:var(--gold)':'color:var(--red)'):'';
+      var inc=c.lead&&c.lead.income?'$'+(c.lead.income/1000).toFixed(0)+'K':'';
+      var st=c.lead?c.lead.status||'':'';
+      var type=c.duration>120?'<span class="b bg">Closer</span>':c.duration>0?'<span class="b bp">Setter</span>':'<span class="b bb">TBD</span>';
+      var outcome='<span class="b bm">'+st+'</span>';
+      if(st.indexOf('Follow')>-1)outcome='<span class="b by">Follow-up</span>';
+      else if(st.indexOf('Scheduled')>-1)outcome='<span class="b bb">Scheduled</span>';
+      else if(st.indexOf('No Show')>-1)outcome='<span class="b br">No Show</span>';
+      else if(st.indexOf('Won')>-1||st==='Customer')outcome='<span class="b bg">Won</span>';
+      else if(st.indexOf('Lost')>-1)outcome='<span class="b br">Lost</span>';
+      var note=(c.note||'').replace(/\n/g,' ').substring(0,180);
+      var rec=c.hasRecording?'🎙️':'';
+
+      totalDur+=c.duration;rowCount++;
+      if(c.lead&&c.lead.cs){totalCS+=c.lead.cs;csCount++}
+      if(c.lead&&c.lead.income){totalInc+=c.lead.income;incCount++}
+
+      var tr=document.createElement('tr');
+      tr.innerHTML='<td>'+ds+'</td><td>'+time+'</td><td><strong>'+name+'</strong></td><td>'+rn+'</td><td>'+type+'</td><td>'+dur+'</td><td style="'+csC+'">'+cs+'</td><td>'+inc+'</td><td><span class="b bb">FB</span></td><td>'+outcome+'</td><td class="note">'+note+'</td><td>'+rec+'</td>';
+      tb.appendChild(tr);
+    });
+
+    // Totals row
+    if(rowCount>0){
+      var avgDur=Math.floor(totalDur/rowCount);
+      var avgCS=csCount>0?Math.round(totalCS/csCount):'—';
+      var avgInc=incCount>0?'$'+(totalInc/incCount/1000).toFixed(0)+'K':'—';
+
+      var totRow=document.createElement('tr');
+      totRow.className='total-row';
+      totRow.innerHTML='<td colspan="4">TOTALS ('+rowCount+' calls)</td><td></td><td>'+Math.floor(totalDur/60)+'m total</td><td></td><td></td><td></td><td></td><td></td><td></td>';
+      tf.appendChild(totRow);
+
+      var avgRow=document.createElement('tr');
+      avgRow.className='avg-row';
+      avgRow.innerHTML='<td colspan="4">AVERAGES</td><td></td><td>'+(avgDur>60?Math.floor(avgDur/60)+'m':avgDur+'s')+'/call</td><td>'+avgCS+'</td><td>'+avgInc+'</td><td></td><td></td><td></td><td></td>';
+      tf.appendChild(avgRow);
+    }
+    applyCols();
+  }catch(e){console.error(e)}
+}
+load();
+</script>
+</body>
+</html>

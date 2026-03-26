@@ -1,0 +1,1884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="favicon.png">
+<title>Sales Clarity Dashboard — AICommerce 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#08080c;--card:rgba(255,255,255,.03);--cb:rgba(255,255,255,.07);--ch:rgba(255,255,255,.05);--t:#f0f0f0;--tm:#999;--td:#555;--cy:#3ea2e4;--bl:#3ea2e4;--gn:#22c55e;--rd:#ef4444;--yl:#eab308;--or:#f59e0b;--pu:#8a62ec;--pk:#f10cf6;--grad:linear-gradient(135deg,#3ea2e4,#8a62ec,#f10cf6)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);line-height:1.5;-webkit-font-smoothing:antialiased}::selection{background:rgba(138,98,236,.3);color:#fff}
+.layout{display:flex;min-height:100vh}
+.sidebar{width:220px;background:#0a0a0e;border-right:1px solid var(--cb);padding:20px 16px;position:fixed;height:100vh;overflow-y:auto;z-index:10}
+.sidebar h2{font-size:16px;font-weight:800;background:linear-gradient(135deg,#3ea2e4,#8a62ec,#f10cf6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:2px}
+.sidebar .sub{font-size:11px;color:var(--td);margin-bottom:24px}
+.sidebar h3{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--td);margin:20px 0 8px}
+.nav-item{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;font-size:13px;color:var(--tm);cursor:pointer;margin-bottom:2px;text-decoration:none;transition:all .2s}
+.nav-item:hover,.nav-item.active{background:rgba(62,162,228,.1);color:#3ea2e4;border-left:2px solid #3ea2e4;transition:all .3s}
+.nav-item .icon{font-size:14px}
+.source-item{display:flex;align-items:center;justify-content:space-between;padding:6px 12px;font-size:12px;color:var(--tm)}
+.source-item a{color:var(--tm);text-decoration:none}.source-item:hover span:first-child{text-decoration:underline}
+.nav-group{margin-bottom:8px}
+.nav-group-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--t);cursor:pointer;border-radius:8px;transition:all .2s;user-select:none;background:linear-gradient(135deg,rgba(62,162,228,.08),rgba(138,98,236,.06));border:1px solid rgba(255,255,255,.05)}
+.nav-group-header:hover{background:linear-gradient(135deg,rgba(62,162,228,.15),rgba(138,98,236,.1));border-color:rgba(62,162,228,.15)}
+.nav-group-header .chevron{transition:transform .2s;font-size:10px;color:var(--td)}
+.nav-group-header.open .chevron{transform:rotate(90deg);color:#3ea2e4}
+.nav-group-items{overflow:hidden;max-height:0;transition:max-height .3s ease}
+.nav-group-items.open{max-height:500px}
+.nav-group-items .nav-item{padding:8px 12px 8px 32px;font-size:13px;color:var(--tm)}
+.badge-live{background:linear-gradient(135deg,rgba(62,162,228,.15),rgba(138,98,236,.15));color:#3ea2e4;padding:2px 8px;border-radius:8px;font-size:10px;font-weight:600}
+.badge-pending{background:rgba(234,179,8,.15);color:#facc15;padding:2px 8px;border-radius:8px;font-size:10px;font-weight:600}
+.main{margin-left:220px;flex:1;padding:24px 28px 80px;overflow-x:hidden;max-width:calc(100vw - 220px)}
+.top-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px;position:sticky;top:0;background:#0a0a0a;z-index:5;padding:16px 0;width:100%}
+.top-bar h1{font-size:24px;font-weight:800;letter-spacing:-.5px;background:linear-gradient(135deg,#3ea2e4,#8a62ec,#f10cf6);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.top-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+select,button{font-family:'Inter',sans-serif;font-size:12px;padding:8px 14px;border-radius:8px;border:1px solid var(--cb);background:var(--card);color:var(--t);cursor:pointer}
+select:hover,button:hover{border-color:rgba(255,255,255,.15)}
+.btn-refresh{background:linear-gradient(135deg,rgba(62,162,228,.15),rgba(138,98,236,.15));color:#3ea2e4;border-color:rgba(62,162,228,.3);font-weight:600;transition:all .3s}.btn-refresh:hover{background:linear-gradient(135deg,rgba(62,162,228,.25),rgba(138,98,236,.25));transform:translateY(-1px);box-shadow:0 2px 12px rgba(62,162,228,.15)}
+.kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:24px;overflow:visible}
+.kpi{background:var(--card);border:1px solid var(--cb);border-radius:12px;padding:18px 20px;transition:all .3s;position:relative;overflow:visible}.kpi:hover{border-color:rgba(62,162,228,.3);transform:translateY(-2px);box-shadow:0 4px 20px rgba(62,162,228,.08)}.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#3ea2e4,#8a62ec,#f10cf6);opacity:0;transition:opacity .3s}.kpi:hover::before{opacity:1}
+.kpi .label{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--tm);margin-bottom:6px;display:flex;align-items:center;gap:4px}
+.kpi .info-icon{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border-radius:50%;background:rgba(255,255,255,.08);color:var(--td);font-size:9px;cursor:help;position:relative;flex-shrink:0}
+.kpi .info-icon:hover .info-tip{display:block}
+.info-tip{display:none;position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%);background:#1a1a24;border:1px solid rgba(62,162,228,.3);border-radius:8px;padding:10px 12px;font-size:11px;color:#ccc;white-space:normal;text-transform:none;letter-spacing:0;line-height:1.5;min-width:220px;max-width:300px;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.5);font-weight:400;pointer-events:none}
+.info-tip strong{color:#3ea2e4;font-weight:600}
+.info-tip code{background:rgba(62,162,228,.15);color:#3ea2e4;padding:1px 4px;border-radius:3px;font-size:10px;font-family:monospace}
+.kpi .value{font-size:28px;font-weight:800;letter-spacing:-1px}
+.kpi .detail{font-size:11px;color:var(--td);margin-top:4px}
+.tabs{display:flex;gap:4px;margin-bottom:20px;border-bottom:1px solid var(--cb);padding-bottom:0}
+.tab{padding:10px 20px;font-size:13px;font-weight:600;color:var(--tm);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s}
+.tab:hover{color:var(--t)}
+.tab.active{color:#3ea2e4;border-bottom:2px solid transparent;border-image:linear-gradient(90deg,#3ea2e4,#8a62ec) 1}
+.live-indicator{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--tm);margin-bottom:16px}
+.live-dot{width:8px;height:8px;border-radius:50%;background:linear-gradient(135deg,#3ea2e4,#f10cf6);animation:blink 2s infinite;box-shadow:0 0 8px rgba(241,12,246,.3)}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.filters{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.table-wrap{overflow:auto;border:1px solid rgba(62,162,228,.1);border-radius:12px;max-height:70vh;box-shadow:0 0 30px rgba(0,0,0,.3)}
+table{width:100%;border-collapse:collapse;font-size:12px;table-layout:auto}
+th{background:#12121a;padding:10px 14px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--tm);cursor:pointer;position:sticky;top:0;transition:color .2s;border-bottom:1px solid rgba(62,162,228,.1);position:relative}
+th:hover{color:#3ea2e4}
+th .resize-handle{position:absolute;right:0;top:0;bottom:0;width:5px;cursor:col-resize;background:transparent;z-index:2}
+th .resize-handle:hover,th .resize-handle.active{background:rgba(62,162,228,.4)}
+td{padding:10px 14px;border-top:1px solid rgba(255,255,255,.04);color:var(--tm)}
+tr:hover td{background:rgba(62,162,228,.04)}
+.pill{padding:3px 10px;border-radius:10px;font-size:10px;font-weight:600;display:inline-block}
+.pill-showed{background:rgba(34,197,94,.15);color:#4ade80}
+.pill-noshow{background:rgba(239,68,68,.15);color:#f87171}
+.pill-booked{background:rgba(59,130,246,.15);color:#60a5fa}
+.pill-cancelled{background:rgba(234,179,8,.15);color:#facc15}
+.pill-setter{background:rgba(34,197,94,.15);color:#4ade80}
+.pill-closer{background:rgba(59,130,246,.15);color:#60a5fa}
+.pill-closed{background:rgba(34,197,94,.15);color:#4ade80}
+.pill-followup{background:rgba(245,158,11,.15);color:#fbbf24}
+.pill-scheduled{background:rgba(59,130,246,.15);color:#60a5fa}
+.pill-lost{background:rgba(239,68,68,.15);color:#f87171}
+.pill-t1{background:rgba(34,197,94,.1);color:#4ade80}
+.pill-t2{background:rgba(234,179,8,.1);color:#facc15}
+.pill-t3{background:rgba(245,158,11,.1);color:#fbbf24}
+.pill-t4{background:rgba(239,68,68,.1);color:#f87171}
+.cs-good{color:#4ade80}
+.cs-mid{color:#facc15}
+.cs-low{color:#f87171}
+.row-count{font-size:12px;color:var(--td);margin:12px 0}
+.analytics{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px}
+.chart-card{background:var(--card);border:1px solid var(--cb);border-radius:12px;padding:20px;transition:all .3s}.chart-card:hover{border-color:rgba(138,98,236,.2);box-shadow:0 4px 20px rgba(138,98,236,.05)}
+.chart-card h3{font-size:14px;font-weight:700;margin-bottom:16px}
+.bar-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.bar-label{font-size:12px;color:var(--tm);min-width:80px}
+.bar-track{flex:1;height:28px;background:rgba(255,255,255,.04);border-radius:6px;overflow:visible;position:relative}
+.bar-fill{height:100%;border-radius:6px;display:flex;align-items:center;padding-left:10px;font-size:11px;font-weight:700;transition:width .5s;white-space:nowrap;overflow:visible;position:relative}
+.bar-green{background:linear-gradient(90deg,rgba(34,197,94,.6),rgba(34,197,94,.3))}
+.bar-yellow{background:linear-gradient(90deg,rgba(234,179,8,.6),rgba(234,179,8,.3))}
+.bar-red{background:linear-gradient(90deg,rgba(239,68,68,.6),rgba(239,68,68,.3))}
+.bar-cyan{background:linear-gradient(90deg,rgba(62,162,228,.7),rgba(138,98,236,.4))}
+.footer{text-align:center;margin-top:40px;padding-top:16px;border-top:1px solid var(--cb);color:var(--td);font-size:11px}
+#detailedView,#analyticsView{display:none}
+/* Mobile hamburger */
+.mobile-header{display:none;position:fixed;top:0;left:0;right:0;height:56px;background:#0a0a0e;border-bottom:1px solid var(--cb);z-index:20;padding:0 16px;align-items:center;justify-content:space-between}
+.mobile-header img{height:28px}
+.hamburger{background:none;border:none;color:var(--t);font-size:24px;cursor:pointer;padding:8px}
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:15}
+.sidebar-overlay.open{display:block}
+
+@media(max-width:768px){
+  .mobile-header{display:flex}
+  .sidebar{transform:translateX(-100%);transition:transform .3s ease;z-index:25;width:260px}
+  .sidebar.open{transform:translateX(0)}
+  .main{margin-left:0;padding:68px 14px 80px;max-width:100vw}
+  .top-bar{flex-direction:column;align-items:flex-start;gap:10px;padding:12px 0;position:relative}
+  .top-bar h1{font-size:18px}
+  .top-controls{width:100%;flex-wrap:wrap;gap:6px}
+  .top-controls select,.top-controls button{font-size:11px;padding:7px 10px}
+  .kpi-row{grid-template-columns:repeat(2,1fr)!important;gap:8px}
+  .kpi .value{font-size:22px}
+  .kpi{padding:14px 16px}
+  .table-wrap{max-height:60vh;border-radius:8px}
+  table{font-size:11px}
+  th,td{padding:8px 10px}
+  .analytics{grid-template-columns:1fr;gap:12px}
+  .chart-card{padding:16px}
+  .bar-label{min-width:60px;font-size:11px}
+  .live-indicator{font-size:11px}
+  .filters{flex-direction:column}
+  #filterPanel>div{grid-template-columns:1fr 1fr!important}
+  #kpiSelector>div:nth-child(2){grid-template-columns:1fr 1fr!important}
+  .footer{font-size:10px;padding-top:12px}
+  #customDates{flex-wrap:wrap}
+  .row-count{font-size:11px}
+  .source-item{font-size:11px}
+}
+@media(max-width:400px){
+  .kpi-row{grid-template-columns:1fr 1fr!important}
+  .kpi .value{font-size:20px}
+  .top-bar h1{font-size:16px}
+  #filterPanel>div{grid-template-columns:1fr!important}
+  table{font-size:10px}
+  th,td{padding:6px 8px}
+}
+</style>
+</head>
+<body>
+<div class="mobile-header">
+<img src="logo.png" alt="AI Commerce">
+<button class="hamburger" onclick="toggleSidebar()">☰</button>
+</div>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+<div class="layout">
+<aside class="sidebar">
+<img src="logo.png" alt="AI Commerce" style="max-width:180px;margin-bottom:16px">
+
+<div class="nav-group">
+<div class="nav-group-header open" onclick="toggleNavGroup(this)"><span>📊 Performance</span><span class="chevron">▶</span></div>
+<div class="nav-group-items open">
+<a class="nav-item active" onclick="showView('overview')"><span class="icon">⚡</span> Overview</a>
+<a class="nav-item" onclick="showView('detailed')"><span class="icon">📋</span> Detailed Log</a>
+<a class="nav-item" onclick="showView('analytics')"><span class="icon">📈</span> Analytics</a>
+<a class="nav-item" onclick="showView('apptlog')"><span class="icon">📅</span> Appointment Log</a>
+</div>
+</div>
+
+<div class="nav-group">
+<div class="nav-group-header open" onclick="toggleNavGroup(this)"><span>💰 Money</span><span class="chevron">▶</span></div>
+<div class="nav-group-items open">
+<a class="nav-item" onclick="showView('revenue')"><span class="icon">💵</span> Revenue</a>
+<a class="nav-item" onclick="showView('commissions')"><span class="icon">🏦</span> Commissions</a>
+<a class="nav-item" onclick="showView('financing')"><span class="icon">💳</span> Financing</a>
+</div>
+</div>
+
+<div class="nav-group">
+<div class="nav-group-header" onclick="toggleNavGroup(this)"><span>📋 Operations</span><span class="chevron">▶</span></div>
+<div class="nav-group-items">
+<a class="nav-item" onclick="showView('eod')"><span class="icon">📝</span> EOD Tracking</a>
+<a class="nav-item" onclick="showView('eodcompliance')"><span class="icon">✅</span> Rep Compliance</a>
+<a class="nav-item" onclick="showView('eodsubmissions')"><span class="icon">📑</span> Submission Log</a>
+<a class="nav-item" onclick="showView('repavail')"><span class="icon">📅</span> Rep Availability</a>
+<a class="nav-item" onclick="showView('roster')"><span class="icon">👥</span> Team Roster</a>
+</div>
+</div>
+
+<div class="nav-group">
+<div class="nav-group-header" onclick="toggleNavGroup(this)"><span>📖 Reference</span><span class="chevron">▶</span></div>
+<div class="nav-group-items">
+<a class="nav-item" onclick="showView('glossary')"><span class="icon">📖</span> Definitions</a>
+</div>
+</div>
+
+<div class="nav-group">
+<div class="nav-group-header" onclick="toggleNavGroup(this)"><span>🔗 Data Sources</span><span class="chevron">▶</span></div>
+<div class="nav-group-items">
+<a class="source-item" href="https://docs.google.com/spreadsheets/d/1dHVNK3-YdnyBNoiVMcSuWJKy5oyWbIx6UdIa_w4XX_o" target="_blank" style="text-decoration:none;cursor:pointer;padding-left:32px"><span>📝 Appointment Log</span><span style="margin-right:4px">→</span><span class="badge-live">Live</span></a>
+<a class="source-item" href="https://docs.google.com/spreadsheets/d/1-Dnr4JajMDhfnLJV3oo84J3evakULW5B6MVJEurH5Ts" target="_blank" style="text-decoration:none;cursor:pointer;padding-left:32px"><span>📊 SC Funnel Tracker</span><span style="margin-right:4px">→</span><span class="badge-live">Live</span></a>
+<a class="source-item" href="https://docs.google.com/spreadsheets/d/1jAxpzQc3LykrxNtuEGG-2HQ1XxLlY5IIk_fOSk_Znv4" target="_blank" style="text-decoration:none;cursor:pointer;padding-left:32px"><span>💰 AR / Commission Log</span><span style="margin-right:4px">→</span><span class="badge-live">Live</span></a>
+<a class="source-item" href="https://docs.google.com/spreadsheets/d/1eV0imsSntk2WwMSWLu9COzP7WWd8mSNp1DFbN-DN_2o" target="_blank" style="text-decoration:none;cursor:pointer;padding-left:32px"><span>📋 Master EOD Log</span><span style="margin-right:4px">→</span><span class="badge-live">Live</span></a>
+<a class="source-item" href="https://docs.google.com/spreadsheets/d/1b5yxMLGNcfjF5CMYSi_ziA40vcIiuA5Ffvty5Lb-trQ" target="_blank" style="text-decoration:none;cursor:pointer;padding-left:32px"><span>💳 Financing Log</span><span style="margin-right:4px">→</span><span class="badge-live">Live</span></a>
+</div>
+</div>
+</aside>
+<div class="main">
+<div class="top-bar">
+<h1>Sales Clarity Dashboard</h1>
+<div class="top-controls">
+<div style="position:relative;display:inline-block">
+<button id="repBtn" onclick="toggleRepDropdown()" style="font-family:Inter,sans-serif;font-size:12px;padding:8px 14px;border-radius:8px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);color:#f0f0f0;cursor:pointer;min-width:140px;text-align:left">All Reps ▾</button>
+<div id="repDropdown" style="display:none;position:absolute;top:100%;left:0;margin-top:4px;background:#141418;border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:8px;z-index:20;min-width:200px;max-height:300px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,.4)">
+<label style="display:flex;align-items:center;gap:6px;padding:6px 8px;font-size:12px;color:#fff;cursor:pointer;border-bottom:1px solid rgba(255,255,255,.06);margin-bottom:4px"><input type="checkbox" id="repAll" checked onchange="toggleAllReps()" style="accent-color:#3ea2e4"> <strong>All Reps</strong></label>
+<div id="repCheckboxes"></div>
+</div>
+</div>
+<select id="dateFilter" onchange="handleDateFilter()">
+<option value="7">Last 7 Days</option>
+<option value="14">Last 14 Days</option>
+<option value="30" selected>Last 30 Days</option>
+<option value="60">Last 60 Days</option>
+<option value="90">Q1 2026</option>
+<option value="all">All Time</option>
+<option value="custom">Custom Range</option>
+</select>
+<span id="customDates" style="display:none;align-items:center">
+<input type="date" id="dateFrom" onchange="applyFilters()" style="font-family:Inter,sans-serif;font-size:12px;padding:7px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);color:#f0f0f0">
+<span style="color:#555;font-size:12px;padding:0 8px;display:inline-flex;align-items:center;line-height:1">to</span>
+<input type="date" id="dateTo" onchange="applyFilters()" style="font-family:Inter,sans-serif;font-size:12px;padding:7px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);color:#f0f0f0">
+</span>
+<button class="btn-refresh" onclick="liveRefresh()" id="refreshBtn">🔄 Refresh</button>
+<button onclick="toggleKPISelector()" style="background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.2);color:#a78bfa;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer">⚙️ KPIs</button>
+</div>
+</div>
+<div id="kpiSelector" style="display:none;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:16px 20px;margin-bottom:16px">
+<div style="font-size:12px;font-weight:600;color:#a78bfa;margin-bottom:10px">Choose KPIs to display (up to 12):</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px" id="kpiOptions"></div>
+<div id="kpiError" style="display:none;color:#f87171;font-size:12px;margin-top:8px;font-weight:600">⚠️ Maximum 12 KPIs allowed. Please deselect some before adding more.</div>
+<div style="margin-top:10px;text-align:right"><button onclick="saveKPIs()" style="background:rgba(6,182,212,.15);color:#06b6d4;border:1px solid rgba(6,182,212,.3);padding:6px 16px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer">Apply</button></div>
+</div>
+<div id="kpiRow" class="kpi-row" style="grid-template-columns:repeat(6,1fr)"></div>
+
+<div class="live-indicator"><span class="live-dot"></span> LIVE · <span id="liveTime"></span> EST</div>
+<div id="overviewView">
+<div id="overviewLeaderboard"></div>
+<div id="overviewCharts"></div>
+<div id="overviewTableSection">
+<div style="margin-bottom:16px">
+<button onclick="toggleFilters()" id="filterToggle" style="background:rgba(6,182,212,.1);border:1px solid rgba(6,182,212,.2);color:#06b6d4;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer">🔽 Advanced Filters <span id="filterCount" style="background:rgba(6,182,212,.3);padding:2px 8px;border-radius:10px;margin-left:6px;display:none">0</span></button>
+</div>
+<div id="filterPanel" style="display:none;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:16px 20px;margin-bottom:16px">
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px">
+<div>
+<div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#555;margin-bottom:6px">Status</div>
+<select id="statusFilter" onchange="applyFilters()" style="width:100%"><option value="all">All Status</option><option value="Showed">Showed</option><option value="No Show">No Show</option></select>
+</div>
+<div>
+<div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#555;margin-bottom:6px">Triage</div>
+<select id="triageFilter" onchange="applyFilters()" style="width:100%"><option value="all">All Triage</option><option value="yes">Triaged</option><option value="no">Not Triaged</option></select>
+</div>
+<div>
+<div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#555;margin-bottom:6px">Outcome</div>
+<select id="outcomeFilter" onchange="applyFilters()" style="width:100%"><option value="all">All Outcomes</option><option value="Closed">Closed</option><option value="Follow">Follow-up</option><option value="Scheduled">Scheduled</option><option value="Lost">Lost</option><option value="No Show">No Show</option></select>
+</div>
+<div>
+<div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#555;margin-bottom:6px">Confidence</div>
+<select id="confidenceFilter" onchange="applyFilters()" style="width:100%"><option value="all">All Tiers</option><option value="Tier 1">Tier 1</option><option value="Tier 2">Tier 2</option><option value="Tier 3">Tier 3</option><option value="Tier 4">Tier 4</option><option value="No Match">No Match</option></select>
+</div>
+<div>
+<div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#555;margin-bottom:6px">Credit Score Min</div>
+<input type="number" id="csMin" placeholder="e.g. 650" onchange="applyFilters()" style="width:100%;font-family:Inter,sans-serif;font-size:12px;padding:7px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);color:#f0f0f0">
+</div>
+<div>
+<div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#555;margin-bottom:6px">Credit Score Max</div>
+<input type="number" id="csMax" placeholder="e.g. 800" onchange="applyFilters()" style="width:100%;font-family:Inter,sans-serif;font-size:12px;padding:7px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);color:#f0f0f0">
+</div>
+<div>
+<div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#555;margin-bottom:6px">Credit Avail Min</div>
+<input type="number" id="creditMin" placeholder="e.g. 5000" onchange="applyFilters()" style="width:100%;font-family:Inter,sans-serif;font-size:12px;padding:7px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);color:#f0f0f0">
+</div>
+<div>
+<div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#555;margin-bottom:6px">Credit Avail Max</div>
+<input type="number" id="creditMax" placeholder="e.g. 50000" onchange="applyFilters()" style="width:100%;font-family:Inter,sans-serif;font-size:12px;padding:7px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);color:#f0f0f0">
+</div>
+<div>
+<div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#555;margin-bottom:6px">Credit Frozen</div>
+<select id="frozenFilter" onchange="applyFilters()" style="width:100%"><option value="all">All</option><option value="Yes">Frozen</option><option value="No">Not Frozen</option></select>
+</div>
+</div>
+<div style="margin-top:12px;text-align:right"><button onclick="clearFilters()" style="font-size:11px;color:#888;background:none;border:1px solid rgba(255,255,255,.08);padding:6px 14px;border-radius:6px;cursor:pointer">Clear All Filters</button></div>
+</div>
+<div id="rowCount" class="row-count"></div>
+<div class="table-wrap"><table><thead id="overviewHead"></thead><tbody id="overviewBody"></tbody></table></div>
+</div><!-- end overviewTableSection -->
+</div>
+<div id="detailedView">
+<div id="detailCount" class="row-count"></div>
+<div class="table-wrap"><table><thead id="detailHead"></thead><tbody id="detailBody"></tbody></table></div>
+</div>
+<div id="analyticsView" id="analyticsContent"></div>
+<div id="apptlogView" style="display:none">
+<div id="apptlogContent"></div>
+</div>
+
+<div id="commissionsView" style="display:none">
+<div id="commKPIs2" class="kpi-row" style="grid-template-columns:repeat(6,1fr)"></div>
+<div id="commContent2"></div>
+</div>
+
+<div id="revenueView" style="display:none">
+<div id="commKPIs" class="kpi-row" style="grid-template-columns:repeat(6,1fr)"></div>
+<div id="commContent"></div>
+</div>
+
+<div id="eodView" style="display:none">
+<div id="eodKPIs" class="kpi-row" style="grid-template-columns:repeat(6,1fr)"></div>
+<div id="eodContent"></div>
+</div>
+
+<div id="eodcomplianceView" style="display:none">
+<div id="complianceKPIs" class="kpi-row" style="grid-template-columns:repeat(6,1fr)"></div>
+<div id="complianceContent"></div>
+</div>
+
+<div id="eodsubmissionsView" style="display:none">
+<div id="submissionsContent"></div>
+</div>
+
+<div id="financingView" style="display:none">
+<div id="finKPIs" class="kpi-row" style="grid-template-columns:repeat(6,1fr)"></div>
+<div id="finContent"></div>
+</div>
+
+
+
+<div id="glossaryView" style="display:none">
+<div style="max-width:900px">
+<h2 style="font-size:20px;font-weight:800;margin-bottom:24px;background:linear-gradient(135deg,#3ea2e4,#8a62ec,#f10cf6);-webkit-background-clip:text;-webkit-text-fill-color:transparent">📖 Metric Definitions & Formulas</h2>
+
+<div class="chart-card" style="margin-bottom:16px">
+<h3 style="color:#3ea2e4">Overview Metrics</h3>
+<table style="font-size:13px;width:100%">
+<thead><tr><th style="width:160px">Metric</th><th>Definition</th><th style="width:220px">Formula</th><th style="width:140px">Data Source</th></tr></thead>
+<tbody>
+<tr><td style="color:var(--t);font-weight:600">Appointments</td><td>Total booked appointments in the selected date range and rep filter.</td><td><code>COUNT(all matching rows)</code></td><td style="font-size:11px;color:var(--tm)">Appointment Log<br>(Google Sheet)</td></tr>
+<tr><td style="color:var(--t);font-weight:600">Demos Held</td><td>Appointments where the prospect showed up for the demo call. Determined by Fathom call recording match or manual status.</td><td><code>COUNT(Status = "Showed")</code></td><td style="font-size:11px;color:var(--tm)">Appointment Log<br>+ Fathom API</td><td style="font-size:11px;color:var(--tm)">Master EOD Log<br>(self-reported)</td></tr>
+<tr><td style="color:var(--t);font-weight:600">Show Rate</td><td>Percentage of booked appointments where the prospect actually showed. Industry benchmark: 40-60%.</td><td><code>Demos Held ÷ Appointments × 100</code><br>🟢 ≥40% · 🟡 ≥25% · 🔴 &lt;25%</td><td style="font-size:11px;color:var(--tm)">Appointment Log<br>(calculated)</td></tr>
+<tr><td style="color:var(--t);font-weight:600">No Shows</td><td>Appointments where the prospect did not show up. Trend arrow compares to previous period (↑ means improvement = fewer no-shows).</td><td><code>COUNT(Status = "No Show")</code></td><td style="font-size:11px;color:var(--tm)">Appointment Log<br>(calculated)</td></tr>
+<tr><td style="color:var(--t);font-weight:600">Close Rate</td><td>Percentage of demos held that resulted in a closed deal. Based on Outcome column containing "Closed".</td><td><code>Closed Deals ÷ Demos Held × 100</code></td><td style="font-size:11px;color:var(--tm)">Appointment Log<br>(Outcome column)</td></tr>
+<tr><td style="color:var(--t);font-weight:600">Avg Duration</td><td>Average call length in minutes across all demos with a recorded duration (from Fathom). Only counts calls with duration > 0.</td><td><code>SUM(Duration) ÷ COUNT(Duration > 0)</code></td><td style="font-size:11px;color:var(--tm)">Fathom API<br>(call recordings)</td></tr>
+<tr><td style="color:var(--t);font-weight:600">Avg Credit Score</td><td>Mean credit score across all prospects that have a score on file (from SC Funnel Tracker backfill).</td><td><code>SUM(Credit Score) ÷ COUNT(has score)</code><br>🟢 ≥650 · 🟡 ≥600 · 🔴 &lt;600</td><td style="font-size:11px;color:var(--tm)">SC Funnel Tracker<br>(backfilled)</td></tr>
+<tr><td style="color:var(--t);font-weight:600">CS 650+ Rate</td><td>Percentage of scored prospects with a credit score of 650 or above — generally qualifiable for financing.</td><td><code>COUNT(CS ≥ 650) ÷ COUNT(has score) × 100</code></td><td style="font-size:11px;color:var(--tm)">SC Funnel Tracker<br>(calculated)</td></tr>
+<tr><td style="color:var(--t);font-weight:600">Avg Credit Avail</td><td>Mean available credit limit across prospects with credit data.</td><td><code>SUM(Credit Avail) ÷ COUNT(has data)</code></td><td style="font-size:11px;color:var(--tm)">SC Funnel Tracker<br>(backfilled)</td></tr>
+<tr><td style="color:var(--t);font-weight:600">Frozen Credit %</td><td>Percentage of prospects with frozen credit files, which blocks financing applications.</td><td><code>COUNT(Frozen = "Yes") ÷ Total × 100</code><br>🔴 >10% · 🟢 ≤10%</td><td style="font-size:11px;color:var(--tm)">SC Funnel Tracker<br>(backfilled)</td></tr>
+<tr><td style="color:var(--t);font-weight:600">Triage Rate</td><td>Percentage of appointments that were triaged (pre-qualified) before the demo call.</td><td><code>COUNT(Triaged = "Yes") ÷ Total × 100</code></td><td style="font-size:11px;color:var(--tm)">Appointment Log<br>(Triaged column)</td></tr>
+<tr><td style="color:var(--t);font-weight:600">Active Reps</td><td>Number of unique sales reps who have at least one appointment in the selected period.</td><td><code>COUNT(DISTINCT Sales Rep)</code></td><td style="font-size:11px;color:var(--tm)">Appointment Log<br>(Rep column)</td></tr>
+<tr><td style="color:var(--t);font-weight:600">Trend Arrows</td><td>↑/↓ percentages compare the current period to the previous period of equal length. E.g., "Last 30 Days" compares to the 30 days before that.</td><td><code>(Current - Previous) ÷ Previous × 100</code></td><td style="font-size:11px;color:var(--tm)">Appointment Log<br>(calculated)</td></tr>
+</tbody></table></div>
+
+<div class="chart-card" style="margin-bottom:16px">
+<h3 style="color:#8a62ec">Commissions Metrics</h3>
+<table style="font-size:13px;width:100%">
+<thead><tr><th style="width:160px">Metric</th><th>Definition</th><th style="width:220px">Formula</th><th style="width:140px">Data Source</th></tr></thead>
+<tbody>
+<tr><td style="color:var(--t);font-weight:600">Closer Total Commission</td><td>Total commission earned by the closer before the 90-day reserve hold.</td><td><code>Net Amount × Closer Comm %</code></td><td style="font-size:11px;color:var(--tm)">AR/Commission Log<br>(Payments tab)</td></tr>
+<tr><td style="color:var(--t);font-weight:600">Closer Reserve $</td><td>10% of the closer's total commission held for 90 days as a reserve (refund protection).</td><td><code>Closer Total Comm × Reserve %</code></td><td style="font-size:11px;color:var(--tm)">AR/Commission Log<br>(Payments tab)</td></tr>
+<tr><td style="color:var(--t);font-weight:600">Closer Payable Commission</td><td>What the closer is actually owed right now — total commission minus the reserve hold.</td><td><code>Total Commission - Reserve $</code></td><td style="font-size:11px;color:var(--tm)">AR/Commission Log<br>(calculated)</td></tr>
+<tr><td style="color:var(--t);font-weight:600">Setter Payable Commission</td><td>Same structure as closer — total setter commission minus their reserve hold.</td><td><code>Setter Comm $ - Setter Reserve $</code></td><td style="font-size:11px;color:var(--tm)">AR/Commission Log<br>(Payments tab)</td></tr>
+<tr><td style="color:var(--t);font-weight:600">Total Reserves</td><td>Company-wide total of all commission reserves being held (closer + setter). Released after 90 days if no refund.</td><td><code>SUM(Closer Reserve) + SUM(Setter Reserve)</code></td><td style="font-size:11px;color:var(--tm)">AR/Commission Log<br>(calculated)</td></tr>
+<tr><td style="color:var(--t);font-weight:600">Reserve Status</td><td>"Holding" = within 90-day window, "Released" = past 90 days and eligible for payout.</td><td>Based on Reserve Release Date vs today</td><td style="font-size:11px;color:var(--tm)">AR/Commission Log<br>(Payments tab)</td></tr>
+</tbody></table></div>
+
+<div class="chart-card" style="margin-bottom:16px">
+<h3 style="color:var(--gn)">AR Log / Revenue Metrics</h3>
+<table style="font-size:13px;width:100%">
+<thead><tr><th style="width:160px">Metric</th><th>Definition</th><th style="width:220px">Formula</th><th style="width:140px">Data Source</th></tr></thead>
+<tbody>
+<tr><td style="color:var(--t);font-weight:600">Cash Collected</td><td>Total gross payment amount received from clients (before processing fees).</td><td><code>SUM(Payment Amount) where Status = "Collected"</code></td><td style="font-size:11px;color:var(--tm)">AR/Commission Log<br>(Payments tab)</td><td style="font-size:11px;color:var(--tm)">Master EOD Log<br>(self-reported)</td></tr>
+<tr><td style="color:var(--t);font-weight:600">Net After Fees</td><td>Cash actually received after payment processor takes their cut.</td><td><code>SUM(Net Amount Received)</code></td><td style="font-size:11px;color:var(--tm)">AR/Commission Log<br>(Payments tab)</td></tr>
+<tr><td style="color:var(--t);font-weight:600">Processing Fees</td><td>Total lost to payment processors (Credit Card ~2.5%, Elective ~15%, Clarity Pay varies).</td><td><code>Cash Collected - Net After Fees</code></td><td style="font-size:11px;color:var(--tm)">AR/Commission Log<br>(calculated)</td></tr>
+<tr><td style="color:var(--t);font-weight:600">Collection Rate</td><td>Percentage of payments that have been successfully collected vs pending.</td><td><code>Collected ÷ Total Payments × 100</code></td><td style="font-size:11px;color:var(--tm)">AR/Commission Log<br>(calculated)</td></tr>
+</tbody></table></div>
+
+<div class="chart-card" style="margin-bottom:16px">
+<h3 style="color:#f10cf6">Financing Metrics</h3>
+<table style="font-size:13px;width:100%">
+<thead><tr><th style="width:160px">Metric</th><th>Definition</th><th style="width:220px">Formula</th><th style="width:140px">Data Source</th></tr></thead>
+<tbody>
+<tr><td style="color:var(--t);font-weight:600">Applications</td><td>Total financing applications submitted across all partners.</td><td><code>COUNT(all financing rows)</code></td><td style="font-size:11px;color:var(--tm)">AIC Financing Log<br>(CB tab)</td></tr>
+<tr><td style="color:var(--t);font-weight:600">Approval Rate</td><td>Percentage of applications that were approved (any "Approved" status).</td><td><code>Approved ÷ Total × 100</code></td><td style="font-size:11px;color:var(--tm)">AIC Financing Log<br>(calculated)</td></tr>
+<tr><td style="color:var(--t);font-weight:600">Denied</td><td>Applications that were denied by the financing partner.</td><td><code>COUNT(Status = "Denied")</code></td><td style="font-size:11px;color:var(--tm)">AIC Financing Log<br>(CB tab)</td></tr>
+<tr><td style="color:var(--t);font-weight:600">Avg Amount</td><td>Average funding amount requested across all applications.</td><td><code>SUM(Amount Requested) ÷ Total Apps</code></td><td style="font-size:11px;color:var(--tm)">AIC Financing Log<br>(calculated)</td></tr>
+<tr><td style="color:var(--t);font-weight:600">Top Partner</td><td>Financing partner with the most applications submitted.</td><td><code>MODE(Funding Partner)</code></td><td style="font-size:11px;color:var(--tm)">AIC Financing Log<br>(calculated)</td></tr>
+</tbody></table></div>
+
+<div class="chart-card" style="margin-bottom:16px">
+<h3 style="color:var(--yl)">EOD Tracking Metrics</h3>
+<table style="font-size:13px;width:100%">
+<thead><tr><th style="width:160px">Metric</th><th>Definition</th><th style="width:220px">Formula</th><th style="width:140px">Data Source</th></tr></thead>
+<tbody>
+<tr><td style="color:var(--t);font-weight:600">Submissions</td><td>Total EOD form submissions by all reps. Each rep submits daily.</td><td><code>COUNT(all EOD rows)</code></td><td style="font-size:11px;color:var(--tm)">Master EOD Log<br>(Log tab)</td></tr>
+<tr><td style="color:var(--t);font-weight:600">Avg Calls/Day</td><td>Average number of phone calls made per rep per day.</td><td><code>SUM(Phone Calls) ÷ Submissions</code></td><td style="font-size:11px;color:var(--tm)">Master EOD Log<br>(calculated)</td></tr>
+<tr><td style="color:var(--t);font-weight:600">Avg Sets/Day</td><td>Average number of appointments set per rep per day from outbound calling.</td><td><code>SUM(Outbound Sets) ÷ Submissions</code></td><td style="font-size:11px;color:var(--tm)">Master EOD Log<br>(calculated)</td></tr>
+<tr><td style="color:var(--t);font-weight:600">Demos Held</td><td>Total demos held as self-reported by reps in their EOD submissions.</td><td><code>SUM(Demos Held column)</code></td></tr>
+<tr><td style="color:var(--t);font-weight:600">Closed Units</td><td>Total deals closed as self-reported by reps.</td><td><code>SUM(Closed Units column)</code></td><td style="font-size:11px;color:var(--tm)">Master EOD Log<br>(self-reported)</td></tr>
+<tr><td style="color:var(--t);font-weight:600">Cash Collected</td><td>Total cash collected as self-reported. ⚠️ May differ from AR Log actuals.</td><td><code>SUM(Cash Collected column)</code></td></tr>
+</tbody></table></div>
+
+<div class="chart-card">
+<h3 style="color:var(--tm)">Data Sources & Matching</h3>
+<table style="font-size:13px;width:100%">
+<thead><tr><th style="width:160px">Concept</th><th>Explanation</th><th style="width:140px">Source</th></tr></thead>
+<tbody>
+<tr><td style="color:var(--t);font-weight:600">Match Confidence</td><td>How we linked Fathom recordings to appointments. <strong>Tier 1:</strong> Prospect email + rep email + date ±1 day (highest). <strong>Tier 2:</strong> Prospect email + date, different rep. <strong>Tier 3:</strong> Rep + date + full name in title. <strong>Tier 4:</strong> Rep + date + first name only.</td><td style="font-size:11px;color:var(--tm)">Fathom API +<br>Appointment Log</td></tr>
+<tr><td style="color:var(--t);font-weight:600">Show Detection</td><td>A prospect "Showed" if Fathom detected external attendees (calendar_invitees_domains_type = "one_or_more_external") AND call duration > 5 minutes.</td><td style="font-size:11px;color:var(--tm)">Fathom API<br>(calendar metadata)</td></tr>
+<tr><td style="color:var(--t);font-weight:600">Email as Primary Key</td><td>Prospect email is the unique identifier used to join data across Appointment Log, AR/Commission Log, and Financing Log.</td><td style="font-size:11px;color:var(--tm)">All sources<br>(joined on email)</td></tr>
+<tr><td style="color:var(--t);font-weight:600">Date Filtering</td><td>All dates are in Eastern Time (ET). Date filters apply to: Appointment Date (Overview), Collection Date (AR/Commissions), Application Date (Financing), Stat Date (EOD).</td><td style="font-size:11px;color:var(--tm)">All sources<br>(per-tab date column)</td></tr>
+</tbody></table></div>
+
+</div>
+</div>
+
+<div id="repavailView" style="display:none">
+<div id="repavailKPIs" class="kpi-row" style="grid-template-columns:repeat(6,1fr)"></div>
+<div id="repavailContent"></div>
+</div>
+
+<div id="rosterView" style="display:none">
+<div id="rosterContent"></div>
+</div>
+
+<div class="footer">Sales Clarity Dashboard — AI Commerce · Powered by Ace · <span id="lastUpdated"></span></div>
+</div>
+</div>
+<script src="extra-data.js?v=1774564283"></script>
+<script src="data.js?v=1774564283"></script>
+<script>
+function toggleNavGroup(header){
+  header.classList.toggle('open');
+  const items=header.nextElementSibling;
+  items.classList.toggle('open');
+}
+function toggleSidebar(){
+  const sb=document.querySelector('.sidebar');
+  const ov=document.getElementById('sidebarOverlay');
+  sb.classList.toggle('open');
+  ov.classList.toggle('open');
+}
+
+// Column resize with persistence
+const _colWidths={};
+let _isResizing=false;
+function enableColumnResize(){
+  document.querySelectorAll('.table-wrap table').forEach(table=>{
+    const tableId=table.closest('[id]')?.id||'default';
+    if(!_colWidths[tableId])_colWidths[tableId]={};
+    const ths=table.querySelectorAll('th');
+    // Restore saved widths
+    ths.forEach((th,i)=>{
+      if(_colWidths[tableId][i]){th.style.width=_colWidths[tableId][i];th.style.minWidth=_colWidths[tableId][i];}
+      if(th.querySelector('.resize-handle'))return;
+      const handle=document.createElement('div');
+      handle.className='resize-handle';
+      th.appendChild(handle);
+      th.style.overflow='hidden';
+      let startX,startW,didDrag;
+      handle.addEventListener('mousedown',function(e){
+        e.preventDefault();e.stopPropagation();
+        startX=e.pageX;startW=th.offsetWidth;didDrag=false;
+        _isResizing=true;
+        handle.classList.add('active');
+        document.body.style.cursor='col-resize';
+        document.body.style.userSelect='none';
+        function onMove(e2){didDrag=true;const w=(startW+e2.pageX-startX)+'px';th.style.width=w;th.style.minWidth=w;_colWidths[tableId][i]=w;}
+        function onUp(){handle.classList.remove('active');document.body.style.cursor='';document.body.style.userSelect='';document.removeEventListener('mousemove',onMove);document.removeEventListener('mouseup',onUp);setTimeout(()=>{_isResizing=false;},50);}
+        document.addEventListener('mousemove',onMove);
+        document.addEventListener('mouseup',onUp);
+      });
+      handle.addEventListener('touchstart',function(e){
+        e.preventDefault();e.stopPropagation();
+        startX=e.touches[0].pageX;startW=th.offsetWidth;
+        _isResizing=true;
+        handle.classList.add('active');
+        function onMove(e2){const w=(startW+e2.touches[0].pageX-startX)+'px';th.style.width=w;th.style.minWidth=w;_colWidths[tableId][i]=w;}
+        function onUp(){handle.classList.remove('active');document.removeEventListener('touchmove',onMove);document.removeEventListener('touchend',onUp);setTimeout(()=>{_isResizing=false;},50);}
+        document.addEventListener('touchmove',onMove);
+        document.addEventListener('touchend',onUp);
+      });
+    });
+  });
+}
+const _resizeObserver=new MutationObserver(()=>enableColumnResize());
+document.addEventListener('DOMContentLoaded',()=>{
+  enableColumnResize();
+  document.querySelectorAll('.table-wrap').forEach(tw=>_resizeObserver.observe(tw,{childList:true,subtree:true}));
+});
+// Column indices
+const CI={date:0,created:1,delta:2,name:3,email:4,rep:5,triage:6,status:7,outcome:8,notes:9,fathom:10,source:11,cs:12,credit:13,dti:14,repEmail:15,duration:16,frozen:17,calendar:18,confidence:19};
+
+// ═══ ACTIVE TEAM ROSTER (single source of truth) ═══
+// Update this list when team members join or leave
+const ACTIVE_TEAM=[
+  {name:'Anthony Steel',role:'Closer',email:'anthony@peterszabo.co'},
+  {name:'Adil Mithoo',role:'Closer',email:'adil@peterszabo.co'},
+  {name:'John Cantu',role:'Closer',email:'john.c@peterszabo.co'},
+  {name:'Zak Lewis',role:'Closer',email:'zak@peterszabo.co'},
+  {name:'Luke Tripconey',role:'Closer',email:'luke@peterszabo.co'},
+  {name:'Allan Kuriakose',role:'Closer',email:'allan@peterszabo.co'},
+  {name:'Stef Merola',role:'Sales Manager',email:'stef@peterszabo.co'},
+  {name:'Cayden Raine',role:'Setter',email:'cayden@peterszabo.co'},
+  {name:'Sam Figueiredo',role:'Setter',email:'sam@peterszabo.co'},
+];
+const ACTIVE_NAMES=ACTIVE_TEAM.map(t=>t.name);
+const INACTIVE_NAMES=['Cale Jacob','Chris Barry','Jason Scott','Kris Endique','Matthew Shetler','Rob Rammuny'];
+function isActiveRep(name){return ACTIVE_NAMES.some(n=>n.toLowerCase()===name.toLowerCase());}
+
+let filtered=[];
+let sortCol=-1,sortAsc=true;
+let currentView='overview';
+
+function toggleFilters(){
+  const p=document.getElementById('filterPanel');
+  const b=document.getElementById('filterToggle');
+  if(p.style.display==='none'){p.style.display='block';b.innerHTML='🔼 Advanced Filters <span id="filterCount" style="background:rgba(6,182,212,.3);padding:2px 8px;border-radius:10px;margin-left:6px;display:none">0</span>';}
+  else{p.style.display='none';b.innerHTML='🔽 Advanced Filters <span id="filterCount" style="background:rgba(6,182,212,.3);padding:2px 8px;border-radius:10px;margin-left:6px;display:none">0</span>';updateFilterCount();}
+}
+
+function clearFilters(){
+  ['statusFilter','triageFilter','outcomeFilter','confidenceFilter','frozenFilter'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='all';});
+  ['csMin','csMax','creditMin','creditMax'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  applyFilters();
+}
+
+function updateFilterCount(){
+  let count=0;
+  if(gv('statusFilter','all')!=='all')count++;
+  if(gv('triageFilter','all')!=='all')count++;
+  if(gv('outcomeFilter','all')!=='all')count++;
+  if(gv('confidenceFilter','all')!=='all')count++;
+  if(gv('csMin',''))count++;
+  if(gv('csMax',''))count++;
+  if(gv('creditMin',''))count++;
+  if(gv('creditMax',''))count++;
+  if(gv('frozenFilter','all')!=='all')count++;
+  const badge=document.getElementById('filterCount');
+  if(badge){badge.textContent=count;badge.style.display=count>0?'inline':'none';}
+}
+
+function toggleRepDropdown(){
+  const dd=document.getElementById('repDropdown');
+  dd.style.display=dd.style.display==='none'?'block':'none';
+}
+
+function toggleAllReps(){
+  const all=document.getElementById('repAll').checked;
+  document.querySelectorAll('#repCheckboxes input').forEach(cb=>{cb.checked=all;});
+  updateRepButton();
+  applyFilters();
+}
+
+function onRepChange(){
+  const boxes=[...document.querySelectorAll('#repCheckboxes input')];
+  const allChecked=boxes.every(b=>b.checked);
+  document.getElementById('repAll').checked=allChecked;
+  updateRepButton();
+  applyFilters();
+}
+
+function updateRepButton(){
+  const boxes=[...document.querySelectorAll('#repCheckboxes input:checked')];
+  const total=[...document.querySelectorAll('#repCheckboxes input')].length;
+  const btn=document.getElementById('repBtn');
+  if(boxes.length===total)btn.textContent='All Reps ▾';
+  else if(boxes.length===0)btn.textContent='No Reps ▾';
+  else if(boxes.length===1)btn.textContent=boxes[0].value+' ▾';
+  else btn.textContent=boxes.length+' Reps ▾';
+}
+
+function getSelectedReps(){
+  const allChecked=document.getElementById('repAll').checked;
+  if(allChecked)return'all';
+  return [...document.querySelectorAll('#repCheckboxes input:checked')].map(cb=>cb.value);
+}
+
+document.addEventListener('click',function(e){
+  const dd=document.getElementById('repDropdown');
+  const btn=document.getElementById('repBtn');
+  if(dd&&!dd.contains(e.target)&&e.target!==btn)dd.style.display='none';
+});
+
+function handleDateFilter(){
+  const v=gv('dateFilter','30');
+  const cd=document.getElementById('customDates');
+  if(cd)cd.style.display=v==='custom'?'inline-flex':'none';
+  if(v!=='custom')applyFilters();
+}
+
+function getDateRange(){
+  const v=gv('dateFilter','30');
+  const now=new Date();
+  if(v==='custom'){
+    const from=gv('dateFrom','');
+    const to=gv('dateTo','');
+    if(from&&to)return{start:new Date(from),end:new Date(to+'T23:59:59'),days:Math.ceil((new Date(to)-new Date(from))/(1000*60*60*24))};
+    return{start:new Date(2025,0,1),end:now,days:365};
+  }
+  if(v==='all')return{start:new Date(2025,0,1),end:now,days:365};
+  const days=parseInt(v);
+  const start=new Date(now);start.setDate(start.getDate()-days);
+  return{start,end:now,days};
+}
+
+function getPrevRange(){
+  const r=getDateRange();
+  const prevEnd=new Date(r.start);prevEnd.setDate(prevEnd.getDate()-1);
+  const prevStart=new Date(prevEnd);prevStart.setDate(prevStart.getDate()-r.days);
+  return{start:prevStart,end:prevEnd,days:r.days};
+}
+
+function trendBadge(current,previous){
+  if(previous===0)return'';
+  const pct=((current-previous)/previous*100).toFixed(1);
+  if(pct>0)return' <span style="color:#4ade80;font-size:11px">↑'+pct+'%</span>';
+  if(pct<0)return' <span style="color:#f87171;font-size:11px">↓'+Math.abs(pct)+'%</span>';
+  return' <span style="color:#888;font-size:11px">→ 0%</span>';
+}
+
+async function liveRefresh(){
+  const btn=document.getElementById('refreshBtn');
+  btn.textContent='⏳ Loading...';
+  btn.disabled=true;
+  try{
+    const resp=await fetch('/.netlify/functions/refresh');
+    const data=await resp.json();
+    if(data.error)throw new Error(data.error);
+    
+    H=data.headers;
+    D=data.rows;
+    
+    applyFilters();
+    btn.textContent='✅ Updated!';
+    document.getElementById('lastUpdated').textContent='Updated '+new Date().toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'});
+    document.getElementById('liveTime').textContent=new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true});
+    setTimeout(()=>{btn.textContent='🔄 Refresh';btn.disabled=false;},2000);
+  }catch(e){
+    console.error('Refresh failed:',e);
+    btn.textContent='❌ Error - '+e.message;
+    setTimeout(()=>{btn.textContent='🔄 Refresh';btn.disabled=false;},3000);
+  }
+}
+
+function init(){
+  // Populate rep filter
+  const reps=[...new Set(D.map(r=>r[CI.rep]).filter(Boolean))].sort();
+  const repContainer=document.getElementById('repCheckboxes');
+  reps.forEach(r=>{
+    const label=document.createElement('label');
+    label.style.cssText='display:flex;align-items:center;gap:6px;padding:5px 8px;font-size:12px;color:#999;cursor:pointer;border-radius:4px';
+    label.onmouseenter=function(){this.style.background='rgba(62,162,228,.1)'};
+    label.onmouseleave=function(){this.style.background='none'};
+    label.innerHTML='<input type="checkbox" value="'+r+'" checked onchange="onRepChange()" style="accent-color:#3ea2e4"> '+r;
+    repContainer.appendChild(label);
+  });
+  document.getElementById('liveTime').textContent=new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true});
+  document.getElementById('lastUpdated').textContent='Updated '+new Date().toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'});
+  applyFilters();
+}
+
+function parseDate(s){
+  if(!s)return null;
+  try{
+    const parts=s.match(/(\d+)\/(\d+)\/(\d+)\s+(\d+):(\d+)/);
+    if(parts)return new Date(parts[3],parts[1]-1,parts[2],parts[4],parts[5]);
+  }catch(e){}
+  return null;
+}
+
+function gv(id,fallback){const el=document.getElementById(id);return el?el.value:(fallback||'all');}
+
+function applyFilters(){
+  try{
+  const selectedReps=getSelectedReps();
+  
+  const status=gv('statusFilter','all');
+  const triage=gv('triageFilter','all');
+  const now=new Date();
+  
+  filtered=D.filter(r=>{
+    if(selectedReps!=='all'&&!selectedReps.includes(r[CI.rep]))return false;
+    if(status!=='all'&&r[CI.status]!==status)return false;
+    if(triage==='yes'&&(!r[CI.triage]||r[CI.triage].toLowerCase()==='no'))return false;
+    if(triage==='no'&&r[CI.triage]&&r[CI.triage].toLowerCase()==='yes')return false;
+    const outcome=gv('outcomeFilter','all');
+    if(outcome!=='all'&&(!r[CI.outcome]||!r[CI.outcome].toLowerCase().includes(outcome.toLowerCase())))return false;
+    const conf=gv('confidenceFilter','all');
+    if(conf!=='all'&&r[CI.confidence]!==conf)return false;
+    const csMinV=gv('csMin','');
+    if(csMinV&&(!r[CI.cs]||parseFloat(r[CI.cs])<parseFloat(csMinV)))return false;
+    const csMaxV=gv('csMax','');
+    if(csMaxV&&(!r[CI.cs]||parseFloat(r[CI.cs])>parseFloat(csMaxV)))return false;
+    const creditMinV=gv('creditMin','');
+    if(creditMinV){const cv=parseFloat((r[CI.credit]||'0').replace(/[^0-9.-]/g,''));if(cv<parseFloat(creditMinV))return false;}
+    const creditMaxV=gv('creditMax','');
+    if(creditMaxV){const cv2=parseFloat((r[CI.credit]||'0').replace(/[^0-9.-]/g,''));if(cv2>parseFloat(creditMaxV))return false;}
+    const frozen=gv('frozenFilter','all');
+    if(frozen!=='all'&&r[CI.frozen]!==frozen)return false;
+    const range=getDateRange();
+    const d=parseDate(r[CI.date]);
+    if(!d)return false;
+    if(d<range.start||d>range.end)return false;
+    return true;
+  });
+  
+  if(sortCol>=0){
+    filtered.sort((a,b)=>{
+      let va=a[sortCol]||'',vb=b[sortCol]||'';
+      const na=parseFloat(va.replace(/[^0-9.-]/g,'')),nb=parseFloat(vb.replace(/[^0-9.-]/g,''));
+      if(!isNaN(na)&&!isNaN(nb))return sortAsc?na-nb:nb-na;
+      return sortAsc?va.localeCompare(vb):vb.localeCompare(va);
+    });
+  }
+  
+  updateFilterCount();
+  renderKPIs();
+  renderOverview();
+  renderDetailed();
+  renderAnalytics();
+  // Re-render current non-overview view with new filters
+  if(currentView==='commissions')renderCommissionsView();
+  if(currentView==='revenue')renderCommissions();
+  if(currentView==='financing')renderFinancing();
+  if(currentView==='eod')renderEOD();
+  if(currentView==='eodcompliance')renderEODCompliance();
+  if(currentView==='eodsubmissions')renderEODSubmissions();
+  
+  if(currentView==='apptlog')renderApptLog();
+  if(currentView==='overview')renderOverviewCharts();
+  if(currentView==='repavail')renderRepAvail();
+  }catch(e){console.error('[applyFilters]',e);document.getElementById('rowCount').textContent='ERROR: '+e.message;}
+}
+
+const ALL_KPIS=[
+  {id:'appointments',label:'Appointments',default:true},
+  {id:'demos',label:'Demos Held',default:true},
+  {id:'showRate',label:'Show Rate',default:true},
+  {id:'noShows',label:'No Shows',default:true},
+  {id:'closeRate',label:'Close Rate',default:true},
+  {id:'avgDuration',label:'Avg Duration',default:true},
+  {id:'avgCS',label:'Avg Credit Score',default:true},
+  {id:'cs650',label:'CS 650+ Rate',default:true},
+  {id:'epCall',label:'Earnings/Call',default:false},
+  {id:'cashCollected',label:'Cash Collected',default:false},
+  {id:'revPerLead',label:'Revenue/Lead',default:false},
+  {id:'setRate',label:'Set Rate',default:false},
+  {id:'avgCredit',label:'Avg Credit Avail',default:false},
+  {id:'frozenRate',label:'Frozen Credit %',default:false},
+  {id:'triageRate',label:'Triage Rate',default:false},
+  {id:'totalReps',label:'Active Reps',default:false}
+];
+
+function getActiveKPIs(){
+  const saved=localStorage.getItem('activeKPIs');
+  if(saved)return JSON.parse(saved);
+  return ALL_KPIS.filter(k=>k.default).map(k=>k.id);
+}
+
+function moveKPI(id,dir){
+  const active=getActiveKPIs();
+  const idx=active.indexOf(id);
+  if(idx<0)return;
+  const newIdx=idx+dir;
+  if(newIdx<0||newIdx>=active.length)return;
+  active.splice(idx,1);
+  active.splice(newIdx,0,id);
+  localStorage.setItem('activeKPIs',JSON.stringify(active));
+  renderKPIOptions();
+  renderKPIs();
+}
+
+function checkKPILimit(){
+  const checked=[...document.querySelectorAll('#kpiOptions input:checked')];
+  const unchecked=[...document.querySelectorAll('#kpiOptions input:not(:checked)')];
+  const err=document.getElementById('kpiError');
+  if(checked.length>=12){
+    err.style.display='block';
+    unchecked.forEach(cb=>{cb.disabled=true;cb.parentElement.style.opacity='0.4';cb.parentElement.style.border='1px solid rgba(239,68,68,.3)';cb.parentElement.style.cursor='not-allowed';});
+  }else{
+    err.style.display='none';
+    unchecked.forEach(cb=>{cb.disabled=false;cb.parentElement.style.opacity='1';cb.parentElement.style.border='1px solid rgba(255,255,255,.06)';cb.parentElement.style.cursor='pointer';});
+  }
+  // Update active ones styling
+  checked.forEach(cb=>{cb.parentElement.style.background='rgba(6,182,212,.1)';cb.parentElement.style.border='1px solid rgba(6,182,212,.2)';cb.parentElement.style.opacity='1';});
+}
+
+function toggleKPISelector(){
+  const el=document.getElementById('kpiSelector');
+  el.style.display=el.style.display==='none'?'block':'none';
+  if(el.style.display==='block')renderKPIOptions();
+}
+
+function renderKPIOptions(){
+  const active=getActiveKPIs();
+  const el=document.getElementById('kpiOptions');
+  // Show active KPIs first (in order), then inactive
+  const sorted=[...ALL_KPIS].sort((a,b)=>{
+    const ai=active.indexOf(a.id),bi=active.indexOf(b.id);
+    if(ai>=0&&bi>=0)return ai-bi;
+    if(ai>=0)return -1;
+    if(bi>=0)return 1;
+    return 0;
+  });
+  el.innerHTML=sorted.map((k,idx)=>{
+    const isActive=active.includes(k.id);
+    const pos=isActive?active.indexOf(k.id):-1;
+    const arrows=isActive?`<span style="display:flex;flex-direction:column;gap:0;margin-left:auto;font-size:10px"><span onclick="moveKPI('${k.id}',-1);event.preventDefault();event.stopPropagation()" style="cursor:pointer;color:#06b6d4;line-height:1">▲</span><span onclick="moveKPI('${k.id}',1);event.preventDefault();event.stopPropagation()" style="cursor:pointer;color:#06b6d4;line-height:1">▼</span></span>`:'';
+    return `<label id="kpi_${k.id}" style="display:flex;align-items:center;gap:6px;font-size:12px;color:#888;cursor:pointer;padding:6px 8px;border-radius:6px;background:${isActive?'rgba(6,182,212,.1)':'rgba(255,255,255,.02)'};border:1px solid ${isActive?'rgba(6,182,212,.2)':'rgba(255,255,255,.06)'}"><input type="checkbox" value="${k.id}" ${isActive?'checked':''} onchange="checkKPILimit()" style="accent-color:#06b6d4">${isActive?'<span style="color:#06b6d4;font-size:10px;font-weight:700">#'+(pos+1)+'</span>':''} ${k.label}${arrows}</label>`;
+  }).join('');
+}
+
+function saveKPIs(){
+  const checks=[...document.querySelectorAll('#kpiOptions input:checked')].map(c=>c.value).slice(0,12);
+  localStorage.setItem('activeKPIs',JSON.stringify(checks));
+  document.getElementById('kpiSelector').style.display='none';
+  renderKPIs();
+}
+
+function renderKPIs(){
+  const total=filtered.length;
+  const showed=filtered.filter(r=>r[CI.status]==='Showed').length;
+  const noshow=filtered.filter(r=>r[CI.status]==='No Show').length;
+  const showRate=total>0?(showed/total*100).toFixed(1):0;
+  const durations=filtered.filter(r=>r[CI.duration]&&parseFloat(r[CI.duration])>0).map(r=>parseFloat(r[CI.duration]));
+  const avgDur=durations.length>0?(durations.reduce((a,b)=>a+b,0)/durations.length).toFixed(0):0;
+  const scores=filtered.filter(r=>r[CI.cs]&&parseFloat(r[CI.cs])>0).map(r=>parseFloat(r[CI.cs]));
+  const avgCS=scores.length>0?Math.round(scores.reduce((a,b)=>a+b,0)/scores.length):0;
+  const above650=scores.filter(s=>s>=650).length;
+  const repsActive=[...new Set(filtered.map(r=>r[CI.rep]).filter(Boolean))].length;
+  const closed=filtered.filter(r=>r[CI.outcome]&&r[CI.outcome].toLowerCase().includes('closed')).length;
+  const closeRate=showed>0?(closed/showed*100).toFixed(1):0;
+  
+  // Calculate previous period for comparison
+  const prev=getPrevRange();
+  const prevFiltered=D.filter(r=>{
+    const d=parseDate(r[CI.date]);
+    if(!d)return false;
+    return d>=prev.start&&d<=prev.end;
+  });
+  const prevTotal=prevFiltered.length;
+  const prevShowed=prevFiltered.filter(r=>r[CI.status]==='Showed').length;
+  const prevNoshow=prevFiltered.filter(r=>r[CI.status]==='No Show').length;
+  const prevShowRate=prevTotal>0?(prevShowed/prevTotal*100).toFixed(1):0;
+  const prevDurs=prevFiltered.filter(r=>r[CI.duration]&&parseFloat(r[CI.duration])>0).map(r=>parseFloat(r[CI.duration]));
+  const prevAvgDur=prevDurs.length>0?(prevDurs.reduce((a,b)=>a+b,0)/prevDurs.length).toFixed(0):0;
+
+  const cs650Rate=scores.length>0?(above650/scores.length*100).toFixed(1):0;
+  const avgCreditAvail=filtered.filter(r=>r[CI.credit]).map(r=>parseFloat((r[CI.credit]||'0').replace(/[^0-9.-]/g,''))).filter(v=>v>0);
+  const avgCreditVal=avgCreditAvail.length>0?Math.round(avgCreditAvail.reduce((a,b)=>a+b,0)/avgCreditAvail.length):0;
+  const frozenCount=filtered.filter(r=>r[CI.frozen]==='Yes').length;
+  const frozenRate=filtered.length>0?(frozenCount/filtered.length*100).toFixed(1):0;
+  const triagedCount=filtered.filter(r=>r[CI.triage]&&r[CI.triage].toLowerCase()==='yes').length;
+  const triageRate=filtered.length>0?(triagedCount/filtered.length*100).toFixed(1):0;
+
+  const kpiDefs={
+    appointments:'<strong>Appointments</strong><br>Total booked appointments in the selected date range and rep filter.<br><code>COUNT(all rows matching filters)</code>',
+    demos:'<strong>Demos Held</strong><br>Appointments where prospect showed up (Status = "Showed").<br><code>COUNT(Status = "Showed")</code>',
+    showRate:'<strong>Show Rate</strong><br>Percentage of booked appointments where the prospect showed.<br><code>Showed ÷ Total Appointments × 100</code><br>🟢 ≥40% | 🟡 ≥25% | 🔴 &lt;25%',
+    noShows:'<strong>No Shows</strong><br>Appointments where prospect did not show (Status = "No Show").<br><code>COUNT(Status = "No Show")</code><br>Trend compares to previous period (↑ = worse).',
+    closeRate:'<strong>Close Rate</strong><br>Percentage of demos held that resulted in a close (Outcome contains "Closed").<br><code>Closed ÷ Demos Held × 100</code>',
+    avgDuration:'<strong>Avg Duration</strong><br>Average call length in minutes for demos with duration > 0 (from Fathom).<br><code>SUM(Duration) ÷ COUNT(Duration > 0)</code>',
+    avgCS:'<strong>Avg Credit Score</strong><br>Mean credit score across prospects with a score on file.<br><code>SUM(Credit Score) ÷ COUNT(has score)</code><br>🟢 ≥650 | 🟡 ≥600 | 🔴 &lt;600',
+    cs650:'<strong>CS 650+ Rate</strong><br>Percentage of scored prospects with credit score ≥ 650.<br><code>COUNT(CS ≥ 650) ÷ COUNT(has score) × 100</code>',
+    epCall:'<strong>Earnings/Call</strong><br>Revenue generated per demo held.<br><code>Total Cash Collected ÷ Demos Held</code><br>⚠️ Needs AR/Commission data connected.',
+    cashCollected:'<strong>Cash Collected</strong><br>Total cash received from closed deals in the period.<br>⚠️ Needs AR/Commission data connected.',
+    revPerLead:'<strong>Revenue/Lead</strong><br>Revenue generated per booked appointment (includes no-shows).<br><code>Total Cash ÷ Total Appointments</code><br>⚠️ Needs payment data.',
+    setRate:'<strong>Set Rate</strong><br>Percentage of outbound calls that resulted in a booked appointment.<br><code>Sets ÷ Outbound Calls × 100</code><br>⚠️ Needs EOD data connected.',
+    avgCredit:'<strong>Avg Credit Available</strong><br>Mean available credit across prospects with credit data.<br><code>SUM(Credit Avail) ÷ COUNT(has credit data)</code>',
+    frozenRate:'<strong>Frozen Credit %</strong><br>Percentage of prospects with frozen credit files.<br><code>COUNT(Frozen = "Yes") ÷ Total × 100</code><br>🔴 >10% | 🟢 ≤10%',
+    triageRate:'<strong>Triage Rate</strong><br>Percentage of appointments that were triaged before the demo.<br><code>COUNT(Triaged = "Yes") ÷ Total × 100</code>',
+    totalReps:'<strong>Active Reps</strong><br>Number of unique sales reps with at least one appointment in the selected period.<br><code>COUNT(DISTINCT Rep)</code>'
+  };
+  function kpiLabel(id,name){return name+' <span class="info-icon">ⓘ<span class="info-tip">'+kpiDefs[id]+'</span></span>';}
+
+  const kpiMap={
+    appointments:`<div class="kpi"><div class="label">${kpiLabel('appointments','Appointments')}</div><div class="value">${total}</div><div class="detail">${repsActive} reps${trendBadge(total,prevTotal)}</div></div>`,
+    demos:`<div class="kpi"><div class="label">${kpiLabel('demos','Demos Held')}</div><div class="value">${showed}</div><div class="detail">of ${total} booked${trendBadge(showed,prevShowed)}</div></div>`,
+    showRate:`<div class="kpi"><div class="label">${kpiLabel('showRate','Show Rate')}</div><div class="value" style="color:${parseFloat(showRate)>=40?'var(--gn)':parseFloat(showRate)>=25?'var(--yl)':'var(--rd)'}">${showRate}%</div><div class="detail">${showed}/${total}${trendBadge(parseFloat(showRate),parseFloat(prevShowRate))}</div></div>`,
+    noShows:`<div class="kpi"><div class="label">${kpiLabel('noShows','No Shows')}</div><div class="value" style="color:var(--rd)">${noshow}</div><div class="detail">${total>0?(noshow/total*100).toFixed(1):0}%${trendBadge(prevNoshow,noshow)}</div></div>`,
+    closeRate:`<div class="kpi"><div class="label">${kpiLabel('closeRate','Close Rate')}</div><div class="value" style="color:#8a62ec">${closeRate}%</div><div class="detail">${closed}/${showed} demos</div></div>`,
+    avgDuration:`<div class="kpi"><div class="label">${kpiLabel('avgDuration','Avg Duration')}</div><div class="value" style="color:#3ea2e4">${avgDur}m</div><div class="detail">Demos >5min${trendBadge(parseFloat(avgDur),parseFloat(prevAvgDur))}</div></div>`,
+    avgCS:`<div class="kpi"><div class="label">${kpiLabel('avgCS','Avg Credit Score')}</div><div class="value" style="color:${avgCS>=650?'var(--gn)':avgCS>=600?'var(--yl)':'var(--rd)'}">${avgCS||'—'}</div><div class="detail">${scores.length} scored</div></div>`,
+    cs650:`<div class="kpi"><div class="label">${kpiLabel('cs650','CS 650+ Rate')}</div><div class="value" style="color:var(--gn)">${cs650Rate}%</div><div class="detail">${above650}/${scores.length}</div></div>`,
+    epCall:`<div class="kpi"><div class="label">${kpiLabel('epCall','Earnings/Call')}</div><div class="value" style="color:var(--tm)">N/A</div><div class="detail">Needs payment data</div></div>`,
+    cashCollected:`<div class="kpi"><div class="label">${kpiLabel('cashCollected','Cash Collected')}</div><div class="value" style="color:var(--tm)">N/A</div><div class="detail">Needs AR log</div></div>`,
+    revPerLead:`<div class="kpi"><div class="label">${kpiLabel('revPerLead','Revenue/Lead')}</div><div class="value" style="color:var(--tm)">N/A</div><div class="detail">Needs payment data</div></div>`,
+    setRate:`<div class="kpi"><div class="label">${kpiLabel('setRate','Set Rate')}</div><div class="value" style="color:var(--tm)">N/A</div><div class="detail">Needs EOD data</div></div>`,
+    avgCredit:`<div class="kpi"><div class="label">${kpiLabel('avgCredit','Avg Credit Avail')}</div><div class="value" style="color:#3ea2e4">$${avgCreditVal.toLocaleString()}</div><div class="detail">${avgCreditAvail.length} prospects</div></div>`,
+    frozenRate:`<div class="kpi"><div class="label">${kpiLabel('frozenRate','Frozen Credit %')}</div><div class="value" style="color:${parseFloat(frozenRate)>10?'var(--rd)':'var(--gn)'}">${frozenRate}%</div><div class="detail">${frozenCount} frozen</div></div>`,
+    triageRate:`<div class="kpi"><div class="label">${kpiLabel('triageRate','Triage Rate')}</div><div class="value" style="color:#3ea2e4">${triageRate}%</div><div class="detail">${triagedCount}/${filtered.length}</div></div>`,
+    totalReps:`<div class="kpi"><div class="label">${kpiLabel('totalReps','Active Reps')}</div><div class="value" style="color:#3ea2e4">${repsActive}</div><div class="detail">with appointments</div></div>`
+  };
+  
+  const active=getActiveKPIs();
+  document.getElementById('kpiRow').innerHTML=active.map(id=>kpiMap[id]||'').join('');
+}
+
+function pill(val,type){
+  if(!val)return'—';
+  const v=val.toLowerCase();
+  if(type==='status'){
+    if(v==='showed')return'<span class="pill pill-showed">Showed</span>';
+    if(v==='no show')return'<span class="pill pill-noshow">No Show</span>';
+    if(v==='cancelled')return'<span class="pill pill-cancelled">Cancelled</span>';
+    return'<span class="pill pill-booked">'+val+'</span>';
+  }
+  if(type==='outcome'){
+    if(v.includes('closed'))return'<span class="pill pill-closed">Closed</span>';
+    if(v.includes('follow'))return'<span class="pill pill-followup">Follow-up</span>';
+    if(v.includes('sched'))return'<span class="pill pill-scheduled">Scheduled</span>';
+    if(v.includes('lost'))return'<span class="pill pill-lost">Lost</span>';
+    return'<span class="pill" style="background:rgba(255,255,255,.06);color:var(--tm)">'+val+'</span>';
+  }
+  if(type==='confidence'){
+    if(v.includes('1'))return'<span class="pill pill-t1">Tier 1</span>';
+    if(v.includes('2'))return'<span class="pill pill-t2">Tier 2</span>';
+    if(v.includes('3'))return'<span class="pill pill-t3">Tier 3</span>';
+    if(v.includes('4'))return'<span class="pill pill-t4">Tier 4</span>';
+    if(v.includes('no match'))return'<span class="pill pill-noshow">No Match</span>';
+    return val;
+  }
+  return val;
+}
+
+function csColor(v){
+  const n=parseFloat(v);
+  if(isNaN(n))return'var(--tm)';
+  if(n>=700)return'#4ade80';
+  if(n>=600)return'#facc15';
+  return'#f87171';
+}
+
+function sortBy(col){
+  if(_isResizing)return;
+  if(sortCol===col)sortAsc=!sortAsc;
+  else{sortCol=col;sortAsc=true;}
+  applyFilters();
+}
+
+function renderOverview(){
+  const cols=[{i:CI.date,n:'Date & Time (ET)'},{i:CI.name,n:'Prospect'},{i:CI.rep,n:'Rep'},{i:CI.status,n:'Status'},{i:CI.duration,n:'Dur'},{i:CI.cs,n:'CS'},{i:CI.credit,n:'Credit Avail'},{i:CI.source,n:'Source'},{i:CI.outcome,n:'Outcome'},{i:CI.triage,n:'Triaged'},{i:CI.confidence,n:'Confidence'},{i:CI.fathom,n:'▶ Fathom'}];
+  
+  let h='<tr>';
+  cols.forEach(c=>h+=`<th onclick="sortBy(${c.i})">${c.n} ${sortCol===c.i?(sortAsc?'↑':'↓'):''}</th>`);
+  h+='</tr>';
+  document.getElementById('overviewHead').innerHTML=h;
+  
+  let b='';
+  filtered.forEach(r=>{
+    const d=r[CI.date]||'';
+    const dateParts=d.split(' ');
+    const dateStr=dateParts[0]||'';
+    const timeStr=dateParts[1]?dateParts[1].substring(0,5):'';
+    b+='<tr>';
+    b+=`<td style="color:var(--t)">${dateStr} <span style="color:#3ea2e4">${timeStr}</span></td>`;
+    b+=`<td style="color:var(--t);font-weight:600">${r[CI.name]||'—'}</td>`;
+    b+=`<td>${r[CI.rep]||'—'}</td>`;
+    b+=`<td>${pill(r[CI.status],'status')}</td>`;
+    b+=`<td>${r[CI.duration]?r[CI.duration]+'m':'—'}</td>`;
+    b+=`<td style="color:${csColor(r[CI.cs])};font-weight:600">${r[CI.cs]||'—'}</td>`;
+    b+=`<td>${r[CI.credit]||'—'}</td>`;
+    b+=`<td>${r[CI.source]?'<span class="pill" style="background:rgba(59,130,246,.15);color:#60a5fa">'+r[CI.source]+'</span>':'—'}</td>`;
+    b+=`<td>${pill(r[CI.outcome],'outcome')}</td>`;
+    b+=`<td>${r[CI.triage]||'—'}</td>`;
+    b+=`<td>${pill(r[CI.confidence],'confidence')}</td>`;
+    b+=`<td>${r[CI.fathom]?'<a href="'+r[CI.fathom]+'" target="_blank" style="color:#3ea2e4">▶</a>':'—'}</td>`;
+    b+='</tr>';
+  });
+  document.getElementById('overviewBody').innerHTML=b;
+  document.getElementById('rowCount').textContent=`Showing ${filtered.length} of ${D.length} appointments`;
+}
+
+function renderDetailed(){
+  let h='<tr>';
+  H.forEach((c,i)=>h+=`<th onclick="sortBy(${i})">${i===0?'Date & Time (ET)':c}</th>`);
+  h+='</tr>';
+  document.getElementById('detailHead').innerHTML=h;
+  
+  let b='';
+  filtered.forEach(r=>{
+    b+='<tr>';
+    r.forEach((v,i)=>{
+      if(i===CI.status)b+=`<td>${pill(v,'status')}</td>`;
+      else if(i===CI.outcome)b+=`<td>${pill(v,'outcome')}</td>`;
+      else if(i===CI.confidence)b+=`<td>${pill(v,'confidence')}</td>`;
+      else if(i===CI.fathom&&v)b+=`<td><a href="${v}" target="_blank" style="color:#3ea2e4">▶ Link</a></td>`;
+      else if(i===CI.cs)b+=`<td style="color:${csColor(v)};font-weight:600">${v||'—'}</td>`;
+      else b+=`<td>${v||'—'}</td>`;
+    });
+    b+='</tr>';
+  });
+  document.getElementById('detailBody').innerHTML=b;
+  document.getElementById('detailCount').textContent=`Showing ${filtered.length} of ${D.length} appointments`;
+}
+
+function renderAnalytics(){
+  const reps=[...new Set(D.map(r=>r[CI.rep]).filter(Boolean))];
+  
+  // Show rate by rep
+  let showRateHTML='<div class="chart-card"><h3>Show Rate by Rep</h3>';
+  const repStats=reps.map(rep=>{
+    const repRows=filtered.filter(r=>r[CI.rep]===rep);
+    const showed=repRows.filter(r=>r[CI.status]==='Showed').length;
+    const total=repRows.length;
+    const rate=total>0?(showed/total*100):0;
+    return{rep,rate,showed,total};
+  }).sort((a,b)=>b.rate-a.rate);
+  
+  repStats.forEach(s=>{
+    const color=s.rate>=40?'bar-green':s.rate>=25?'bar-yellow':'bar-red';
+    showRateHTML+=`<div class="bar-row"><div class="bar-label">${s.rep.split(' ')[0]} ${s.rep.split(' ')[1]?s.rep.split(' ')[1][0]+'.':''}</div><div class="bar-track"><div class="bar-fill ${color}" style="width:${Math.max(s.rate,3)}%">${s.rate.toFixed(1)}%</div></div></div>`;
+  });
+  showRateHTML+='</div>';
+  
+  // Duration by rep
+  let durHTML='<div class="chart-card"><h3>Avg Call Duration by Rep</h3>';
+  const durStats=reps.map(rep=>{
+    const durs=filtered.filter(r=>r[CI.rep]===rep&&r[CI.duration]&&parseFloat(r[CI.duration])>0).map(r=>parseFloat(r[CI.duration]));
+    const avg=durs.length>0?(durs.reduce((a,b)=>a+b,0)/durs.length):0;
+    return{rep,avg,count:durs.length};
+  }).sort((a,b)=>b.avg-a.avg);
+  
+  const maxDur=Math.max(...durStats.map(s=>s.avg),1);
+  durStats.forEach(s=>{
+    durHTML+=`<div class="bar-row"><div class="bar-label">${s.rep.split(' ')[0]} ${s.rep.split(' ')[1]?s.rep.split(' ')[1][0]+'.':''}</div><div class="bar-track"><div class="bar-fill bar-cyan" style="width:${(s.avg/maxDur*100).toFixed(0)}%">${s.avg.toFixed(0)}m</div></div></div>`;
+  });
+  durHTML+='</div>';
+  
+  // Rep leaderboard
+  let lbHTML='<div class="chart-card" style="grid-column:1/-1"><h3>🏆 Rep Leaderboard</h3><table style="font-size:12px"><thead><tr><th>#</th><th>Rep</th><th>Calls</th><th>Demos</th><th>Show%</th><th>Avg Dur</th><th>CS 650+</th></tr></thead><tbody>';
+  repStats.forEach((s,i)=>{
+    const durs=filtered.filter(r=>r[CI.rep]===s.rep&&r[CI.duration]).map(r=>parseFloat(r[CI.duration])||0);
+    const avgD=durs.length?(durs.reduce((a,b)=>a+b,0)/durs.length).toFixed(0):0;
+    const cs650=filtered.filter(r=>r[CI.rep]===s.rep&&parseFloat(r[CI.cs])>=650).length;
+    lbHTML+=`<tr><td style="color:#3ea2e4">${i+1}</td><td style="color:var(--t);font-weight:600">${s.rep}</td><td>${s.total}</td><td>${s.showed}</td><td style="color:${s.rate>=40?'var(--gn)':s.rate>=25?'var(--yl)':'var(--rd)'}">${s.rate.toFixed(1)}%</td><td>${avgD}m</td><td>${cs650}</td></tr>`;
+  });
+  lbHTML+='</tbody></table></div>';
+  
+  document.getElementById('analyticsView').innerHTML='<div class="analytics">'+showRateHTML+durHTML+lbHTML+'</div>';
+}
+
+function showView(view){
+  currentView=view;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  ['overviewView','detailedView','analyticsView','apptlogView','commissionsView','revenueView','eodView','eodcomplianceView','eodsubmissionsView','financingView','glossaryView','repavailView','rosterView'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.style.display='none';
+  });
+  const viewMap={overview:'overviewView',detailed:'detailedView',analytics:'analyticsView',apptlog:'apptlogView',commissions:'commissionsView',revenue:'revenueView',eod:'eodView',eodcompliance:'eodcomplianceView',eodsubmissions:'eodsubmissionsView',financing:'financingView',glossary:'glossaryView',repavail:'repavailView',roster:'rosterView'};
+  const target=document.getElementById(viewMap[view]);
+  if(target)target.style.display='block';
+  if(event&&event.target)event.target.classList.add('active');
+  // Show/hide overview-only elements
+  const isOverview=(view==='overview'||view==='detailed'||view==='analytics'||view==='apptlog');
+  document.getElementById('kpiRow').style.display=isOverview?'grid':'none';
+  document.getElementById('kpiSelector').style.display='none';
+  const liveInd=document.querySelector('.live-indicator');
+  if(liveInd)liveInd.style.display=isOverview?'flex':'none';
+  // Toggle overview sections
+  const chartsEl=document.getElementById('overviewCharts');
+  const tableEl=document.getElementById('overviewTableSection');
+  const lbEl=document.getElementById('overviewLeaderboard');
+  if(chartsEl)chartsEl.style.display=(view==='overview')?'block':'none';
+  if(lbEl)lbEl.style.display=(view==='overview')?'block':'none';
+  if(tableEl)tableEl.style.display=(view==='overview'||view==='apptlog')?'block':'none';
+  const filterToggleEl=document.getElementById('filterToggle');
+  if(filterToggleEl)filterToggleEl.parentElement.style.display=(view==='overview'||view==='apptlog')?'':'none';
+  const filterPanelEl=document.getElementById('filterPanel');
+  if(filterPanelEl&&view!=='overview'&&view!=='apptlog')filterPanelEl.style.display='none';
+  // Render data views on demand
+  if(view==='commissions')renderCommissionsView();
+  if(view==='revenue')renderCommissions();
+  if(view==='financing')renderFinancing();
+  if(view==='eod')renderEOD();
+  if(view==='eodcompliance')renderEODCompliance();
+  if(view==='eodsubmissions')renderEODSubmissions();
+  
+  if(view==='apptlog')renderApptLog();
+  if(view==='overview')renderOverviewCharts();
+  if(view==='repavail')renderRepAvail();
+  if(view==='roster')renderRoster();
+  // Close sidebar on mobile
+  if(window.innerWidth<=768){const sb=document.querySelector('.sidebar');const ov=document.getElementById('sidebarOverlay');if(sb)sb.classList.remove('open');if(ov)ov.classList.remove('open');}
+}
+
+// ═══════════════════════════════════════
+// SHARED FILTER HELPERS FOR ALL VIEWS
+// ═══════════════════════════════════════
+function getGlobalDateRange(){
+  const v=gv('dateFilter','30');
+  const now=new Date();
+  if(v==='custom'){
+    const from=gv('dateFrom','');const to=gv('dateTo','');
+    if(from&&to)return{start:new Date(from),end:new Date(to+'T23:59:59')};
+    return{start:new Date(2024,0,1),end:now};
+  }
+  if(v==='all')return{start:new Date(2024,0,1),end:now};
+  const days=parseInt(v);
+  const start=new Date(now);start.setDate(start.getDate()-days);
+  return{start,end:now};
+}
+function parseAnyDate(s){
+  if(!s)return null;
+  // M/D/YYYY or M/D/YYYY H:M
+  let parts=s.match(/(\d+)\/(\d+)\/(\d+)/);
+  if(parts)return new Date(parts[3],parts[1]-1,parts[2]);
+  // YYYY-MM-DD
+  parts=s.match(/(\d{4})-(\d{2})-(\d{2})/);
+  if(parts)return new Date(parts[1],parts[2]-1,parts[3]);
+  return null;
+}
+function filterByDateAndRep(rows,dateIdx,repIdx){
+  const range=getGlobalDateRange();
+  const selectedReps=getSelectedReps();
+  return rows.filter(r=>{
+    const d=parseAnyDate(r[dateIdx]||'');
+    if(d&&(d<range.start||d>range.end))return false;
+    if(repIdx>=0&&selectedReps!=='all'){
+      const rep=r[repIdx]||'';
+      if(!selectedReps.some(sr=>rep.toLowerCase().includes(sr.toLowerCase().split(' ')[0])))return false;
+    }
+    return true;
+  });
+}
+
+// ═══════════════════════════════════════
+// COMMISSIONS VIEW (Revenue — renamed)
+// ═══════════════════════════════════════
+function fmtMoney(v){if(!v)return'—';const s=String(v).replace(/[^0-9.\-]/g,'');const n=parseFloat(s);if(isNaN(n))return'—';return'$'+n.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0});}
+function fmtMoney2(v){if(!v)return'—';const s=String(v).replace(/[^0-9.\-]/g,'');const n=parseFloat(s);if(isNaN(n))return'—';return'$'+n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function numVal(v){if(!v)return 0;return parseFloat(String(v).replace(/[^0-9.\-]/g,''))||0;}
+function fmtDate(s){if(!s)return'—';
+  let parts=s.match(/(\d{4})-(\d{2})-(\d{2})/);
+  if(parts)return parts[2]+'/'+parts[3]+'/'+parts[1];
+  parts=s.match(/(\d+)\/(\d+)\/(\d+)/);
+  if(parts)return parts[1]+'/'+parts[2]+'/'+parts[3];
+  return s;}
+function tip(label,explanation){return label+' <span class="info-icon">ⓘ<span class="info-tip">'+explanation+'</span></span>';}
+
+function renderCommissions(){
+  if(typeof COMM_D==='undefined'||!COMM_D.length){document.getElementById('commContent').innerHTML='<p style="color:var(--tm);padding:20px">No revenue data available.</p>';return;}
+  const data=filterByDateAndRep(COMM_D,4,13);
+  
+  const collected=data.filter(r=>(r[10]||'').includes('Collected'));
+  const pending=data.filter(r=>!(r[10]||'').includes('Collected'));
+  const totalCash=collected.reduce((a,r)=>a+numVal(r[5]),0);
+  const totalNet=collected.reduce((a,r)=>a+numVal(r[9]),0);
+  const totalFees=totalCash-totalNet;
+  const pendingCash=pending.reduce((a,r)=>a+numVal(r[5]),0);
+  const avgPayment=collected.length>0?totalCash/collected.length:0;
+  const feeRate=totalCash>0?(totalFees/totalCash*100).toFixed(1):0;
+
+  document.getElementById('commKPIs').innerHTML=`
+    <div class="kpi"><div class="label">${tip('Cash Collected','<strong>Cash Collected</strong><br>Total gross payments received.<br><code>SUM(Amount) where Collected</code>')}</div><div class="value" style="color:var(--gn)">${fmtMoney(totalCash)}</div><div class="detail">${collected.length} payments</div></div>
+    <div class="kpi"><div class="label">${tip('Net After Fees','<strong>Net After Fees</strong><br>Cash after processor fees (CC ~2.5%, Elective ~15%).<br><code>SUM(Net Amount Received)</code>')}</div><div class="value" style="color:#3ea2e4">${fmtMoney(totalNet)}</div><div class="detail">${feeRate}% avg fees</div></div>
+    <div class="kpi"><div class="label">${tip('Processing Fees','<strong>Processing Fees</strong><br>Lost to payment processors.<br><code>Cash - Net</code>')}</div><div class="value" style="color:var(--rd)">${fmtMoney(totalFees)}</div><div class="detail">Total fees paid</div></div>
+    <div class="kpi"><div class="label">${tip('Avg Payment','<strong>Avg Payment</strong><br>Average gross per collection.<br><code>Cash ÷ # Collected</code>')}</div><div class="value" style="color:#8a62ec">${fmtMoney(avgPayment)}</div><div class="detail">Per payment</div></div>
+    <div class="kpi"><div class="label">${tip('Pending','<strong>Pending</strong><br>Payments not yet collected.<br><code>SUM(Amount) where not Collected</code>')}</div><div class="value" style="color:var(--yl)">${fmtMoney(pendingCash)}</div><div class="detail">${pending.length} awaiting</div></div>
+    <div class="kpi"><div class="label">${tip('Collection Rate','<strong>Collection Rate</strong><br>% of payments collected.<br><code>Collected ÷ Total × 100</code>')}</div><div class="value" style="color:var(--gn)">${data.length>0?(collected.length/data.length*100).toFixed(0):0}%</div><div class="detail">${collected.length}/${data.length}</div></div>`;
+
+  // Cash by Closer
+  const closerCash={};
+  collected.forEach(r=>{const c=r[13]||'Unknown';closerCash[c]=(closerCash[c]||0)+numVal(r[5]);});
+  const closerList=Object.entries(closerCash).sort((a,b)=>b[1]-a[1]);
+  const maxCloser=closerList.length?closerList[0][1]:1;
+
+  let closerHTML='<div class="chart-card" style="margin-bottom:16px"><h3>\ud83c\udfc6 Cash by Closer</h3>';
+  closerList.forEach(([name,cash])=>{
+    const deals=collected.filter(r=>r[13]===name).length;
+    closerHTML+=`<div class="bar-row"><div class="bar-label">${name}</div><div class="bar-track"><div class="bar-fill bar-green" style="width:${(cash/maxCloser*100).toFixed(0)}%">${fmtMoney(cash)} \u00b7 ${deals} deals</div></div></div>`;
+  });
+  closerHTML+='</div>';
+
+  // Setter leaderboard
+  const setterCash={};
+  collected.forEach(r=>{const s=(r[12]||'').trim();if(!s||s==='NA'||(r[3]||'')==='No Setter')return;setterCash[s]=(setterCash[s]||0)+numVal(r[5]);});
+  const setterList=Object.entries(setterCash).sort((a,b)=>b[1]-a[1]);
+  const maxSetter=setterList.length?setterList[0][1]:1;
+
+  let setterHTML='<div class="chart-card" style="margin-bottom:16px"><h3>\ud83d\udcde Setter Contributions</h3>';
+  if(setterList.length===0){setterHTML+='<p style="color:var(--tm);font-size:12px;padding:8px 0">No setter-attributed deals.</p>';}
+  else{setterList.forEach(([name,cash])=>{const deals=collected.filter(r=>(r[12]||'').trim()===name).length;setterHTML+=`<div class="bar-row"><div class="bar-label">${name}</div><div class="bar-track"><div class="bar-fill bar-cyan" style="width:${(cash/maxSetter*100).toFixed(0)}%">${fmtMoney(cash)} \u00b7 ${deals} deals</div></div></div>`;});}
+  setterHTML+='</div>';
+
+  // Cash by Payment Medium
+  const mediumCash={};const mediumFees={};
+  collected.forEach(r=>{const m=r[6]||'Unknown';mediumCash[m]=(mediumCash[m]||0)+numVal(r[5]);mediumFees[m]=(mediumFees[m]||0)+(numVal(r[5])-numVal(r[9]));});
+  const mediumList=Object.entries(mediumCash).sort((a,b)=>b[1]-a[1]);
+  const maxMedium=mediumList.length?mediumList[0][1]:1;
+
+  let mediumHTML='<div class="chart-card" style="margin-bottom:16px"><h3>\ud83d\udcb3 Cash by Payment Medium</h3>';
+  mediumList.forEach(([name,cash])=>{const fees=mediumFees[name]||0;const fp=cash>0?(fees/cash*100).toFixed(1):0;mediumHTML+=`<div class="bar-row"><div class="bar-label" style="min-width:100px">${name}</div><div class="bar-track"><div class="bar-fill bar-cyan" style="width:${(cash/maxMedium*100).toFixed(0)}%">${fmtMoney(cash)} \u00b7 ${fp}% fees</div></div></div>`;});
+  mediumHTML+='</div>';
+
+  // Cash by Product
+  const prodCash={};
+  collected.forEach(r=>{const p=r[2]||'Unknown';prodCash[p]=(prodCash[p]||0)+numVal(r[5]);});
+  const prodList=Object.entries(prodCash).sort((a,b)=>b[1]-a[1]);
+  const maxProd=prodList.length?prodList[0][1]:1;
+
+  let prodHTML='<div class="chart-card" style="margin-bottom:16px"><h3>\ud83d\udce6 Cash by Product</h3>';
+  prodList.forEach(([name,cash])=>{const cnt=collected.filter(r=>r[2]===name).length;prodHTML+=`<div class="bar-row"><div class="bar-label" style="min-width:130px">${name}</div><div class="bar-track"><div class="bar-fill bar-green" style="width:${(cash/maxProd*100).toFixed(0)}%">${fmtMoney(cash)} \u00b7 ${cnt} sales</div></div></div>`;});
+  prodHTML+='</div>';
+
+  // Cash by Month
+  const monthCash={};
+  collected.forEach(r=>{const d=r[4]||'';let m='Unknown';const parts=d.match(/(\d{4})-(\d{2})/);if(parts)m=parts[2]+'/'+parts[1];else{const p2=d.match(/(\d+)\/(\d+)\/(\d+)/);if(p2)m=p2[1].padStart(2,'0')+'/'+p2[3];}monthCash[m]=(monthCash[m]||0)+numVal(r[5]);});
+  const monthList=Object.entries(monthCash).sort();
+  const maxMonth=Math.max(...monthList.map(m=>m[1]),1);
+
+  let monthHTML='<div class="chart-card" style="margin-bottom:16px"><h3>\ud83d\udcc8 Cash by Month</h3>';
+  monthList.forEach(([name,cash])=>{monthHTML+=`<div class="bar-row"><div class="bar-label">${name}</div><div class="bar-track"><div class="bar-fill bar-cyan" style="width:${(cash/maxMonth*100).toFixed(0)}%">${fmtMoney(cash)}</div></div></div>`;});
+  monthHTML+='</div>';
+
+  // Collection filter + table
+  const cf=window._revCollFilter||'all';
+  const tableData=cf==='collected'?data.filter(r=>(r[10]||'').includes('Collected')):cf==='pending'?data.filter(r=>!(r[10]||'').includes('Collected')):data;
+  
+  const collectFilter='<div style="margin-bottom:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span style="font-size:11px;color:var(--tm);text-transform:uppercase;letter-spacing:.5px">Filter:</span><button onclick="window._revCollFilter=\'all\';renderCommissions()" style="font-size:11px;padding:5px 12px;border-radius:6px;border:1px solid '+((!window._revCollFilter||window._revCollFilter==='all')?'rgba(62,162,228,.4)':'rgba(255,255,255,.08)')+';background:'+((!window._revCollFilter||window._revCollFilter==='all')?'rgba(62,162,228,.15)':'var(--card)')+';color:'+((!window._revCollFilter||window._revCollFilter==='all')?'#3ea2e4':'var(--tm)')+';cursor:pointer">All ('+data.length+')</button><button onclick="window._revCollFilter=\'collected\';renderCommissions()" style="font-size:11px;padding:5px 12px;border-radius:6px;border:1px solid '+(window._revCollFilter==='collected'?'rgba(34,197,94,.4)':'rgba(255,255,255,.08)')+';background:'+(window._revCollFilter==='collected'?'rgba(34,197,94,.15)':'var(--card)')+';color:'+(window._revCollFilter==='collected'?'#4ade80':'var(--tm)')+';cursor:pointer">Collected ('+collected.length+')</button><button onclick="window._revCollFilter=\'pending\';renderCommissions()" style="font-size:11px;padding:5px 12px;border-radius:6px;border:1px solid '+(window._revCollFilter==='pending'?'rgba(234,179,8,.4)':'rgba(255,255,255,.08)')+';background:'+(window._revCollFilter==='pending'?'rgba(234,179,8,.15)':'var(--card)')+';color:'+(window._revCollFilter==='pending'?'#facc15':'var(--tm)')+';cursor:pointer">Pending ('+pending.length+')</button></div>';
+
+  let tbl='<div class="row-count">'+tableData.length+' of '+data.length+' payments</div><div class="table-wrap"><table><thead><tr><th>Date (ET)</th><th>Client</th><th>Email</th><th>Product</th><th>Setter</th><th>Amount</th><th>Medium</th><th>Fee %</th><th>Net</th><th>Closer</th><th>Status</th></tr></thead><tbody>';
+  tableData.forEach(r=>{
+    const statusPill=(r[10]||'').includes('Collected')?'<span class="pill pill-showed">Collected</span>':'<span class="pill pill-cancelled">Pending</span>';
+    const setter=(r[12]||'').trim();
+    const setterDisplay=(!setter||setter==='NA'||(r[3]||'')==='No Setter')?'\u2014':setter;
+    const email=r[39]||'';
+    tbl+=`<tr><td>${r[4]?fmtDate(r[4]):'<span class="pill pill-noshow">Not Collected</span>'}</td><td style="color:var(--t);font-weight:600">${r[0]||'\u2014'}</td><td style="font-size:11px;color:var(--tm)">${email||'\u2014'}</td><td>${r[2]||'\u2014'}</td><td>${setterDisplay}</td><td style="color:var(--gn);font-weight:600">${r[5]||'\u2014'}</td><td>${r[6]||'\u2014'}</td><td style="color:var(--rd)">${r[7]||'\u2014'}</td><td style="color:#3ea2e4;font-weight:600">${r[9]||'\u2014'}</td><td>${r[13]||'\u2014'}</td><td>${statusPill}</td></tr>`;
+  });
+  tbl+='</tbody></table></div>';
+
+  document.getElementById('commContent').innerHTML='<div class="analytics" style="grid-template-columns:1fr 1fr">'+closerHTML+setterHTML+mediumHTML+prodHTML+monthHTML+'</div>'+collectFilter+tbl;
+}
+
+// ═══════════════════════════════════════
+// FINANCING VIEW
+// ═══════════════════════════════════════
+function renderFinancing(){
+  if(typeof FIN_D==='undefined'||!FIN_D.length){document.getElementById('finContent').innerHTML='<p style="color:var(--tm);padding:20px">No financing data available.</p>';return;}
+  const data=filterByDateAndRep(FIN_D,0,13);
+  const total=data.length;
+  const approved=data.filter(r=>(r[5]||'').toLowerCase().includes('approved')).length;
+  const denied=data.filter(r=>(r[5]||'').toLowerCase().includes('denied')).length;
+  const pending=data.filter(r=>(r[5]||'').toLowerCase().includes('pending')).length;
+  const approvalRate=total>0?(approved/total*100).toFixed(1):0;
+  const avgAmt=data.reduce((a,r)=>a+numVal(r[4]),0)/Math.max(total,1);
+
+  // Top partner
+  const partnerCounts={};
+  data.forEach(r=>{const p=r[3]||'';if(p)partnerCounts[p]=(partnerCounts[p]||0)+1;});
+  const topPartner=Object.entries(partnerCounts).sort((a,b)=>b[1]-a[1])[0];
+
+  document.getElementById('finKPIs').innerHTML=`
+    <div class="kpi"><div class="label">${tip("Applications","<strong>Applications</strong><br>Total financing applications submitted in the selected period.<br><code>COUNT(all financing rows)</code>")}</div><div class="value" style="color:#3ea2e4">${total}</div><div class="detail">Total submitted</div></div>
+    <div class="kpi"><div class="label">${tip("Approval Rate","<strong>Approval Rate</strong><br>Percentage of applications approved by financing partners.<br><code>Approved ÷ Total × 100</code>")}</div><div class="value" style="color:var(--gn)">${approvalRate}%</div><div class="detail">${approved} approved</div></div>
+    <div class="kpi"><div class="label">${tip("Denied","<strong>Denied</strong><br>Applications rejected by the financing partner.<br><code>COUNT(Status = Denied)</code>")}</div><div class="value" style="color:var(--rd)">${denied}</div><div class="detail">${total>0?(denied/total*100).toFixed(1):0}%</div></div>
+    <div class="kpi"><div class="label">${tip("Pending","<strong>Pending</strong><br>Applications still awaiting a decision from the financing partner.<br><code>COUNT(Status = Pending)</code>")}</div><div class="value" style="color:var(--yl)">${pending}</div><div class="detail">Awaiting decision</div></div>
+    <div class="kpi"><div class="label">${tip("Avg Amount","<strong>Avg Amount Requested</strong><br>Mean funding amount requested across all applications.<br><code>SUM(Amount) ÷ Total Apps</code>")}</div><div class="value" style="color:#3ea2e4">${fmtMoney(avgAmt)}</div><div class="detail">Requested</div></div>
+    <div class="kpi"><div class="label">${tip("Top Partner","<strong>Top Partner</strong><br>Financing partner with the most applications submitted.<br><code>MODE(Funding Partner)</code>")}</div><div class="value" style="color:#8a62ec;font-size:18px">${topPartner?topPartner[0]:'—'}</div><div class="detail">${topPartner?topPartner[1]+' apps':'—'}</div></div>`;
+
+  // Partner approval rates
+  const partnerStats={};
+  data.forEach(r=>{
+    const p=r[3]||'Unknown';
+    if(!partnerStats[p])partnerStats[p]={approved:0,denied:0,pending:0,total:0};
+    partnerStats[p].total++;
+    const s=(r[5]||'').toLowerCase();
+    if(s.includes('approved'))partnerStats[p].approved++;
+    else if(s.includes('denied'))partnerStats[p].denied++;
+    else if(s.includes('pending'))partnerStats[p].pending++;
+  });
+  const partners=Object.entries(partnerStats).filter(([k])=>k!=='Unknown'&&k).sort((a,b)=>b[1].total-a[1].total);
+
+  let partnerHTML='<div class="chart-card"><h3>📊 Approval Rate by Partner</h3>';
+  partners.forEach(([name,s])=>{
+    const rate=s.total>0?(s.approved/s.total*100):0;
+    const color=rate>=50?'bar-green':rate>=25?'bar-yellow':'bar-red';
+    partnerHTML+=`<div class="bar-row"><div class="bar-label" style="min-width:100px;font-size:11px">${name}</div><div class="bar-track"><div class="bar-fill ${color}" style="width:${Math.max(rate,5)}%">${rate.toFixed(0)}% (${s.approved}/${s.total})</div></div></div>`;
+  });
+  partnerHTML+='</div>';
+
+  // Rep approval rates
+  const repStats={};
+  data.forEach(r=>{
+    const rep=r[13]||r[12]||'';
+    if(!rep)return;
+    if(!repStats[rep])repStats[rep]={approved:0,denied:0,total:0};
+    repStats[rep].total++;
+    if((r[5]||'').toLowerCase().includes('approved'))repStats[rep].approved++;
+    if((r[5]||'').toLowerCase().includes('denied'))repStats[rep].denied++;
+  });
+  const reps=Object.entries(repStats).sort((a,b)=>b[1].total-a[1].total);
+
+  let repHTML='<div class="chart-card"><h3>👤 Applications by Rep</h3>';
+  const maxRep=reps.length?reps[0][1].total:1;
+  reps.forEach(([name,s])=>{
+    const rate=s.total>0?(s.approved/s.total*100):0;
+    repHTML+=`<div class="bar-row"><div class="bar-label">${name}</div><div class="bar-track"><div class="bar-fill bar-cyan" style="width:${(s.total/maxRep*100).toFixed(0)}%">${s.total} apps · ${rate.toFixed(0)}% approved</div></div></div>`;
+  });
+  repHTML+='</div>';
+
+  // Application table
+  let tbl=`<div class="row-count">${total} applications</div><div class="table-wrap"><table><thead><tr><th>Date (ET)</th><th>Name</th><th>Email</th><th>Partner</th><th>Amount</th><th>Status</th><th>CS</th><th>Rep</th></tr></thead><tbody>`;
+  data.forEach(r=>{
+    const st=(r[5]||'').toLowerCase();
+    const statusPill=st.includes('approved')?'<span class="pill pill-showed">Approved</span>':st.includes('denied')?'<span class="pill pill-noshow">Denied</span>':st.includes('pending')?'<span class="pill pill-cancelled">Pending</span>':'<span class="pill" style="background:rgba(255,255,255,.06);color:var(--tm)">'+(r[5]||'—')+'</span>';
+    const cs=r[7]||'';
+    tbl+=`<tr><td>${r[0]||'—'}</td><td style="color:var(--t);font-weight:600">${r[1]||'—'}</td><td style="font-size:11px">${r[2]||'—'}</td><td>${r[3]||'—'}</td><td style="color:#3ea2e4;font-weight:600">${r[4]||'—'}</td><td>${statusPill}</td><td style="color:${csColor(cs)};font-weight:600">${cs||'—'}</td><td>${r[13]||r[12]||'—'}</td></tr>`;
+  });
+  tbl+='</tbody></table></div>';
+
+  document.getElementById('finContent').innerHTML='<div class="analytics" style="grid-template-columns:1fr 1fr">'+partnerHTML+repHTML+'</div>'+tbl;
+}
+
+// ═══════════════════════════════════════
+// EOD COMPLIANCE VIEW
+// ═══════════════════════════════════════
+function renderEOD(){
+  if(typeof EOD_D==='undefined'||!EOD_D.length){document.getElementById('eodContent').innerHTML='<p style="color:var(--tm);padding:20px">No EOD data available.</p>';return;}
+  const data=filterByDateAndRep(EOD_D,1,2);
+  const totalSubs=data.length;
+  const uniqueReps=new Set(data.map(r=>r[2]).filter(Boolean)).size;
+  const totalCalls=data.reduce((a,r)=>a+numVal(r[3]),0);
+  const avgCalls=totalSubs>0?(totalCalls/totalSubs).toFixed(0):0;
+  const totalSets=data.reduce((a,r)=>a+numVal(r[5]),0);
+  const avgSets=totalSubs>0?(totalSets/totalSubs).toFixed(1):0;
+  const totalDemos=data.reduce((a,r)=>a+numVal(r[8]),0);
+  const totalCash=data.reduce((a,r)=>a+numVal(r[12]),0);
+
+  document.getElementById('eodKPIs').innerHTML=`
+    <div class="kpi"><div class="label">${tip("Submissions","<strong>Submissions</strong><br>Total EOD form submissions by all reps in the selected period.<br><code>COUNT(EOD rows)</code>")}</div><div class="value" style="color:#3ea2e4">${totalSubs}</div><div class="detail">${uniqueReps} reps</div></div>
+    <div class="kpi"><div class="label">${tip("Avg Calls/Day","<strong>Avg Calls/Day</strong><br>Average phone calls per rep per day.<br><code>SUM(Phone Calls) ÷ Submissions</code>")}</div><div class="value" style="color:#8a62ec">${avgCalls}</div><div class="detail">${totalCalls.toLocaleString()} total</div></div>
+    <div class="kpi"><div class="label">${tip("Avg Sets/Day","<strong>Avg Sets/Day</strong><br>Average appointments set per rep per day from outbound.<br><code>SUM(Outbound Sets) ÷ Submissions</code>")}</div><div class="value" style="color:var(--gn)">${avgSets}</div><div class="detail">${totalSets} total</div></div>
+    <div class="kpi"><div class="label">${tip("Demos Held","<strong>Demos Held (EOD)</strong><br>Total demos held as self-reported by reps.<br><code>SUM(Demos Held column)</code>")}</div><div class="value" style="color:#3ea2e4">${totalDemos}</div><div class="detail">Self-reported</div></div>
+    <div class="kpi"><div class="label">${tip("Closed Units","<strong>Closed Units</strong><br>Total deals closed as self-reported by reps in EOD.<br><code>SUM(Closed Units column)</code>")}</div><div class="value" style="color:var(--gn)">${data.reduce((a,r)=>a+numVal(r[10]),0)}</div><div class="detail">Self-reported</div></div>
+    <div class="kpi"><div class="label">${tip("Cash Collected","<strong>Cash Collected (EOD)</strong><br>Total cash collected as self-reported by reps. ⚠️ May differ from AR Log actuals.<br><code>SUM(Cash Collected column)</code>")}</div><div class="value" style="color:var(--gn)">${fmtMoney(totalCash)}</div><div class="detail">Self-reported</div></div>`;
+
+  // Rep activity summary
+  const repMap={};
+  data.forEach(r=>{
+    const rep=r[2]||'Unknown';
+    if(!isActiveRep(rep))return;
+    if(!repMap[rep])repMap[rep]={subs:0,calls:0,connects:0,sets:0,demos:0,closed:0,cash:0};
+    repMap[rep].subs++;
+    repMap[rep].calls+=numVal(r[3]);
+    repMap[rep].connects+=numVal(r[4]);
+    repMap[rep].sets+=numVal(r[5]);
+    repMap[rep].demos+=numVal(r[8]);
+    repMap[rep].closed+=numVal(r[10]);
+    repMap[rep].cash+=numVal(r[12]);
+  });
+  const repList=Object.entries(repMap).sort((a,b)=>b[1].subs-a[1].subs);
+  const maxSubs=repList.length?repList[0][1].subs:1;
+
+  let actHTML='<div class="chart-card"><h3>📊 Rep Activity (Total)</h3>';
+  repList.forEach(([name,s])=>{
+    actHTML+=`<div class="bar-row"><div class="bar-label">${name}</div><div class="bar-track"><div class="bar-fill bar-cyan" style="width:${(s.subs/maxSubs*100).toFixed(0)}%">${s.subs} days · ${s.calls} calls · ${s.sets} sets</div></div></div>`;
+  });
+  actHTML+='</div>';
+
+  // Conversion funnel
+  let funHTML='<div class="chart-card"><h3>🔄 Team Conversion Funnel</h3>';
+  const stages=[
+    {label:'Phone Calls',val:totalCalls,color:'bar-cyan'},
+    {label:'Connects',val:data.reduce((a,r)=>a+numVal(r[4]),0),color:'bar-cyan'},
+    {label:'Sets',val:totalSets,color:'bar-green'},
+    {label:'Demos Held',val:totalDemos,color:'bar-green'},
+    {label:'Offers',val:data.reduce((a,r)=>a+numVal(r[9]),0),color:'bar-yellow'},
+    {label:'Closed',val:data.reduce((a,r)=>a+numVal(r[10]),0),color:'bar-green'}
+  ];
+  const maxStage=stages[0].val||1;
+  stages.forEach(s=>{
+    funHTML+=`<div class="bar-row"><div class="bar-label" style="min-width:90px">${s.label}</div><div class="bar-track"><div class="bar-fill ${s.color}" style="width:${Math.max((s.val/maxStage*100),3).toFixed(0)}%">${s.val.toLocaleString()}</div></div></div>`;
+  });
+  funHTML+='</div>';
+
+  // Rep summary table
+  let repTbl='<div class="table-wrap" style="margin-top:16px"><table><thead><tr><th>Rep</th><th>Days</th><th>Calls</th><th>Connects</th><th>Sets</th><th>Demos</th><th>Closed</th><th>Cash</th><th>Calls/Day</th></tr></thead><tbody>';
+  repList.forEach(([name,s])=>{
+    const cpd=s.subs>0?(s.calls/s.subs).toFixed(0):0;
+    repTbl+=`<tr><td style="color:var(--t);font-weight:600">${name}</td><td>${s.subs}</td><td>${s.calls.toLocaleString()}</td><td>${s.connects}</td><td>${s.sets}</td><td>${s.demos}</td><td style="color:var(--gn);font-weight:600">${s.closed}</td><td style="color:var(--gn)">${fmtMoney(s.cash)}</td><td style="color:#3ea2e4">${cpd}</td></tr>`;
+  });
+  repTbl+='</tbody></table></div>';
+
+  document.getElementById('eodContent').innerHTML='<div class="analytics" style="grid-template-columns:1fr 1fr">'+actHTML+funHTML+'</div><div class="row-count">'+repList.length+' reps · '+totalSubs+' submissions</div>'+repTbl;
+}
+
+// ═══════════════════════════════════════
+// COMMISSIONS VIEW (Payouts & Reserves)
+// ═══════════════════════════════════════
+function renderCommissionsView(){
+  if(typeof COMM_D==='undefined'||!COMM_D.length){document.getElementById('commContent2').innerHTML='<p style="color:var(--tm);padding:20px">No commission data available.</p>';return;}
+  const data=filterByDateAndRep(COMM_D,4,13);
+  
+  const closerPaid=data.filter(r=>(r[28]||'').includes('Paid')&&!(r[28]||'').includes('Not Paid'));
+  const closerOutstanding=data.filter(r=>(r[28]||'').includes('Outstanding')||(!(r[28]||'').includes('Paid')));
+  const outstandingCloserPay=closerOutstanding.reduce((a,r)=>a+numVal(r[25]),0);
+  const paidCloserPay=closerPaid.reduce((a,r)=>a+numVal(r[25]),0);
+  const outstandingSetterPay=data.filter(r=>(r[27]||'').includes('Outstanding')).reduce((a,r)=>a+numVal(r[20]),0);
+  const paidSetterPay=data.filter(r=>(r[27]||'').includes('Paid')&&!(r[27]||'').includes('Not Paid')).reduce((a,r)=>a+numVal(r[20]),0);
+  const totalOutstanding=outstandingCloserPay+outstandingSetterPay;
+  const totalAlreadyPaid=paidCloserPay+paidSetterPay;
+  const totalReserves=data.reduce((a,r)=>a+numVal(r[24])+numVal(r[19]),0);
+  const totalComm=data.reduce((a,r)=>a+numVal(r[22])+numVal(r[17]),0);
+
+  document.getElementById('commKPIs2').innerHTML=`
+    <div class="kpi"><div class="label">${tip('Outstanding','<strong>Outstanding</strong><br>Commissions marked Outstanding - Not Paid, still owed to reps.<br><code>SUM(Payable) where Comm Status = Outstanding</code>')}</div><div class="value" style="color:var(--rd)">${fmtMoney2(totalOutstanding)}</div><div class="detail">Needs to be paid</div></div>
+    <div class="kpi"><div class="label">${tip('Already Paid','<strong>Already Paid</strong><br>Commissions already paid out to reps.<br><code>SUM(Payable) where Comm Status = Paid</code>')}</div><div class="value" style="color:var(--gn)">${fmtMoney2(totalAlreadyPaid)}</div><div class="detail">${closerPaid.length} entries paid</div></div>
+    <div class="kpi"><div class="label">${tip('Total Reserves','<strong>Total Reserves</strong><br>All reserves held 90 days (closer + setter).<br><code>SUM(All Reserve $)</code>')}</div><div class="value" style="color:var(--yl)">${fmtMoney2(totalReserves)}</div><div class="detail">Held 90 days</div></div>
+    <div class="kpi"><div class="label">${tip('Total Commission','<strong>Total Commission</strong><br>Gross commission before reserves.<br><code>SUM(Closer Total + Setter Comm)</code>')}</div><div class="value" style="color:var(--tm)">${fmtMoney2(totalComm)}</div><div class="detail">Before reserves</div></div>
+    <div class="kpi"><div class="label">${tip('Closer Outstanding','<strong>Closer Outstanding</strong><br>Closer payable commissions not yet paid.<br><code>SUM(Closer Payable) where status != Paid</code>')}</div><div class="value" style="color:#3ea2e4">${fmtMoney2(outstandingCloserPay)}</div><div class="detail">${closerOutstanding.length} entries</div></div>
+    <div class="kpi"><div class="label">${tip('# Deals','<strong># Deals</strong><br>Total payments in selected range.<br><code>COUNT(rows)</code>')}</div><div class="value" style="color:#3ea2e4">${data.length}</div><div class="detail">Commission-bearing</div></div>`;
+
+  const closerMap={};
+  data.forEach(r=>{const c=r[13]||'Unknown';const isPaid=(r[28]||'').includes('Paid')&&!(r[28]||'').includes('Not Paid');if(!closerMap[c])closerMap[c]={total:0,reserve:0,paid:0,outstanding:0,deals:0};closerMap[c].total+=numVal(r[22]);closerMap[c].reserve+=numVal(r[24]);closerMap[c].deals++;if(isPaid)closerMap[c].paid+=numVal(r[25]);else closerMap[c].outstanding+=numVal(r[25]);});
+  const closerList=Object.entries(closerMap).sort((a,b)=>b[1].outstanding-a[1].outstanding);
+  const maxOut=Math.max(...closerList.map(([,s])=>s.outstanding),1);
+
+  let closerHTML='<div class="chart-card" style="margin-bottom:16px"><h3>\ud83d\udd34 Closer Outstanding (Owed)</h3>';
+  closerList.forEach(([name,s])=>{if(s.outstanding<=0)return;closerHTML+=`<div class="bar-row"><div class="bar-label">${name}</div><div class="bar-track"><div class="bar-fill bar-red" style="width:${Math.max((s.outstanding/maxOut*100),5).toFixed(0)}%">${fmtMoney2(s.outstanding)} owed</div></div></div>`;});
+  if(closerList.every(([,s])=>s.outstanding<=0))closerHTML+='<p style="color:var(--gn);font-size:12px;padding:8px 0">\u2705 All closer commissions paid!</p>';
+  closerHTML+='</div>';
+
+  const maxPd=Math.max(...closerList.map(([,s])=>s.paid),1);
+  let paidHTML='<div class="chart-card" style="margin-bottom:16px"><h3>\u2705 Already Paid</h3>';
+  closerList.forEach(([name,s])=>{if(s.paid<=0)return;paidHTML+=`<div class="bar-row"><div class="bar-label">${name}</div><div class="bar-track"><div class="bar-fill bar-green" style="width:${Math.max((s.paid/maxPd*100),5).toFixed(0)}%">${fmtMoney2(s.paid)} paid</div></div></div>`;});
+  if(closerList.every(([,s])=>s.paid<=0))paidHTML+='<p style="color:var(--tm);font-size:12px;padding:8px 0">No payments recorded yet.</p>';
+  paidHTML+='</div>';
+
+  let repTbl='<div class="chart-card" style="margin-bottom:16px;grid-column:1/-1"><h3>\ud83d\udccb Commission Summary by Rep</h3><table style="font-size:12px;width:100%"><thead><tr><th>Rep</th><th>Role</th><th>Deals</th><th>Total Comm</th><th>Reserve</th><th>Already Paid</th><th>Outstanding</th><th>Status</th></tr></thead><tbody>';
+  closerList.forEach(([name,s])=>{const pill=s.outstanding>0?'<span class="pill pill-noshow">'+fmtMoney2(s.outstanding)+' owed</span>':'<span class="pill pill-showed">All Paid</span>';repTbl+=`<tr><td style="color:var(--t);font-weight:600">${name}</td><td>Closer</td><td>${s.deals}</td><td>${fmtMoney2(s.total)}</td><td style="color:var(--yl)">${fmtMoney2(s.reserve)}</td><td style="color:var(--gn)">${fmtMoney2(s.paid)}</td><td style="color:var(--rd);font-weight:600">${fmtMoney2(s.outstanding)}</td><td>${pill}</td></tr>`;});
+  const setterMap={};
+  data.forEach(r=>{const s=(r[12]||'').trim();if(!s||s==='NA'||(r[3]||'')==='No Setter')return;const isPaid=(r[27]||'').includes('Paid')&&!(r[27]||'').includes('Not Paid');if(!setterMap[s])setterMap[s]={total:0,reserve:0,paid:0,outstanding:0,deals:0};setterMap[s].total+=numVal(r[17]);setterMap[s].reserve+=numVal(r[19]);setterMap[s].deals++;if(isPaid)setterMap[s].paid+=numVal(r[20]);else setterMap[s].outstanding+=numVal(r[20]);});
+  Object.entries(setterMap).sort((a,b)=>b[1].outstanding-a[1].outstanding).forEach(([name,s])=>{const pill=s.outstanding>0?'<span class="pill pill-noshow">'+fmtMoney2(s.outstanding)+' owed</span>':'<span class="pill pill-showed">All Paid</span>';repTbl+=`<tr><td style="color:var(--t);font-weight:600">${name}</td><td>Setter</td><td>${s.deals}</td><td>${fmtMoney2(s.total)}</td><td style="color:var(--yl)">${fmtMoney2(s.reserve)}</td><td style="color:var(--gn)">${fmtMoney2(s.paid)}</td><td style="color:var(--rd);font-weight:600">${fmtMoney2(s.outstanding)}</td><td>${pill}</td></tr>`;});
+  repTbl+=`<tr style="border-top:2px solid rgba(62,162,228,.2)"><td style="color:var(--t);font-weight:800">TOTAL</td><td></td><td>${data.length}</td><td style="font-weight:700">${fmtMoney2(totalComm)}</td><td style="color:var(--yl);font-weight:700">${fmtMoney2(totalReserves)}</td><td style="color:var(--gn);font-weight:700">${fmtMoney2(totalAlreadyPaid)}</td><td style="color:var(--rd);font-weight:800">${fmtMoney2(totalOutstanding)}</td><td></td></tr>`;
+  repTbl+='</tbody></table></div>';
+
+  let tbl=`<div class="row-count">${data.length} commission entries</div><div class="table-wrap"><table><thead><tr><th>Date (ET)</th><th>Client</th><th>Closer</th><th>Payable</th><th>Comm Status</th><th>Setter</th><th>Set Payable</th><th>Set Status</th><th>Reserve Release</th><th>Res Status</th></tr></thead><tbody>`;
+  data.forEach(r=>{const cs=(r[28]||'');const cPill=cs.includes('Not Paid')?'<span class="pill pill-noshow">Outstanding</span>':cs.includes('Paid')?'<span class="pill pill-showed">Paid</span>':'<span class="pill" style="background:rgba(255,255,255,.06);color:var(--td)">\u2014</span>';const st=(r[12]||'').trim();const stD=(!st||st==='NA'||(r[3]||'')==='No Setter')?'\u2014':st;const ss=(r[27]||'');const sPill=stD==='\u2014'?'\u2014':ss.includes('Not Paid')?'<span class="pill pill-noshow">Outstanding</span>':ss.includes('Paid')?'<span class="pill pill-showed">Paid</span>':'\u2014';const rd=r[35]||'\u2014';const rs=(r[36]||'');const rPill=rs.includes('Holding')?'<span class="pill pill-cancelled">Holding</span>':rs.includes('Released')?'<span class="pill pill-showed">Released</span>':'\u2014';tbl+=`<tr><td>${r[4]?fmtDate(r[4]):'\u2014'}</td><td style="color:var(--t);font-weight:600">${r[0]||'\u2014'}</td><td>${r[13]||'\u2014'}</td><td style="color:var(--gn);font-weight:600">${fmtMoney2(r[25])}</td><td>${cPill}</td><td>${stD}</td><td style="color:#8a62ec">${fmtMoney2(r[20])}</td><td>${sPill}</td><td>${rd}</td><td>${rPill}</td></tr>`;});
+  tbl+='</tbody></table></div>';
+
+  document.getElementById('commContent2').innerHTML='<div class="analytics" style="grid-template-columns:1fr 1fr">'+closerHTML+paidHTML+repTbl+'</div>'+tbl;
+}
+
+
+// ═══════════════════════════════════════
+// EOD REP COMPLIANCE VIEW
+// ═══════════════════════════════════════
+function renderEODCompliance(){
+  if(typeof EOD_D==='undefined'||!EOD_D.length){document.getElementById('complianceContent').innerHTML='<p style="color:var(--tm);padding:20px">No EOD data.</p>';return;}
+  const data=filterByDateAndRep(EOD_D,1,2);
+  
+  // Get all unique reps and dates
+  const allReps=[...new Set(data.map(r=>r[2]).filter(Boolean))].filter(n=>isActiveRep(n)).sort();
+  const allDates=[...new Set(data.map(r=>r[1]).filter(Boolean))].sort((a,b)=>{const da=parseAnyDate(a),db=parseAnyDate(b);return da&&db?da-db:0;});
+  
+  // Build submission map: rep -> set of dates
+  const subMap={};
+  allReps.forEach(rep=>subMap[rep]=new Set());
+  data.forEach(r=>{if(r[2]&&r[1])subMap[r[2]].add(r[1]);});
+  
+  // Calculate compliance
+  const totalPossible=allReps.length*allDates.length;
+  const totalSubmitted=data.length;
+  const complianceRate=totalPossible>0?(totalSubmitted/totalPossible*100).toFixed(1):0;
+  const perfectReps=allReps.filter(rep=>subMap[rep].size===allDates.length).length;
+  const missingToday=allReps.filter(rep=>{const today=new Date().toLocaleDateString('en-US');return!subMap[rep].has(today);});
+  
+  document.getElementById('complianceKPIs').innerHTML=`
+    <div class="kpi"><div class="label">${tip('Compliance Rate','<strong>Compliance Rate</strong><br>Percentage of expected submissions received.<br><code>Submissions ÷ (Reps × Days) × 100</code>')}</div><div class="value" style="color:${parseFloat(complianceRate)>=80?'var(--gn)':parseFloat(complianceRate)>=50?'var(--yl)':'var(--rd)'}">${complianceRate}%</div><div class="detail">${totalSubmitted}/${totalPossible} expected</div></div>
+    <div class="kpi"><div class="label">${tip('Active Reps','<strong>Active Reps</strong><br>Reps with at least one submission in period.<br><code>COUNT(DISTINCT Rep)</code>')}</div><div class="value" style="color:#3ea2e4">${allReps.length}</div><div class="detail">Tracked reps</div></div>
+    <div class="kpi"><div class="label">${tip('Days Tracked','<strong>Days Tracked</strong><br>Unique dates with at least one submission.<br><code>COUNT(DISTINCT Date)</code>')}</div><div class="value" style="color:#8a62ec">${allDates.length}</div><div class="detail">In range</div></div>
+    <div class="kpi"><div class="label">${tip('Perfect Compliance','<strong>Perfect Compliance</strong><br>Reps who submitted every single day in the period.<br><code>COUNT(reps where days = total days)</code>')}</div><div class="value" style="color:var(--gn)">${perfectReps}</div><div class="detail">of ${allReps.length} reps</div></div>
+    <div class="kpi"><div class="label">${tip('Total Submissions','<strong>Total Submissions</strong><br>Total EOD forms received.<br><code>COUNT(rows)</code>')}</div><div class="value" style="color:#3ea2e4">${totalSubmitted}</div><div class="detail">Forms received</div></div>
+    <div class="kpi"><div class="label">${tip('Avg Submissions','<strong>Avg Submissions/Rep</strong><br>Average days submitted per rep.<br><code>Submissions ÷ Reps</code>')}</div><div class="value" style="color:#3ea2e4">${allReps.length>0?(totalSubmitted/allReps.length).toFixed(1):0}</div><div class="detail">Per rep</div></div>`;
+
+  // Rep compliance table
+  let repTbl='<div class="chart-card" style="margin-bottom:16px"><h3>✅ Rep Compliance Breakdown</h3><table style="font-size:12px;width:100%"><thead><tr><th>Rep</th><th>Days Submitted</th><th>Days Expected</th><th>Compliance %</th><th>Missed Days</th><th>Status</th></tr></thead><tbody>';
+  allReps.sort((a,b)=>(subMap[b].size/allDates.length)-(subMap[a].size/allDates.length)).forEach(rep=>{
+    const submitted=subMap[rep].size;
+    const expected=allDates.length;
+    const pct=expected>0?(submitted/expected*100).toFixed(1):0;
+    const missed=expected-submitted;
+    const statusPill=parseFloat(pct)>=90?'<span class="pill pill-showed">On Track</span>':parseFloat(pct)>=50?'<span class="pill pill-cancelled">Needs Improvement</span>':'<span class="pill pill-noshow">At Risk</span>';
+    repTbl+=`<tr><td style="color:var(--t);font-weight:600">${rep}</td><td>${submitted}</td><td>${expected}</td><td style="color:${parseFloat(pct)>=80?'var(--gn)':parseFloat(pct)>=50?'var(--yl)':'var(--rd)'};font-weight:600">${pct}%</td><td style="color:${missed>0?'var(--rd)':'var(--gn)'}">${missed}</td><td>${statusPill}</td></tr>`;
+  });
+  repTbl+='</tbody></table></div>';
+
+  // Compliance heatmap (reps × recent dates)
+  const recentDates=allDates.slice(-14);
+  let heatHTML='<div class="chart-card"><h3>📅 Submission Heatmap (Last 14 Days in Range)</h3><div style="overflow-x:auto"><table style="font-size:10px"><thead><tr><th style="min-width:100px">Rep</th>';
+  recentDates.forEach(d=>{const parts=d.split('/');heatHTML+=`<th style="min-width:32px;text-align:center;padding:4px">${parts[0]}/${parts[1]}</th>`;});
+  heatHTML+='</tr></thead><tbody>';
+  allReps.forEach(rep=>{
+    heatHTML+=`<tr><td style="color:var(--t);font-weight:600;white-space:nowrap">${rep}</td>`;
+    recentDates.forEach(d=>{
+      const has=subMap[rep].has(d);
+      heatHTML+=`<td style="text-align:center;padding:4px"><span style="display:inline-block;width:20px;height:20px;border-radius:4px;background:${has?'rgba(34,197,94,.4)':'rgba(239,68,68,.2)'};line-height:20px;font-size:9px">${has?'✓':'✗'}</span></td>`;
+    });
+    heatHTML+='</tr>';
+  });
+  heatHTML+='</tbody></table></div></div>';
+
+  document.getElementById('complianceContent').innerHTML=repTbl+heatHTML;
+}
+
+// ═══════════════════════════════════════
+// EOD SUBMISSION LOG VIEW
+// ═══════════════════════════════════════
+function renderEODSubmissions(){
+  if(typeof EOD_D==='undefined'||!EOD_D.length){document.getElementById('submissionsContent').innerHTML='<p style="color:var(--tm);padding:20px">No EOD data.</p>';return;}
+  const data=filterByDateAndRep(EOD_D,1,2);
+  
+  let tbl=`<div class="row-count">${data.length} submissions</div><div class="table-wrap"><table><thead><tr><th>Timestamp</th><th>Date</th><th>Rep</th><th>Calls</th><th>Connects</th><th>Sets</th><th>Shown</th><th>On Cal</th><th>Demos</th><th>Offers</th><th>Closed</th><th>Contract $</th><th>Cash</th><th>Triage</th><th>Week</th></tr></thead><tbody>`;
+  data.forEach(r=>{
+    while(r.length<18)r.push('');
+    tbl+=`<tr><td style="font-size:10px;color:var(--td)">${r[0]||'—'}</td><td style="color:var(--t)">${r[1]||'—'}</td><td style="color:var(--t);font-weight:600">${r[2]||'—'}</td><td>${r[3]||'0'}</td><td>${r[4]||'0'}</td><td>${r[5]||'0'}</td><td>${r[6]||'0'}</td><td>${r[7]||'0'}</td><td style="color:#3ea2e4;font-weight:600">${r[8]||'0'}</td><td>${r[9]||'0'}</td><td style="color:var(--gn);font-weight:600">${r[10]||'0'}</td><td>${r[11]||'$0'}</td><td style="color:var(--gn)">${r[12]||'$0'}</td><td>${r[14]||'0'}</td><td>${r[17]||'—'}</td></tr>`;
+  });
+  tbl+='</tbody></table></div>';
+  
+  document.getElementById('submissionsContent').innerHTML=tbl;
+}
+
+// ═══════════════════════════════════════
+// REP AVAILABILITY VIEW
+// ═══════════════════════════════════════
+const SETTERS=ACTIVE_TEAM.filter(t=>t.role==='Setter').map(t=>t.name);
+const MAX_DEMOS_PER_DAY=6;
+
+function renderRepAvail(){
+  if(!D||!D.length){document.getElementById('repavailContent').innerHTML='<p style="color:var(--tm);padding:20px">No data.</p>';return;}
+  
+  // Get closers only (exclude setters)
+  const allReps=ACTIVE_TEAM.filter(t=>t.role==='Closer').map(t=>t.name).sort();
+  
+  // Get next 7 days from today
+  const today=new Date();
+  const days=[];
+  for(let i=0;i<7;i++){const d=new Date(today);d.setDate(d.getDate()+i);days.push(d);}
+  
+  // Count bookings per rep per day
+  const bookings={};
+  allReps.forEach(rep=>{bookings[rep]={};days.forEach(d=>{bookings[rep][d.toDateString()]=0;});});
+  
+  D.forEach(r=>{
+    const rep=r[CI.rep];
+    if(!rep||SETTERS.some(s=>rep.toLowerCase().includes(s.toLowerCase().split(' ')[0])))return;
+    const d=parseDate(r[CI.date]);
+    if(!d)return;
+    const key=d.toDateString();
+    if(bookings[rep]&&bookings[rep][key]!==undefined)bookings[rep][key]++;
+  });
+  
+  // KPIs
+  let totalSlots=allReps.length*MAX_DEMOS_PER_DAY;
+  const todayKey=today.toDateString();
+  let todayBooked=allReps.reduce((a,rep)=>a+(bookings[rep][todayKey]||0),0);
+  let todayAvail=totalSlots-todayBooked;
+  let weekBooked=0;let weekSlots=allReps.length*MAX_DEMOS_PER_DAY*7;
+  days.forEach(d=>{allReps.forEach(rep=>{weekBooked+=(bookings[rep][d.toDateString()]||0);});});
+  let weekAvail=weekSlots-weekBooked;
+  const utilizationToday=totalSlots>0?(todayBooked/totalSlots*100).toFixed(0):0;
+  const repsFullToday=allReps.filter(rep=>(bookings[rep][todayKey]||0)>=MAX_DEMOS_PER_DAY).length;
+
+  document.getElementById('repavailKPIs').innerHTML=`
+    <div class="kpi"><div class="label">${tip('Today Available','<strong>Today Available</strong><br>Open demo slots across all closers today.<br><code>(Closers × 6) - Booked Today</code>')}</div><div class="value" style="color:var(--gn)">${todayAvail}</div><div class="detail">of ${totalSlots} slots</div></div>
+    <div class="kpi"><div class="label">${tip('Today Booked','<strong>Today Booked</strong><br>Demos already on calendar for today.<br><code>COUNT(appointments today)</code>')}</div><div class="value" style="color:#3ea2e4">${todayBooked}</div><div class="detail">${utilizationToday}% utilized</div></div>
+    <div class="kpi"><div class="label">${tip('Reps Full','<strong>Reps at Capacity</strong><br>Closers with 6+ demos booked today.<br><code>COUNT(reps with ≥6 today)</code>')}</div><div class="value" style="color:${repsFullToday>0?'var(--rd)':'var(--gn)'}">${repsFullToday}</div><div class="detail">at 6/6 today</div></div>
+    <div class="kpi"><div class="label">${tip('Week Available','<strong>Week Available</strong><br>Open slots across next 7 days.<br><code>(Closers × 6 × 7) - Booked</code>')}</div><div class="value" style="color:var(--gn)">${weekAvail}</div><div class="detail">next 7 days</div></div>
+    <div class="kpi"><div class="label">${tip('Active Closers','<strong>Active Closers</strong><br>Number of closers tracked (excludes setters).')}</div><div class="value" style="color:#8a62ec">${allReps.length}</div><div class="detail">Max ${MAX_DEMOS_PER_DAY}/day each</div></div>
+    <div class="kpi"><div class="label">${tip('Week Utilization','<strong>Week Utilization</strong><br>% of available slots filled this week.<br><code>Booked ÷ Total Slots × 100</code>')}</div><div class="value" style="color:${weekBooked/weekSlots*100>80?'var(--rd)':weekBooked/weekSlots*100>50?'var(--yl)':'var(--gn)'}">${weekSlots>0?(weekBooked/weekSlots*100).toFixed(0):0}%</div><div class="detail">${weekBooked} of ${weekSlots}</div></div>`;
+
+  // Availability grid: reps × days
+  const dayLabels=days.map(d=>{const opts={weekday:'short',month:'numeric',day:'numeric'};return d.toLocaleDateString('en-US',opts);});
+  
+  let grid='<div class="chart-card" style="margin-bottom:16px"><h3>📅 7-Day Availability Grid</h3><div style="overflow-x:auto"><table style="font-size:12px"><thead><tr><th style="min-width:140px">Closer</th>';
+  dayLabels.forEach((dl,i)=>{
+    const isToday=days[i].toDateString()===todayKey;
+    grid+=`<th style="text-align:center;min-width:80px;${isToday?'color:#3ea2e4;font-weight:700':''}">${dl}${isToday?' ★':''}</th>`;
+  });
+  grid+='<th style="text-align:center">Week Total</th></tr></thead><tbody>';
+  
+  allReps.forEach(rep=>{
+    let weekTotal=0;
+    grid+=`<tr><td style="color:var(--t);font-weight:600">${rep}</td>`;
+    days.forEach(d=>{
+      const booked=bookings[rep][d.toDateString()]||0;
+      weekTotal+=booked;
+      const avail=MAX_DEMOS_PER_DAY-booked;
+      const bg=avail<=0?'rgba(239,68,68,.2)':avail<=2?'rgba(234,179,8,.15)':'rgba(34,197,94,.1)';
+      const color=avail<=0?'#f87171':avail<=2?'#facc15':'#4ade80';
+      grid+=`<td style="text-align:center;background:${bg}"><span style="color:${color};font-weight:700">${avail}</span><span style="color:var(--td);font-size:10px">/${MAX_DEMOS_PER_DAY}</span></td>`;
+    });
+    const weekAvailRep=MAX_DEMOS_PER_DAY*7-weekTotal;
+    grid+=`<td style="text-align:center;font-weight:600;color:${weekAvailRep<=10?'var(--yl)':'var(--gn)'}">${weekAvailRep} open</td>`;
+    grid+='</tr>';
+  });
+  
+  // Total row
+  grid+='<tr style="border-top:2px solid rgba(62,162,228,.2)"><td style="color:var(--t);font-weight:800">TOTAL</td>';
+  days.forEach(d=>{
+    const dayTotal=allReps.reduce((a,rep)=>a+(bookings[rep][d.toDateString()]||0),0);
+    const dayAvail=totalSlots-dayTotal;
+    grid+=`<td style="text-align:center;font-weight:700;color:${dayAvail<=5?'var(--rd)':dayAvail<=15?'var(--yl)':'var(--gn)'}">${dayAvail} open</td>`;
+  });
+  grid+=`<td style="text-align:center;font-weight:800;color:var(--gn)">${weekAvail} open</td>`;
+  grid+='</tr></tbody></table></div></div>';
+
+  // Today's breakdown bar chart
+  const maxBook=MAX_DEMOS_PER_DAY;
+  let todayHTML='<div class="chart-card"><h3>📊 Today\'s Utilization by Closer</h3>';
+  allReps.forEach(rep=>{
+    const booked=bookings[rep][todayKey]||0;
+    const pct=(booked/maxBook*100);
+    const color=booked>=6?'bar-red':booked>=4?'bar-yellow':'bar-green';
+    todayHTML+=`<div class="bar-row"><div class="bar-label">${rep}</div><div class="bar-track"><div class="bar-fill ${color}" style="width:${Math.max(pct,3)}%">${booked}/${MAX_DEMOS_PER_DAY} booked</div></div></div>`;
+  });
+  todayHTML+='</div>';
+
+  document.getElementById('repavailContent').innerHTML=grid+'<div class="analytics" style="grid-template-columns:1fr">'+todayHTML+'</div>';
+}
+
+// ═══════════════════════════════════════
+// TEAM ROSTER VIEW
+// ═══════════════════════════════════════
+function renderRoster(){
+  const roster=ACTIVE_TEAM.map(t=>({...t,status:'Active'}));
+
+  // Enrich with stats from appointment data
+  roster.forEach(r=>{
+    const rows=D.filter(d=>d[CI.rep]===r.name||d[CI.repEmail]===r.email);
+    r.appts=rows.length;
+    r.demos=rows.filter(d=>d[CI.status]==='Showed').length;
+    r.showRate=r.appts>0?(r.demos/r.appts*100).toFixed(1):0;
+  });
+
+  const closers=roster.filter(r=>r.role==='Closer');
+  const setters=roster.filter(r=>r.role==='Setter');
+  const managers=roster.filter(r=>r.role==='Sales Manager');
+
+  function roleColor(role){return role==='Closer'?'#3ea2e4':role==='Setter'?'#8a62ec':role==='Sales Manager'?'#f10cf6':'#06b6d4';}
+  function rolePill(role){return`<span class="pill" style="background:${roleColor(role)}22;color:${roleColor(role)}">${role}</span>`;}
+
+  const rosterFilter=window._rosterFilter||'all';
+  const filteredRoster=rosterFilter==='all'?roster:roster.filter(r=>r.role===rosterFilter);
+  const roles=[...new Set(roster.map(r=>r.role))];
+  
+  let filterHTML='<div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap"><button onclick="window._rosterFilter=\'all\';renderRoster()" style="font-size:11px;padding:5px 12px;border-radius:6px;border:1px solid '+(rosterFilter==='all'?'rgba(62,162,228,.4)':'rgba(255,255,255,.08)')+';background:'+(rosterFilter==='all'?'rgba(62,162,228,.15)':'var(--card)')+';color:'+(rosterFilter==='all'?'#3ea2e4':'var(--tm)')+';cursor:pointer">All ('+roster.length+')</button>';
+  roles.forEach(role=>{const count=roster.filter(r=>r.role===role).length;const clr=roleColor(role);filterHTML+=`<button onclick="window._rosterFilter='${role}';renderRoster()" style="font-size:11px;padding:5px 12px;border-radius:6px;border:1px solid ${rosterFilter===role?clr+'66':'rgba(255,255,255,.08)'};background:${rosterFilter===role?clr+'22':'var(--card)'};color:${rosterFilter===role?clr:'var(--tm)'};cursor:pointer">${role} (${count})</button>`;});
+  filterHTML+='</div>';
+
+  let html='<div class="chart-card" style="margin-bottom:16px"><h3>👥 AI Commerce Sales Team</h3>';
+  html+=filterHTML;
+  html+=`<div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap">
+    <span style="font-size:12px;color:var(--tm)">Closers: <strong style="color:#3ea2e4">${closers.length}</strong></span>
+    <span style="font-size:12px;color:var(--tm)">Setters: <strong style="color:#8a62ec">${setters.length}</strong></span>
+    <span style="font-size:12px;color:var(--tm)">Managers: <strong style="color:#f10cf6">${managers.length}</strong></span>
+    
+  </div>`;
+  html+='<div class="table-wrap"><table style="font-size:12px"><thead><tr><th>Name</th><th>Role</th><th>Email</th><th>Appts</th><th>Demos</th><th>Show Rate</th><th>Status</th></tr></thead><tbody>';
+  filteredRoster.sort((a,b)=>{const order={Closer:0,'Sales Manager':1,Setter:2};return(order[a.role]||9)-(order[b.role]||9);}).forEach(r=>{
+    html+=`<tr><td style="color:var(--t);font-weight:600">${r.name}</td><td>${rolePill(r.role)}</td><td style="font-size:11px;color:var(--tm)">${r.email}</td><td>${r.appts||'—'}</td><td>${r.demos||'—'}</td><td style="color:${parseFloat(r.showRate)>=40?'var(--gn)':parseFloat(r.showRate)>=25?'var(--yl)':'var(--rd)'};font-weight:600">${r.appts>0?r.showRate+'%':'—'}</td><td><span class="pill pill-showed">${r.status}</span></td></tr>`;
+  });
+  html+='</tbody></table></div></div>';
+
+  document.getElementById('rosterContent').innerHTML=html;
+}
+
+// ═══════════════════════════════════════
+// APPOINTMENT LOG VIEW
+// ═══════════════════════════════════════
+let apptSortCol=-1,apptSortAsc=true;
+function apptSortBy(col){
+  if(_isResizing)return;
+  if(apptSortCol===col)apptSortAsc=!apptSortAsc;
+  else{apptSortCol=col;apptSortAsc=true;}
+  renderApptLog();
+}
+function renderApptLog(){
+  if(!D||!D.length){document.getElementById('apptlogContent').innerHTML='<p style="color:var(--tm);padding:20px">No data.</p>';return;}
+  const selectedReps=getSelectedReps();
+  const range=getGlobalDateRange();
+  let data=D.filter(r=>{
+    if(selectedReps!=='all'&&!selectedReps.includes(r[CI.rep]))return false;
+    const d=parseDate(r[CI.date]);
+    if(d&&(d<range.start||d>range.end))return false;
+    return true;
+  });
+  if(apptSortCol>=0){
+    data.sort((a,b)=>{
+      let va=a[apptSortCol]||'',vb=b[apptSortCol]||'';
+      const na=parseFloat(String(va).replace(/[^0-9.\-]/g,'')),nb=parseFloat(String(vb).replace(/[^0-9.\-]/g,''));
+      if(!isNaN(na)&&!isNaN(nb))return apptSortAsc?na-nb:nb-na;
+      return apptSortAsc?String(va).localeCompare(String(vb)):String(vb).localeCompare(String(va));
+    });
+  }
+  let linkBar='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><div class="row-count">'+data.length+' of '+D.length+' appointments</div><a href="https://docs.google.com/spreadsheets/d/1dHVNK3-YdnyBNoiVMcSuWJKy5oyWbIx6UdIa_w4XX_o" target="_blank" style="font-size:12px;color:#3ea2e4;text-decoration:none;padding:6px 12px;border:1px solid rgba(62,162,228,.2);border-radius:6px;background:rgba(62,162,228,.08)">Open in Sheets →</a></div>';
+  let tbl='<div class="table-wrap"><table><thead><tr>';
+  H.forEach((h,i)=>tbl+=`<th onclick="apptSortBy(${i})">${i===0?'Date & Time (ET)':h} ${apptSortCol===i?(apptSortAsc?'↑':'↓'):''}</th>`);
+  tbl+='</tr></thead><tbody>';
+  data.forEach(r=>{
+    tbl+='<tr>';
+    r.forEach((v,i)=>{
+      if(i===CI.date){const parts=(v||'').split(' ');tbl+=`<td style="color:var(--t)">${parts[0]||''} <span style="color:#3ea2e4">${parts[1]?parts[1].substring(0,5):''}</span></td>`;}
+      else if(i===CI.status){tbl+=`<td>${pill(v,'status')}</td>`;}
+      else if(i===CI.outcome){tbl+=`<td>${pill(v,'outcome')}</td>`;}
+      else if(i===CI.confidence){tbl+=`<td>${pill(v,'confidence')}</td>`;}
+      else if(i===CI.fathom&&v){tbl+=`<td><a href="${v}" target="_blank" style="color:#3ea2e4">▶ Link</a></td>`;}
+      else if(i===CI.cs){tbl+=`<td style="color:${csColor(v)};font-weight:600">${v||'—'}</td>`;}
+      else if(i===CI.name){tbl+=`<td style="color:var(--t);font-weight:600">${v||'—'}</td>`;}
+      else{tbl+=`<td>${v||'—'}</td>`;}
+    });
+    tbl+='</tr>';
+  });
+  tbl+='</tbody></table></div>';
+  document.getElementById('apptlogContent').innerHTML=linkBar+tbl;
+}
+
+// ═══════════════════════════════════════
+// OVERVIEW EXECUTIVE CHARTS
+// ═══════════════════════════════════════
+function svgLine(data,w,h,color,label){
+  if(!data.length)return'<p style="color:var(--td);font-size:12px">No data</p>';
+  const maxV=Math.max(...data.map(d=>d.v),1);
+  const minV=Math.min(...data.map(d=>d.v),0);
+  const range=maxV-minV||1;
+  const pad=30;const pw=w-pad*2;const ph=h-pad*2;
+  let pts=data.map((d,i)=>{const x=pad+(i/(data.length-1||1))*pw;const y=pad+ph-(((d.v-minV)/range)*ph);return{x,y,l:d.l,v:d.v};});
+  let path='M'+pts.map(p=>p.x+','+p.y).join(' L');
+  let areaPath=path+` L${pts[pts.length-1].x},${pad+ph} L${pts[0].x},${pad+ph} Z`;
+  let dots=pts.map(p=>{const val=typeof p.v==='number'&&p.v%1!==0?p.v.toFixed(1):Math.round(p.v);return`<circle cx="${p.x}" cy="${p.y}" r="4" fill="${color}" stroke="#0a0a0e" stroke-width="2" style="cursor:pointer" onmouseenter="this.setAttribute('r','7');this.nextElementSibling.style.display='block'" onmouseleave="this.setAttribute('r','4');this.nextElementSibling.style.display='none'"><title>${p.l}: ${val}</title></circle><g style="display:none;pointer-events:none"><rect x="${p.x-25}" y="${p.y-28}" width="50" height="20" rx="4" fill="#1a1a24" stroke="${color}" stroke-width="1"/><text x="${p.x}" y="${p.y-14}" text-anchor="middle" fill="${color}" font-size="11" font-weight="700">${val}</text></g>`;}).join('');
+  let labels='';
+  const step=Math.max(1,Math.floor(pts.length/6));
+  pts.forEach((p,i)=>{if(i%step===0||i===pts.length-1)labels+=`<text x="${p.x}" y="${pad+ph+16}" text-anchor="middle" fill="#555" font-size="9">${p.l}</text>`;});
+  // Y axis labels
+  let yLabels='';
+  for(let i=0;i<=4;i++){const v=minV+(range/4)*i;const y=pad+ph-((v-minV)/range)*ph;yLabels+=`<text x="${pad-6}" y="${y+3}" text-anchor="end" fill="#555" font-size="9">${typeof v==='number'&&v>1000?Math.round(v/1000)+'k':v%1!==0?v.toFixed(1):Math.round(v)}</text><line x1="${pad}" y1="${y}" x2="${pad+pw}" y2="${y}" stroke="rgba(255,255,255,.04)" stroke-width="1"/>`;};
+  return`<svg width="100%" viewBox="0 0 ${w} ${h}" style="overflow:visible"><defs><linearGradient id="grad_${label}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${color}" stop-opacity="0.3"/><stop offset="100%" stop-color="${color}" stop-opacity="0"/></linearGradient></defs>${yLabels}<path d="${areaPath}" fill="url(#grad_${label})"/><path d="${path}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linejoin="round"/>${dots}${labels}</svg>`;
+}
+
+
+// All available charts
+const ALL_CHARTS=[
+  {id:'showRate',label:'Show Rate Trend',default:true},
+  {id:'apptVsDemos',label:'Appointments vs Demos',default:true},
+  {id:'avgDuration',label:'Avg Call Duration',default:true},
+  {id:'cs650',label:'CS 650+ Rate',default:true},
+  {id:'avgCS',label:'Avg Credit Score',default:false},
+  {id:'noShows',label:'No-Show Trend',default:false},
+  {id:'closeRate',label:'Close Rate Trend',default:false},
+  {id:'triageRate',label:'Triage Rate Trend',default:false},
+  {id:'frozenRate',label:'Frozen Credit Trend',default:false},
+  {id:'totalAppts',label:'Total Appointments',default:false},
+  {id:'demosHeld',label:'Demos Held Trend',default:false},
+];
+
+function getActiveCharts(){
+  const saved=localStorage.getItem('activeCharts');
+  if(saved)return JSON.parse(saved);
+  return ALL_CHARTS.filter(c=>c.default).map(c=>c.id);
+}
+
+function moveChart(id,dir){
+  const active=getActiveCharts();
+  const idx=active.indexOf(id);
+  if(idx<0)return;
+  const newIdx=idx+dir;
+  if(newIdx<0||newIdx>=active.length)return;
+  active.splice(idx,1);
+  active.splice(newIdx,0,id);
+  localStorage.setItem('activeCharts',JSON.stringify(active));
+  renderOverviewCharts();
+}
+
+function toggleChartSelector(){
+  const el=document.getElementById('chartSelector');
+  el.style.display=el.style.display==='none'?'block':'none';
+  if(el.style.display==='block')renderChartOptions();
+}
+
+function renderChartOptions(){
+  const active=getActiveCharts();
+  const el=document.getElementById('chartOptions');
+  const sorted=[...ALL_CHARTS].sort((a,b)=>{
+    const ai=active.indexOf(a.id),bi=active.indexOf(b.id);
+    if(ai>=0&&bi>=0)return ai-bi;
+    if(ai>=0)return -1;if(bi>=0)return 1;return 0;
+  });
+  el.innerHTML=sorted.map(k=>{
+    const isActive=active.includes(k.id);
+    const pos=isActive?active.indexOf(k.id):-1;
+    const arrows=isActive?`<span style="display:flex;flex-direction:column;gap:0;margin-left:auto;font-size:10px"><span onclick="moveChart('${k.id}',-1);event.preventDefault();event.stopPropagation()" style="cursor:pointer;color:#06b6d4;line-height:1">▲</span><span onclick="moveChart('${k.id}',1);event.preventDefault();event.stopPropagation()" style="cursor:pointer;color:#06b6d4;line-height:1">▼</span></span>`:'';
+    return `<label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#888;cursor:pointer;padding:6px 8px;border-radius:6px;background:${isActive?'rgba(6,182,212,.1)':'rgba(255,255,255,.02)'};border:1px solid ${isActive?'rgba(6,182,212,.2)':'rgba(255,255,255,.06)'}"><input type="checkbox" value="${k.id}" ${isActive?'checked':''} style="accent-color:#06b6d4">${isActive?'<span style="color:#06b6d4;font-size:10px;font-weight:700">#'+(pos+1)+'</span>':''} ${k.label}${arrows}</label>`;
+  }).join('');
+}
+
+function saveCharts(){
+  const checks=[...document.querySelectorAll('#chartOptions input:checked')].map(c=>c.value);
+  localStorage.setItem('activeCharts',JSON.stringify(checks));
+  document.getElementById('chartSelector').style.display='none';
+  renderOverviewCharts();
+}
+
+function renderOverviewCharts(){
+  // Compute chart data - use weekly buckets for ≤90 days, monthly for longer
+  const range=getGlobalDateRange();
+  const daySpan=Math.ceil((range.end-range.start)/(1000*60*60*24));
+  const useWeekly=daySpan<=90;
+  
+  const bucketData={};
+  filtered.forEach(r=>{
+    const d=parseDate(r[CI.date]);
+    if(!d)return;
+    let key;
+    if(useWeekly){
+      // Week bucket: get Monday of that week
+      const day=d.getDay();const mon=new Date(d);mon.setDate(d.getDate()-(day===0?6:day-1));
+      key=(mon.getMonth()+1)+'/'+mon.getDate();
+    }else{
+      key=(d.getMonth()+1)+'/'+d.getFullYear();
+    }
+    if(!bucketData[key])bucketData[key]={total:0,showed:0,noshow:0,closed:0,durations:[],scores:[],sortKey:d.getTime()};
+    bucketData[key].total++;
+    if(r[CI.status]==='Showed')bucketData[key].showed++;
+    if(r[CI.status]==='No Show')bucketData[key].noshow++;
+    if(r[CI.outcome]&&r[CI.outcome].toLowerCase().includes('closed'))bucketData[key].closed++;
+    if(r[CI.duration]&&parseFloat(r[CI.duration])>0)bucketData[key].durations.push(parseFloat(r[CI.duration]));
+    if(r[CI.cs]&&parseFloat(r[CI.cs])>0)bucketData[key].scores.push(parseFloat(r[CI.cs]));
+    if(!bucketData[key].sortKey||d.getTime()<bucketData[key].sortKey)bucketData[key].sortKey=d.getTime();
+  });
+  const months=Object.keys(bucketData).sort((a,b)=>bucketData[a].sortKey-bucketData[b].sortKey);
+  const monthData=bucketData;
+  const ml=m=>useWeekly?'Wk '+m:m.split('/')[0]+'/'+m.split('/')[1].slice(2);
+
+  const chartContent={
+    showRate:()=>'<div class="chart-card"><h3>Show Rate Trend</h3>'+svgLine(months.map(m=>({l:ml(m),v:monthData[m].total>0?(monthData[m].showed/monthData[m].total*100):0})),400,180,'#4ade80','sr')+'</div>',
+    apptVsDemos:()=>'<div class="chart-card"><h3>Appointments vs Demos</h3>'+svgLine(months.map(m=>({l:ml(m),v:monthData[m].total})),400,140,'#3ea2e4','appt')+'<div style="margin-top:-5px">'+svgLine(months.map(m=>({l:ml(m),v:monthData[m].showed})),400,140,'#8a62ec','demo')+'</div><div style="font-size:10px;color:var(--td);margin-top:4px"><span style="color:#3ea2e4">● Appointments</span> &nbsp; <span style="color:#8a62ec">● Demos</span></div></div>',
+    avgDuration:()=>'<div class="chart-card"><h3>Avg Call Duration</h3>'+svgLine(months.map(m=>({l:ml(m),v:monthData[m].durations.length>0?(monthData[m].durations.reduce((a,b)=>a+b,0)/monthData[m].durations.length):0})),400,180,'#f59e0b','dur')+'</div>',
+    cs650:()=>'<div class="chart-card"><h3>CS 650+ Rate</h3>'+svgLine(months.map(m=>({l:ml(m),v:monthData[m].scores.length>0?(monthData[m].scores.filter(s=>s>=650).length/monthData[m].scores.length*100):0})),400,180,'#06b6d4','cs')+'</div>',
+    avgCS:()=>'<div class="chart-card"><h3>Avg Credit Score</h3>'+svgLine(months.map(m=>({l:ml(m),v:monthData[m].scores.length>0?Math.round(monthData[m].scores.reduce((a,b)=>a+b,0)/monthData[m].scores.length):0})),400,180,'#f10cf6','avcs')+'</div>',
+    noShows:()=>'<div class="chart-card"><h3>No-Show Trend</h3>'+svgLine(months.map(m=>({l:ml(m),v:monthData[m].noshow})),400,180,'#ef4444','ns')+'</div>',
+    closeRate:()=>'<div class="chart-card"><h3>Close Rate Trend</h3>'+svgLine(months.map(m=>({l:ml(m),v:monthData[m].showed>0?(monthData[m].closed/monthData[m].showed*100):0})),400,180,'#8a62ec','cr')+'</div>',
+    triageRate:()=>'<div class="chart-card"><h3>Triage Rate Trend</h3>'+svgLine(months.map(m=>({l:ml(m),v:monthData[m].total>0?(monthData[m].total>0?0:0):0})),400,180,'#06b6d4','tr')+'</div>',
+    frozenRate:()=>'<div class="chart-card"><h3>Frozen Credit Trend</h3>'+svgLine(months.map(m=>{const sc=monthData[m].scores;return{l:ml(m),v:0};}),400,180,'#ef4444','fr')+'</div>',
+    totalAppts:()=>'<div class="chart-card"><h3>Total Appointments</h3>'+svgLine(months.map(m=>({l:ml(m),v:monthData[m].total})),400,180,'#3ea2e4','ta')+'</div>',
+    demosHeld:()=>'<div class="chart-card"><h3>Demos Held</h3>'+svgLine(months.map(m=>({l:ml(m),v:monthData[m].showed})),400,180,'#4ade80','dh')+'</div>',
+    repLeaderboard:()=>{
+      const reps=[...new Set(filtered.map(r=>r[CI.rep]).filter(Boolean))];
+      const stats=reps.map(rep=>{const rows=filtered.filter(r=>r[CI.rep]===rep);const showed=rows.filter(r=>r[CI.status]==='Showed').length;return{rep,total:rows.length,showed,rate:rows.length>0?(showed/rows.length*100):0};}).sort((a,b)=>b.rate-a.rate);
+      let t='<div class="chart-card"><h3>🏆 Rep Leaderboard</h3><table style="font-size:12px;width:100%"><thead><tr><th>#</th><th>Rep</th><th>Appts</th><th>Demos</th><th>Show %</th></tr></thead><tbody>';
+      stats.forEach((s,i)=>{t+=`<tr><td style="color:#3ea2e4;font-weight:700">${i+1}</td><td style="color:var(--t);font-weight:600">${s.rep}</td><td>${s.total}</td><td>${s.showed}</td><td style="color:${s.rate>=40?'var(--gn)':s.rate>=25?'var(--yl)':'var(--rd)'};font-weight:600">${s.rate.toFixed(1)}%</td></tr>`;});
+      t+='</tbody></table></div>';return t;
+    }
+  };
+
+  const active=getActiveCharts().filter(id=>id!=='repLeaderboard');
+  const chartsHTML=active.map(id=>chartContent[id]?chartContent[id]():'').join('');
+  // Render leaderboard separately
+  const lbDiv=document.getElementById('overviewLeaderboard');
+  if(lbDiv){
+    const reps2=[...new Set(filtered.map(r=>r[CI.rep]).filter(Boolean))];
+    const stats2=reps2.map(rep=>{const rows=filtered.filter(r=>r[CI.rep]===rep);const showed=rows.filter(r=>r[CI.status]==='Showed').length;const closed=rows.filter(r=>r[CI.outcome]&&r[CI.outcome].toLowerCase().includes('closed')).length;const durs=rows.filter(r=>r[CI.duration]&&parseFloat(r[CI.duration])>0).map(r=>parseFloat(r[CI.duration]));const avgD=durs.length?(durs.reduce((a,b)=>a+b,0)/durs.length).toFixed(0):0;return{rep,total:rows.length,showed,rate:rows.length>0?(showed/rows.length*100):0,closed,avgD};}).sort((a,b)=>b.rate-a.rate);
+    let lbT='<div style="margin-bottom:24px"><h3 style="font-size:16px;font-weight:700;color:var(--t);margin-bottom:12px">\ud83c\udfc6 Leaderboard</h3><div class="chart-card"><table style="font-size:12px;width:100%"><thead><tr><th>#</th><th>Rep</th><th>Appts</th><th>Demos</th><th>Show %</th><th>Closed</th><th>Avg Duration</th></tr></thead><tbody>';
+    stats2.forEach((s,i)=>{lbT+=`<tr><td style="color:#3ea2e4;font-weight:700">${i+1}</td><td style="color:var(--t);font-weight:600">${s.rep}</td><td>${s.total}</td><td>${s.showed}</td><td style="color:${s.rate>=40?'var(--gn)':s.rate>=25?'var(--yl)':'var(--rd)'};font-weight:600">${s.rate.toFixed(1)}%</td><td style="color:var(--gn);font-weight:600">${s.closed}</td><td>${s.avgD}m</td></tr>`;});
+    lbT+='</tbody></table></div></div>';
+    lbDiv.innerHTML=lbT;
+  }
+  const leaderboardHTML='';
+
+  // Selector UI
+  const selectorBtn='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><span style="font-size:18px;font-weight:800;color:var(--t)">Charts</span><button onclick="toggleChartSelector()" style="background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.2);color:#a78bfa;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer">⚙️ Charts</button></div>';
+  const selectorPanel='<div id="chartSelector" style="display:none;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:16px 20px;margin-bottom:16px"><div style="font-size:12px;font-weight:600;color:#a78bfa;margin-bottom:10px">Choose charts to display:</div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px" id="chartOptions"></div><div style="margin-top:10px;text-align:right"><button onclick="saveCharts()" style="background:rgba(6,182,212,.15);color:#06b6d4;border:1px solid rgba(6,182,212,.3);padding:6px 16px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer">Apply</button></div></div>';
+
+  document.getElementById('overviewCharts').innerHTML=selectorBtn+selectorPanel+'<div class="analytics" style="grid-template-columns:1fr 1fr">'+chartsHTML+'</div>'+leaderboardHTML;
+}
+
+
+init();
+renderOverviewCharts();
+</script>
+</body>
+</html>
