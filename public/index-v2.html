@@ -4,14 +4,21 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/png" href="favicon.png">
-<title>Sales Clarity Dashboard — AICommerce 2026</title>
+<title>AI Commerce Sales Management Dashboard</title>
+<meta name="description" content="AI Commerce Sales Management Dashboard — Real-time sales analytics, appointment tracking, rep performance, and revenue reporting.">
+<meta property="og:title" content="AI Commerce Sales Management Dashboard">
+<meta property="og:description" content="Real-time sales analytics, appointment tracking, rep performance, and revenue reporting.">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#08080c;--card:rgba(255,255,255,.03);--cb:rgba(255,255,255,.07);--ch:rgba(255,255,255,.05);--t:#f0f0f0;--tm:#999;--td:#555;--cy:#3ea2e4;--bl:#3ea2e4;--gn:#22c55e;--rd:#ef4444;--yl:#eab308;--or:#f59e0b;--pu:#8a62ec;--pk:#f10cf6;--grad:linear-gradient(135deg,#3ea2e4,#8a62ec,#f10cf6)}
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);line-height:1.5;-webkit-font-smoothing:antialiased}::selection{background:rgba(138,98,236,.3);color:#fff}
 .layout{display:flex;min-height:100vh}
-.sidebar{width:220px;background:#0a0a0e;border-right:1px solid var(--cb);padding:20px 16px;position:fixed;height:100vh;overflow-y:auto;z-index:10}
+.sidebar{width:220px;background:#0a0a0e;border-right:1px solid var(--cb);padding:20px 16px;position:fixed;height:100vh;overflow-y:auto;z-index:10;transition:width .3s ease,padding .3s ease;display:flex;flex-direction:column}
+.sidebar.collapsed{width:0;padding:0;overflow:hidden}
+.sidebar-toggle{position:fixed;bottom:16px;left:204px;width:28px;height:28px;border-radius:50%;background:rgba(62,162,228,.15);border:1px solid rgba(62,162,228,.3);color:#3ea2e4;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:11;transition:left .3s ease}
+.sidebar-toggle.collapsed{left:8px}
+.sidebar-toggle:hover{background:rgba(62,162,228,.3)}
 .sidebar h2{font-size:16px;font-weight:800;background:linear-gradient(135deg,#3ea2e4,#8a62ec,#f10cf6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:2px}
 .sidebar .sub{font-size:11px;color:var(--td);margin-bottom:24px}
 .sidebar h3{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--td);margin:20px 0 8px}
@@ -30,7 +37,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);line-hei
 .nav-group-items .nav-item{padding:8px 12px 8px 32px;font-size:13px;color:var(--tm)}
 .badge-live{background:linear-gradient(135deg,rgba(62,162,228,.15),rgba(138,98,236,.15));color:#3ea2e4;padding:2px 8px;border-radius:8px;font-size:10px;font-weight:600}
 .badge-pending{background:rgba(234,179,8,.15);color:#facc15;padding:2px 8px;border-radius:8px;font-size:10px;font-weight:600}
-.main{margin-left:220px;flex:1;padding:24px 28px 80px;overflow-x:hidden;max-width:calc(100vw - 220px)}
+.main{margin-left:220px;flex:1;padding:24px 28px 80px;overflow-x:hidden;max-width:calc(100vw - 220px);transition:margin-left .3s ease,max-width .3s ease}
+.main.expanded{margin-left:0;max-width:100vw}
 .top-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px;position:sticky;top:0;background:#0a0a0a;z-index:5;padding:16px 0;width:100%}
 .top-bar h1{font-size:24px;font-weight:800;letter-spacing:-.5px;background:linear-gradient(135deg,#3ea2e4,#8a62ec,#f10cf6);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .top-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
@@ -86,7 +94,7 @@ tr:hover td{background:rgba(62,162,228,.04)}
 .chart-card{background:var(--card);border:1px solid var(--cb);border-radius:12px;padding:20px;transition:all .3s}.chart-card:hover{border-color:rgba(138,98,236,.2);box-shadow:0 4px 20px rgba(138,98,236,.05)}
 .chart-card h3{font-size:14px;font-weight:700;margin-bottom:16px}
 .bar-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
-.bar-label{font-size:12px;color:var(--tm);min-width:80px}
+.bar-label{font-size:12px;color:var(--tm);min-width:140px;flex-shrink:0}
 .bar-track{flex:1;height:28px;background:rgba(255,255,255,.04);border-radius:6px;overflow:visible;position:relative}
 .bar-fill{height:100%;border-radius:6px;display:flex;align-items:center;padding-left:10px;font-size:11px;font-weight:700;transition:width .5s;white-space:nowrap;overflow:visible;position:relative}
 .bar-green{background:linear-gradient(90deg,rgba(34,197,94,.6),rgba(34,197,94,.3))}
@@ -137,9 +145,39 @@ tr:hover td{background:rgba(62,162,228,.04)}
   table{font-size:10px}
   th,td{padding:6px 8px}
 }
+.appt-truncate td{max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.appt-wrap td{white-space:normal;word-break:break-word;max-width:200px}
 </style>
 </head>
 <body>
+<div id="loginGate" style="position:fixed;top:0;left:0;width:100%;height:100%;background:#0a0a0f;z-index:99999;display:flex;align-items:center;justify-content:center">
+<div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:40px;max-width:360px;width:90%;text-align:center">
+<img src="logo.png" alt="AI Commerce" style="max-width:180px;margin-bottom:24px">
+<h2 style="color:var(--t);font-size:20px;font-weight:800;margin-bottom:4px">Sales Management Dashboard</h2>
+<p style="color:var(--tm);font-size:12px;margin-bottom:24px">Enter credentials to continue</p>
+<input id="loginUser" type="text" placeholder="Username" autocomplete="username" style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:var(--t);font-size:14px;margin-bottom:10px;box-sizing:border-box;outline:none">
+<input id="loginPass" type="password" placeholder="Password" autocomplete="current-password" style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:var(--t);font-size:14px;margin-bottom:16px;box-sizing:border-box;outline:none" onkeydown="if(event.key==='Enter')doLogin()">
+<button onclick="doLogin()" style="width:100%;padding:10px;border-radius:8px;border:none;background:linear-gradient(135deg,#3ea2e4,#8a62ec);color:#fff;font-size:14px;font-weight:700;cursor:pointer;letter-spacing:.5px">Sign In</button>
+<p id="loginError" style="color:#f87171;font-size:12px;margin-top:12px;display:none">Invalid credentials</p>
+</div>
+</div>
+<script>
+async function doLogin(){
+  const u=document.getElementById('loginUser').value.trim();
+  const p=document.getElementById('loginPass').value;
+  const enc=new TextEncoder();
+  const buf=await crypto.subtle.digest('SHA-256',enc.encode(u+':'+p));
+  const hash=Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+  if(hash==='4b06f9aa43bc501b4f50a466f2dedc8a3af08e729e6b0dfecc24c95cf0fe146d'){
+    sessionStorage.setItem('scd_auth','1');
+    document.getElementById('loginGate').style.display='none';
+  }else{
+    document.getElementById('loginError').style.display='block';
+    document.getElementById('loginPass').value='';
+  }
+}
+if(sessionStorage.getItem('scd_auth')==='1')document.getElementById('loginGate').style.display='none';
+</script>
 <div class="mobile-header">
 <img src="logo.png" alt="AI Commerce">
 <button class="hamburger" onclick="toggleSidebar()">☰</button>
@@ -147,15 +185,14 @@ tr:hover td{background:rgba(62,162,228,.04)}
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 <div class="layout">
 <aside class="sidebar">
-<img src="logo.png" alt="AI Commerce" style="max-width:180px;margin-bottom:16px">
+<img src="logo.png" alt="AI Commerce" style="max-width:180px;margin-bottom:16px;cursor:pointer" onclick="showView('overview')">
 
 <div class="nav-group">
 <div class="nav-group-header open" onclick="toggleNavGroup(this)"><span>📊 Performance</span><span class="chevron">▶</span></div>
 <div class="nav-group-items open">
 <a class="nav-item active" onclick="showView('overview')"><span class="icon">⚡</span> Overview</a>
-<a class="nav-item" onclick="showView('detailed')"><span class="icon">📋</span> Detailed Log</a>
-<a class="nav-item" onclick="showView('analytics')"><span class="icon">📈</span> Analytics</a>
 <a class="nav-item" onclick="showView('apptlog')"><span class="icon">📅</span> Appointment Log</a>
+<a class="nav-item" onclick="showView('apptsetting')"><span class="icon">📞</span> Appt Setting</a>
 </div>
 </div>
 
@@ -164,6 +201,7 @@ tr:hover td{background:rgba(62,162,228,.04)}
 <div class="nav-group-items open">
 <a class="nav-item" onclick="showView('revenue')"><span class="icon">💵</span> Revenue</a>
 <a class="nav-item" onclick="showView('commissions')"><span class="icon">🏦</span> Commissions</a>
+<a class="nav-item" onclick="showView('reserves')"><span class="icon">🔒</span> Reserves</a>
 <a class="nav-item" onclick="showView('financing')"><span class="icon">💳</span> Financing</a>
 </div>
 </div>
@@ -197,9 +235,10 @@ tr:hover td{background:rgba(62,162,228,.04)}
 </div>
 </div>
 </aside>
+<button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebarCollapse()" title="Toggle sidebar">◀</button>
 <div class="main">
 <div class="top-bar">
-<h1>Sales Clarity Dashboard</h1>
+<h1>Sales Management Dashboard</h1>
 <div class="top-controls">
 <div style="position:relative;display:inline-block">
 <button id="repBtn" onclick="toggleRepDropdown()" style="font-family:Inter,sans-serif;font-size:12px;padding:8px 14px;border-radius:8px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);color:#f0f0f0;cursor:pointer;min-width:140px;text-align:left">All Reps ▾</button>
@@ -209,11 +248,21 @@ tr:hover td{background:rgba(62,162,228,.04)}
 </div>
 </div>
 <select id="dateFilter" onchange="handleDateFilter()">
+<option value="today">Today</option>
+<option value="yesterday">Yesterday</option>
 <option value="7">Last 7 Days</option>
 <option value="14">Last 14 Days</option>
 <option value="30" selected>Last 30 Days</option>
 <option value="60">Last 60 Days</option>
-<option value="90">Q1 2026</option>
+<option value="thisWeek">This Week</option>
+<option value="lastWeek">Last Week</option>
+<option value="thisMonth">This Month</option>
+<option value="lastMonth">Last Month</option>
+<option value="90">Last 90 Days</option>
+<option value="q1">Q1 2026</option>
+<option value="ytd">Year to Date</option>
+<option value="thisYear">This Year</option>
+<option value="lastYear">Last Year</option>
 <option value="all">All Time</option>
 <option value="custom">Custom Range</option>
 </select>
@@ -222,8 +271,7 @@ tr:hover td{background:rgba(62,162,228,.04)}
 <span style="color:#555;font-size:12px;padding:0 8px;display:inline-flex;align-items:center;line-height:1">to</span>
 <input type="date" id="dateTo" onchange="applyFilters()" style="font-family:Inter,sans-serif;font-size:12px;padding:7px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);color:#f0f0f0">
 </span>
-<button class="btn-refresh" onclick="liveRefresh()" id="refreshBtn">🔄 Refresh</button>
-<button onclick="toggleKPISelector()" style="background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.2);color:#a78bfa;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer">⚙️ KPIs</button>
+<button class="btn-refresh" onclick="liveRefresh()" id="refreshBtn">🔄 Refresh All</button>
 </div>
 </div>
 <div id="kpiSelector" style="display:none;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:16px 20px;margin-bottom:16px">
@@ -232,7 +280,10 @@ tr:hover td{background:rgba(62,162,228,.04)}
 <div id="kpiError" style="display:none;color:#f87171;font-size:12px;margin-top:8px;font-weight:600">⚠️ Maximum 12 KPIs allowed. Please deselect some before adding more.</div>
 <div style="margin-top:10px;text-align:right"><button onclick="saveKPIs()" style="background:rgba(6,182,212,.15);color:#06b6d4;border:1px solid rgba(6,182,212,.3);padding:6px 16px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer">Apply</button></div>
 </div>
+<div id="kpiSection">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><span style="font-size:18px;font-weight:800;color:var(--t)">Statistics Snapshot</span><div style="display:flex;gap:8px;align-items:center"><button onclick="refreshView('appointments')" style="font-size:12px;color:#4ade80;padding:6px 12px;border:1px solid rgba(34,197,94,.2);border-radius:6px;background:rgba(34,197,94,.08);cursor:pointer">🔄 Refresh This View</button><button onclick="toggleKPISelector()" style="background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.2);color:#a78bfa;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer">⚙️ KPIs</button></div></div>
 <div id="kpiRow" class="kpi-row" style="grid-template-columns:repeat(6,1fr)"></div>
+</div>
 
 <div class="live-indicator"><span class="live-dot"></span> LIVE · <span id="liveTime"></span> EST</div>
 <div id="overviewView">
@@ -287,41 +338,77 @@ tr:hover td{background:rgba(62,162,228,.04)}
 <div class="table-wrap"><table><thead id="overviewHead"></thead><tbody id="overviewBody"></tbody></table></div>
 </div><!-- end overviewTableSection -->
 </div>
-<div id="detailedView">
-<div id="detailCount" class="row-count"></div>
-<div class="table-wrap"><table><thead id="detailHead"></thead><tbody id="detailBody"></tbody></table></div>
-</div>
-<div id="analyticsView" id="analyticsContent"></div>
 <div id="apptlogView" style="display:none">
 <div id="apptlogContent"></div>
 </div>
 
 <div id="commissionsView" style="display:none">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><span style="font-size:18px;font-weight:800;color:var(--t)">Statistics Snapshot</span><div style="display:flex;gap:8px;align-items:center"><div style="display:flex;gap:8px;align-items:center"><a href="https://docs.google.com/spreadsheets/d/1jAxpzQc3LykrxNtuEGG-2HQ1XxLlY5IIk_fOSk_Znv4" target="_blank" style="font-size:12px;color:#3ea2e4;text-decoration:none;padding:6px 12px;border:1px solid rgba(62,162,228,.2);border-radius:6px;background:rgba(62,162,228,.08)">Open Commission Tracking in Sheets →</a><button onclick="refreshView('commissions')" style="font-size:12px;color:#4ade80;padding:6px 12px;border:1px solid rgba(34,197,94,.2);border-radius:6px;background:rgba(34,197,94,.08);cursor:pointer">🔄 Refresh This View</button></div><button onclick="toggleCommKPISelector()" style="background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.2);color:#a78bfa;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer">⚙️ KPIs</button></div></div>
+<div id="commKPISelector" style="display:none;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:16px 20px;margin-bottom:16px">
+<div style="font-size:12px;font-weight:600;color:#a78bfa;margin-bottom:10px">Choose KPIs to display (up to 6):</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px" id="commKPIOptions"></div>
+<div style="margin-top:10px;text-align:right"><button onclick="saveCommKPIs()" style="background:rgba(6,182,212,.15);color:#06b6d4;border:1px solid rgba(6,182,212,.3);padding:6px 16px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer">Apply</button></div>
+</div>
 <div id="commKPIs2" class="kpi-row" style="grid-template-columns:repeat(6,1fr)"></div>
 <div id="commContent2"></div>
 </div>
 
 <div id="revenueView" style="display:none">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><span style="font-size:18px;font-weight:800;color:var(--t)">Statistics Snapshot</span><div style="display:flex;gap:8px;align-items:center"><a href="https://docs.google.com/spreadsheets/d/1jAxpzQc3LykrxNtuEGG-2HQ1XxLlY5IIk_fOSk_Znv4" target="_blank" style="font-size:12px;color:#3ea2e4;text-decoration:none;padding:6px 12px;border:1px solid rgba(62,162,228,.2);border-radius:6px;background:rgba(62,162,228,.08)">Open AR/Commission Log in Sheets →</a><button onclick="refreshView('commissions')" style="font-size:12px;color:#4ade80;padding:6px 12px;border:1px solid rgba(34,197,94,.2);border-radius:6px;background:rgba(34,197,94,.08);cursor:pointer">🔄 Refresh This View</button><button onclick="toggleRevKPISelector()" style="background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.2);color:#a78bfa;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer">⚙️ KPIs</button></div></div>
+<div id="revKPISelector" style="display:none;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:16px 20px;margin-bottom:16px">
+<div style="font-size:12px;font-weight:600;color:#a78bfa;margin-bottom:10px">Choose KPIs to display (up to 6):</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px" id="revKPIOptions"></div>
+<div style="margin-top:10px;text-align:right"><button onclick="saveRevKPIs()" style="background:rgba(6,182,212,.15);color:#06b6d4;border:1px solid rgba(6,182,212,.3);padding:6px 16px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer">Apply</button></div>
+</div>
 <div id="commKPIs" class="kpi-row" style="grid-template-columns:repeat(6,1fr)"></div>
+<div id="revChartSelector" style="display:none;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:16px 20px;margin-bottom:16px">
+<div style="font-size:12px;font-weight:600;color:#a78bfa;margin-bottom:10px">Choose charts to display:</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px" id="revChartOptions"></div>
+<div style="margin-top:10px;text-align:right"><button onclick="saveRevCharts()" style="background:rgba(6,182,212,.15);color:#06b6d4;border:1px solid rgba(6,182,212,.3);padding:6px 16px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer">Apply</button></div>
+</div>
+<div style="display:flex;justify-content:space-between;align-items:center;margin:16px 0 8px"><span style="font-size:16px;font-weight:700;color:var(--t)">Charts</span><button onclick="toggleRevChartSelector()" style="background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.2);color:#a78bfa;padding:6px 12px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer">⚙️ Charts</button></div>
+<div id="revChartsArea"></div>
 <div id="commContent"></div>
 </div>
 
 <div id="eodView" style="display:none">
+<div style="text-align:right;margin-bottom:8px"><div style="display:flex;gap:8px;align-items:center"><a href="https://docs.google.com/spreadsheets/d/1eV0imsSntk2WwMSWLu9COzP7WWd8mSNp1DFbN-DN_2o" target="_blank" style="font-size:12px;color:#3ea2e4;text-decoration:none;padding:6px 12px;border:1px solid rgba(62,162,228,.2);border-radius:6px;background:rgba(62,162,228,.08)">Open Master Sales EOD Log in Sheets →</a><button onclick="refreshView('eod')" style="font-size:12px;color:#4ade80;padding:6px 12px;border:1px solid rgba(34,197,94,.2);border-radius:6px;background:rgba(34,197,94,.08);cursor:pointer">🔄 Refresh This View</button></div></div>
 <div id="eodKPIs" class="kpi-row" style="grid-template-columns:repeat(6,1fr)"></div>
 <div id="eodContent"></div>
 </div>
 
 <div id="eodcomplianceView" style="display:none">
+<div style="text-align:right;margin-bottom:8px"><div style="display:flex;gap:8px;align-items:center"><a href="https://docs.google.com/spreadsheets/d/1eV0imsSntk2WwMSWLu9COzP7WWd8mSNp1DFbN-DN_2o" target="_blank" style="font-size:12px;color:#3ea2e4;text-decoration:none;padding:6px 12px;border:1px solid rgba(62,162,228,.2);border-radius:6px;background:rgba(62,162,228,.08)">Open Master Sales EOD Log in Sheets →</a><button onclick="refreshView('eod')" style="font-size:12px;color:#4ade80;padding:6px 12px;border:1px solid rgba(34,197,94,.2);border-radius:6px;background:rgba(34,197,94,.08);cursor:pointer">🔄 Refresh This View</button></div></div>
 <div id="complianceKPIs" class="kpi-row" style="grid-template-columns:repeat(6,1fr)"></div>
 <div id="complianceContent"></div>
 </div>
 
 <div id="eodsubmissionsView" style="display:none">
+<div style="text-align:right;margin-bottom:8px"><div style="display:flex;gap:8px;align-items:center"><a href="https://docs.google.com/spreadsheets/d/1eV0imsSntk2WwMSWLu9COzP7WWd8mSNp1DFbN-DN_2o" target="_blank" style="font-size:12px;color:#3ea2e4;text-decoration:none;padding:6px 12px;border:1px solid rgba(62,162,228,.2);border-radius:6px;background:rgba(62,162,228,.08)">Open Master Sales EOD Log in Sheets →</a><button onclick="refreshView('eod')" style="font-size:12px;color:#4ade80;padding:6px 12px;border:1px solid rgba(34,197,94,.2);border-radius:6px;background:rgba(34,197,94,.08);cursor:pointer">🔄 Refresh This View</button></div></div>
 <div id="submissionsContent"></div>
 </div>
 
+<div id="reservesView" style="display:none">
+<div style="text-align:right;margin-bottom:8px"><div style="display:flex;gap:8px;align-items:center"><a href="https://docs.google.com/spreadsheets/d/1jAxpzQc3LykrxNtuEGG-2HQ1XxLlY5IIk_fOSk_Znv4" target="_blank" style="font-size:12px;color:#3ea2e4;text-decoration:none;padding:6px 12px;border:1px solid rgba(62,162,228,.2);border-radius:6px;background:rgba(62,162,228,.08)">Open Commission Tracking in Sheets →</a><button onclick="refreshView('commissions')" style="font-size:12px;color:#4ade80;padding:6px 12px;border:1px solid rgba(34,197,94,.2);border-radius:6px;background:rgba(34,197,94,.08);cursor:pointer">🔄 Refresh This View</button></div></div>
+<div id="reservesKPIs" class="kpi-row" style="grid-template-columns:repeat(6,1fr)"></div>
+<div id="reservesContent"></div>
+</div>
+
 <div id="financingView" style="display:none">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><span style="font-size:18px;font-weight:800;color:var(--t)">Statistics Snapshot</span><div style="display:flex;gap:8px;align-items:center"><a href="https://docs.google.com/spreadsheets/d/1b5yxMLGNcfjF5CMYSi_ziA40vcIiuA5Ffvty5Lb-trQ" target="_blank" style="font-size:12px;color:#3ea2e4;text-decoration:none;padding:6px 12px;border:1px solid rgba(62,162,228,.2);border-radius:6px;background:rgba(62,162,228,.08)">Open Financing Log in Sheets →</a><button onclick="refreshView('financing')" style="font-size:12px;color:#4ade80;padding:6px 12px;border:1px solid rgba(34,197,94,.2);border-radius:6px;background:rgba(34,197,94,.08);cursor:pointer">🔄 Refresh This View</button><button onclick="toggleFinKPISelector()" style="background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.2);color:#a78bfa;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer">⚙️ KPIs</button></div></div>
+<div id="finKPISelector" style="display:none;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:16px 20px;margin-bottom:16px">
+<div style="font-size:12px;font-weight:600;color:#a78bfa;margin-bottom:10px">Choose KPIs to display (up to 6):</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px" id="finKPIOptions"></div>
+<div style="margin-top:10px;text-align:right"><button onclick="saveFinKPIs()" style="background:rgba(6,182,212,.15);color:#06b6d4;border:1px solid rgba(6,182,212,.3);padding:6px 16px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer">Apply</button></div>
+</div>
 <div id="finKPIs" class="kpi-row" style="grid-template-columns:repeat(6,1fr)"></div>
+<div id="finChartSelector" style="display:none;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:16px 20px;margin-bottom:16px">
+<div style="font-size:12px;font-weight:600;color:#a78bfa;margin-bottom:10px">Choose charts to display:</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px" id="finChartOptions"></div>
+<div style="margin-top:10px;text-align:right"><button onclick="saveFinCharts()" style="background:rgba(6,182,212,.15);color:#06b6d4;border:1px solid rgba(6,182,212,.3);padding:6px 16px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer">Apply</button></div>
+</div>
+<div style="display:flex;justify-content:space-between;align-items:center;margin:16px 0 8px"><span style="font-size:16px;font-weight:700;color:var(--t)">Charts</span><button onclick="toggleFinChartSelector()" style="background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.2);color:#a78bfa;padding:6px 12px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer">⚙️ Charts</button></div>
+<div id="finChartsArea"></div>
 <div id="finContent"></div>
 </div>
 
@@ -414,7 +501,14 @@ tr:hover td{background:rgba(62,162,228,.04)}
 </div>
 </div>
 
+<div id="apptSettingView" style="display:none">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><span style="font-size:18px;font-weight:800;color:var(--t)">Appointment Setting Performance</span><div style="display:flex;gap:8px;align-items:center"><button onclick="refreshView('eod')" style="font-size:12px;color:#4ade80;padding:6px 12px;border:1px solid rgba(34,197,94,.2);border-radius:6px;background:rgba(34,197,94,.08);cursor:pointer">🔄 Refresh Data</button><button onclick="toggleASKPISelector()" style="background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.2);color:#a78bfa;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer">⚙️ KPIs</button></div></div>
+<div id="apptSettingKPIs" class="kpi-row" style="grid-template-columns:repeat(6,1fr)"></div>
+<div id="apptSettingContent"></div>
+</div>
+
 <div id="repavailView" style="display:none">
+<div style="text-align:right;margin-bottom:8px"><div style="display:flex;gap:8px;align-items:center"><a href="https://docs.google.com/spreadsheets/d/1dHVNK3-YdnyBNoiVMcSuWJKy5oyWbIx6UdIa_w4XX_o" target="_blank" style="font-size:12px;color:#3ea2e4;text-decoration:none;padding:6px 12px;border:1px solid rgba(62,162,228,.2);border-radius:6px;background:rgba(62,162,228,.08)">Open Appointment Log in Sheets →</a><button onclick="refreshView('appointments')" style="font-size:12px;color:#4ade80;padding:6px 12px;border:1px solid rgba(34,197,94,.2);border-radius:6px;background:rgba(34,197,94,.08);cursor:pointer">🔄 Refresh This View</button></div></div>
 <div id="repavailKPIs" class="kpi-row" style="grid-template-columns:repeat(6,1fr)"></div>
 <div id="repavailContent"></div>
 </div>
@@ -423,12 +517,21 @@ tr:hover td{background:rgba(62,162,228,.04)}
 <div id="rosterContent"></div>
 </div>
 
-<div class="footer">Sales Clarity Dashboard — AI Commerce · Powered by Ace · <span id="lastUpdated"></span></div>
+<div class="footer">Sales Management Dashboard — AI Commerce · Powered by Ace · <span id="lastUpdated"></span></div>
 </div>
 </div>
-<script src="extra-data.js?v=1774564283"></script>
-<script src="data.js?v=1774564283"></script>
+<script src="extra-data.js?v=1774566643"></script>
+<script src="data.js?v=1774566643"></script>
 <script>
+function toggleSidebarCollapse(){
+  const sb=document.querySelector('.sidebar');
+  const main=document.querySelector('.main');
+  const btn=document.getElementById('sidebarToggle');
+  sb.classList.toggle('collapsed');
+  main.classList.toggle('expanded');
+  btn.classList.toggle('collapsed');
+  btn.textContent=sb.classList.contains('collapsed')?'▶':'◀';
+}
 function toggleNavGroup(header){
   header.classList.toggle('open');
   const items=header.nextElementSibling;
@@ -489,23 +592,24 @@ document.addEventListener('DOMContentLoaded',()=>{
   document.querySelectorAll('.table-wrap').forEach(tw=>_resizeObserver.observe(tw,{childList:true,subtree:true}));
 });
 // Column indices
-const CI={date:0,created:1,delta:2,name:3,email:4,rep:5,triage:6,status:7,outcome:8,notes:9,fathom:10,source:11,cs:12,credit:13,dti:14,repEmail:15,duration:16,frozen:17,calendar:18,confidence:19};
+const CI={date:0,created:1,delta:2,name:3,email:4,rep:5,triage:6,status:7,outcome:8,notes:9,fathom:10,source:11,cs:12,credit:13,dti:14,repEmail:15,duration:16,frozen:17,calendar:18,confidence:19,apptSource:25};
 
 // ═══ ACTIVE TEAM ROSTER (single source of truth) ═══
 // Update this list when team members join or leave
 const ACTIVE_TEAM=[
   {name:'Anthony Steel',role:'Closer',email:'anthony@peterszabo.co'},
   {name:'Adil Mithoo',role:'Closer',email:'adil@peterszabo.co'},
-  {name:'John Cantu',role:'Closer',email:'john.c@peterszabo.co'},
+  
   {name:'Zak Lewis',role:'Closer',email:'zak@peterszabo.co'},
   {name:'Luke Tripconey',role:'Closer',email:'luke@peterszabo.co'},
   {name:'Allan Kuriakose',role:'Closer',email:'allan@peterszabo.co'},
   {name:'Stef Merola',role:'Sales Manager',email:'stef@peterszabo.co'},
+  {name:'Chris Barry',role:'Sales Manager',email:'cb@peterszabo.co'},
   {name:'Cayden Raine',role:'Setter',email:'cayden@peterszabo.co'},
   {name:'Sam Figueiredo',role:'Setter',email:'sam@peterszabo.co'},
 ];
 const ACTIVE_NAMES=ACTIVE_TEAM.map(t=>t.name);
-const INACTIVE_NAMES=['Cale Jacob','Chris Barry','Jason Scott','Kris Endique','Matthew Shetler','Rob Rammuny'];
+const INACTIVE_NAMES=['John Cantu','Cale Jacob','Chris Barry','Jason Scott','Kris Endique','Matthew Shetler','Rob Rammuny'];
 function isActiveRep(name){return ACTIVE_NAMES.some(n=>n.toLowerCase()===name.toLowerCase());}
 
 let filtered=[];
@@ -592,6 +696,8 @@ function handleDateFilter(){
 function getDateRange(){
   const v=gv('dateFilter','30');
   const now=new Date();
+  const year=now.getFullYear();
+  const month=now.getMonth();
   if(v==='custom'){
     const from=gv('dateFrom','');
     const to=gv('dateTo','');
@@ -599,6 +705,15 @@ function getDateRange(){
     return{start:new Date(2025,0,1),end:now,days:365};
   }
   if(v==='all')return{start:new Date(2025,0,1),end:now,days:365};
+  if(v==='today'){const s=new Date(year,month,now.getDate());return{start:s,end:now,days:1};}
+  if(v==='yesterday'){const s=new Date(year,month,now.getDate()-1);const e=new Date(year,month,now.getDate()-1,23,59,59);return{start:s,end:e,days:1};}
+  if(v==='thisWeek'){const day=now.getDay();const mon=new Date(now);mon.setDate(now.getDate()-(day===0?6:day-1));mon.setHours(0,0,0,0);return{start:mon,end:now,days:Math.ceil((now-mon)/(1000*60*60*24))||1};}
+  if(v==='thisMonth'){const s=new Date(year,month,1);return{start:s,end:now,days:Math.ceil((now-s)/(1000*60*60*24))};}
+  if(v==='lastMonth'){const s=new Date(year,month-1,1);const e=new Date(year,month,0,23,59,59);return{start:s,end:e,days:Math.ceil((e-s)/(1000*60*60*24))};}
+  if(v==='q1')return{start:new Date(2026,0,1),end:new Date(2026,2,31,23,59,59),days:90};
+  if(v==='ytd'){const s=new Date(year,0,1);return{start:s,end:now,days:Math.ceil((now-s)/(1000*60*60*24))};}
+  if(v==='thisYear'){const s=new Date(year,0,1);return{start:s,end:new Date(year,11,31,23,59,59),days:365};}
+  if(v==='lastYear')return{start:new Date(year-1,0,1),end:new Date(year-1,11,31,23,59,59),days:365};
   const days=parseInt(v);
   const start=new Date(now);start.setDate(start.getDate()-days);
   return{start,end:now,days};
@@ -621,25 +736,45 @@ function trendBadge(current,previous){
 
 async function liveRefresh(){
   const btn=document.getElementById('refreshBtn');
-  btn.textContent='⏳ Loading...';
+  btn.textContent='⏳ Refreshing all data...';
   btn.disabled=true;
   try{
-    const resp=await fetch('/.netlify/functions/refresh');
+    const resp=await fetch('/.netlify/functions/refresh-all');
     const data=await resp.json();
     if(data.error)throw new Error(data.error);
     
-    H=data.headers;
-    D=data.rows;
+    // Update Appointment Log
+    if(data.appointments){H=data.appointments.headers;D=data.appointments.rows;}
+    // Update Commissions/Revenue/Reserves
+    if(data.commissions){COMM_H=data.commissions.headers;COMM_D=data.commissions.rows;}
+    // Update Financing
+    if(data.financing){FIN_H=data.financing.headers;FIN_D=data.financing.rows;}
+    // Update EOD
+    if(data.eod){EOD_H=data.eod.headers;EOD_D=data.eod.rows;}
     
     applyFilters();
-    btn.textContent='✅ Updated!';
+    // Re-render current view
+    if(currentView==='commissions')renderCommissionsView();
+    if(currentView==='revenue')renderCommissions();
+    if(currentView==='reserves')renderReserves();
+    if(currentView==='financing')renderFinancing();
+    if(currentView==='eod')renderEOD();
+    if(currentView==='eodcompliance')renderEODCompliance();
+    if(currentView==='eodsubmissions')renderEODSubmissions();
+    if(currentView==='apptlog')renderApptLog();
+    if(currentView==='overview')renderOverviewCharts();
+    if(currentView==='apptsetting')renderApptSetting();
+    if(currentView==='repavail')renderRepAvail();
+    if(currentView==='roster')renderRoster();
+    
+    btn.textContent='✅ All Data Updated!';
     document.getElementById('lastUpdated').textContent='Updated '+new Date().toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'});
     document.getElementById('liveTime').textContent=new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true});
-    setTimeout(()=>{btn.textContent='🔄 Refresh';btn.disabled=false;},2000);
+    setTimeout(()=>{btn.textContent='🔄 Refresh All';btn.disabled=false;},2000);
   }catch(e){
     console.error('Refresh failed:',e);
     btn.textContent='❌ Error - '+e.message;
-    setTimeout(()=>{btn.textContent='🔄 Refresh';btn.disabled=false;},3000);
+    setTimeout(()=>{btn.textContent='🔄 Refresh All';btn.disabled=false;},3000);
   }
 }
 
@@ -717,11 +852,10 @@ function applyFilters(){
   updateFilterCount();
   renderKPIs();
   renderOverview();
-  renderDetailed();
-  renderAnalytics();
   // Re-render current non-overview view with new filters
   if(currentView==='commissions')renderCommissionsView();
   if(currentView==='revenue')renderCommissions();
+  if(currentView==='reserves')renderReserves();
   if(currentView==='financing')renderFinancing();
   if(currentView==='eod')renderEOD();
   if(currentView==='eodcompliance')renderEODCompliance();
@@ -729,7 +863,8 @@ function applyFilters(){
   
   if(currentView==='apptlog')renderApptLog();
   if(currentView==='overview')renderOverviewCharts();
-  if(currentView==='repavail')renderRepAvail();
+  if(currentView==='apptsetting')renderApptSetting();
+    if(currentView==='repavail')renderRepAvail();
   }catch(e){console.error('[applyFilters]',e);document.getElementById('rowCount').textContent='ERROR: '+e.message;}
 }
 
@@ -738,13 +873,16 @@ const ALL_KPIS=[
   {id:'demos',label:'Demos Held',default:true},
   {id:'showRate',label:'Show Rate',default:true},
   {id:'noShows',label:'No Shows',default:true},
-  {id:'closeRate',label:'Close Rate',default:true},
+  {id:'closeRate',label:'Close Rate (Appt Log)',default:true},
+  {id:'offerRate',label:'Offer Rate (EOD)',default:true},
+  {id:'closeRateOffers',label:'Close Rate / Offers (EOD)',default:true},
+  {id:'closeRateDemos',label:'Close Rate / Demos (EOD)',default:true},
   {id:'avgDuration',label:'Avg Duration',default:true},
   {id:'avgCS',label:'Avg Credit Score',default:true},
   {id:'cs650',label:'CS 650+ Rate',default:true},
   {id:'epCall',label:'Earnings/Call',default:false},
   {id:'cashCollected',label:'Cash Collected',default:false},
-  {id:'revPerLead',label:'Revenue/Lead',default:false},
+  {id:'revPerLead',label:'Revenue/Booked Call',default:false},
   {id:'setRate',label:'Set Rate',default:false},
   {id:'avgCredit',label:'Avg Credit Avail',default:false},
   {id:'frozenRate',label:'Frozen Credit %',default:false},
@@ -829,9 +967,37 @@ function renderKPIs(){
   const avgCS=scores.length>0?Math.round(scores.reduce((a,b)=>a+b,0)/scores.length):0;
   const above650=scores.filter(s=>s>=650).length;
   const repsActive=[...new Set(filtered.map(r=>r[CI.rep]).filter(Boolean))].length;
-  const closed=filtered.filter(r=>r[CI.outcome]&&r[CI.outcome].toLowerCase().includes('closed')).length;
+  // Close rate: cross-reference COMM_D (payment data) emails with filtered appointments
+  let closed=0;
+  if(typeof COMM_D!=='undefined'&&COMM_D.length){
+    const {start,end}=getDateRange();
+    const closedEmails=new Set(COMM_D.filter(r=>{const d=r[4]?new Date(r[4]):r[1]?new Date(r[1]):null;return d&&d>=start&&d<=end&&r[10]&&r[10]==='Collected';}).map(r=>(r[39]||'').toLowerCase().trim()).filter(Boolean));
+    const selectedReps=getSelectedReps();
+    closed=filtered.filter(r=>r[CI.status]==='Showed'&&r[CI.email]&&closedEmails.has(r[CI.email].toLowerCase().trim())).length;
+  } else {
+    closed=filtered.filter(r=>r[CI.outcome]&&r[CI.outcome].toLowerCase().includes('closed')).length;
+  }
   const closeRate=showed>0?(closed/showed*100).toFixed(1):0;
-  
+
+  // EOD-based metrics: Offers Presented, Close Rate (per offers)
+  let eodDemosHeld=0,eodOffers=0,eodClosedUnits=0;
+  if(typeof EOD_D!=='undefined'&&EOD_D.length){
+    const {start,end}=getDateRange();
+    const selReps=getSelectedReps();
+    EOD_D.forEach(r=>{
+      const rep=r[2]||'';
+      if(selReps!=='all'&&!selReps.includes(rep))return;
+      const d=parseAnyDate(r[1]);
+      if(d&&(d<start||d>end))return;
+      eodDemosHeld+=parseInt(r[8])||0;
+      eodOffers+=parseInt(r[9])||0;
+      eodClosedUnits+=parseInt(r[10])||0;
+    });
+  }
+  const offerRate=eodDemosHeld>0?(eodOffers/eodDemosHeld*100).toFixed(1):0;
+  const closeRateOffers=eodOffers>0?(eodClosedUnits/eodOffers*100).toFixed(1):0;
+  const closeRateDemos=eodDemosHeld>0?(eodClosedUnits/eodDemosHeld*100).toFixed(1):0;
+
   // Calculate previous period for comparison
   const prev=getPrevRange();
   const prevFiltered=D.filter(r=>{
@@ -859,13 +1025,16 @@ function renderKPIs(){
     demos:'<strong>Demos Held</strong><br>Appointments where prospect showed up (Status = "Showed").<br><code>COUNT(Status = "Showed")</code>',
     showRate:'<strong>Show Rate</strong><br>Percentage of booked appointments where the prospect showed.<br><code>Showed ÷ Total Appointments × 100</code><br>🟢 ≥40% | 🟡 ≥25% | 🔴 &lt;25%',
     noShows:'<strong>No Shows</strong><br>Appointments where prospect did not show (Status = "No Show").<br><code>COUNT(Status = "No Show")</code><br>Trend compares to previous period (↑ = worse).',
-    closeRate:'<strong>Close Rate</strong><br>Percentage of demos held that resulted in a close (Outcome contains "Closed").<br><code>Closed ÷ Demos Held × 100</code>',
+    closeRate:'<strong>Close Rate (Appt Log)</strong><br>Percentage of demos held that resulted in a close. Based on Outcome column + AR payment cross-reference.<br><code>Closed ÷ Demos Held × 100</code><br>📎 <em>Source: Appointment Log + AR/Commission Log</em>',
+    offerRate:'<strong>Offer Rate (EOD)</strong><br>Percentage of demos held where an offer was presented.<br><code>Offers Presented ÷ Demos Held × 100</code><br>📎 <em>Source: Master EOD Log</em>',
+    closeRateOffers:'<strong>Close Rate / Offers (EOD)</strong><br>Percentage of offers presented that resulted in a closed deal.<br><code>Closed Units ÷ Offers Presented × 100</code><br>📎 <em>Source: Master EOD Log</em>',
+    closeRateDemos:'<strong>Close Rate / Demos (EOD)</strong><br>Percentage of demos held that resulted in a closed deal (from EOD self-reported data).<br><code>Closed Units ÷ Demos Held × 100</code><br>📎 <em>Source: Master EOD Log</em>',
     avgDuration:'<strong>Avg Duration</strong><br>Average call length in minutes for demos with duration > 0 (from Fathom).<br><code>SUM(Duration) ÷ COUNT(Duration > 0)</code>',
     avgCS:'<strong>Avg Credit Score</strong><br>Mean credit score across prospects with a score on file.<br><code>SUM(Credit Score) ÷ COUNT(has score)</code><br>🟢 ≥650 | 🟡 ≥600 | 🔴 &lt;600',
     cs650:'<strong>CS 650+ Rate</strong><br>Percentage of scored prospects with credit score ≥ 650.<br><code>COUNT(CS ≥ 650) ÷ COUNT(has score) × 100</code>',
     epCall:'<strong>Earnings/Call</strong><br>Revenue generated per demo held.<br><code>Total Cash Collected ÷ Demos Held</code><br>⚠️ Needs AR/Commission data connected.',
     cashCollected:'<strong>Cash Collected</strong><br>Total cash received from closed deals in the period.<br>⚠️ Needs AR/Commission data connected.',
-    revPerLead:'<strong>Revenue/Lead</strong><br>Revenue generated per booked appointment (includes no-shows).<br><code>Total Cash ÷ Total Appointments</code><br>⚠️ Needs payment data.',
+    revPerLead:'<strong>Revenue/Booked Call</strong><br>Cash collected divided by total booked calls (includes no-shows).<br><code>Total Cash ÷ Total Booked Calls</code><br>⚠️ Needs payment data.',
     setRate:'<strong>Set Rate</strong><br>Percentage of outbound calls that resulted in a booked appointment.<br><code>Sets ÷ Outbound Calls × 100</code><br>⚠️ Needs EOD data connected.',
     avgCredit:'<strong>Avg Credit Available</strong><br>Mean available credit across prospects with credit data.<br><code>SUM(Credit Avail) ÷ COUNT(has credit data)</code>',
     frozenRate:'<strong>Frozen Credit %</strong><br>Percentage of prospects with frozen credit files.<br><code>COUNT(Frozen = "Yes") ÷ Total × 100</code><br>🔴 >10% | 🟢 ≤10%',
@@ -879,13 +1048,16 @@ function renderKPIs(){
     demos:`<div class="kpi"><div class="label">${kpiLabel('demos','Demos Held')}</div><div class="value">${showed}</div><div class="detail">of ${total} booked${trendBadge(showed,prevShowed)}</div></div>`,
     showRate:`<div class="kpi"><div class="label">${kpiLabel('showRate','Show Rate')}</div><div class="value" style="color:${parseFloat(showRate)>=40?'var(--gn)':parseFloat(showRate)>=25?'var(--yl)':'var(--rd)'}">${showRate}%</div><div class="detail">${showed}/${total}${trendBadge(parseFloat(showRate),parseFloat(prevShowRate))}</div></div>`,
     noShows:`<div class="kpi"><div class="label">${kpiLabel('noShows','No Shows')}</div><div class="value" style="color:var(--rd)">${noshow}</div><div class="detail">${total>0?(noshow/total*100).toFixed(1):0}%${trendBadge(prevNoshow,noshow)}</div></div>`,
-    closeRate:`<div class="kpi"><div class="label">${kpiLabel('closeRate','Close Rate')}</div><div class="value" style="color:#8a62ec">${closeRate}%</div><div class="detail">${closed}/${showed} demos</div></div>`,
+    closeRate:`<div class="kpi"><div class="label">${kpiLabel('closeRate','Close Rate (Appt Log)')}</div><div class="value" style="color:#8a62ec">${closeRate}%</div><div class="detail">${closed}/${showed} demos</div></div>`,
+    offerRate:`<div class="kpi"><div class="label">${kpiLabel('offerRate','Offer Rate (EOD)')}</div><div class="value" style="color:${offerRate>=50?'var(--gn)':offerRate>=30?'var(--yl)':'var(--rd)'}">${eodDemosHeld>0?offerRate+'%':'—'}</div><div class="detail">${eodDemosHeld>0?eodOffers+'/'+eodDemosHeld+' demos':'Awaiting EOD data'}</div></div>`,
+    closeRateOffers:`<div class="kpi"><div class="label">${kpiLabel('closeRateOffers','Close Rate / Offers')}</div><div class="value" style="color:${closeRateOffers>=30?'var(--gn)':closeRateOffers>=15?'var(--yl)':'var(--rd)'}">${eodOffers>0?closeRateOffers+'%':'—'}</div><div class="detail">${eodOffers>0?eodClosedUnits+'/'+eodOffers+' offers':'Awaiting EOD data'}</div></div>`,
+    closeRateDemos:`<div class="kpi"><div class="label">${kpiLabel('closeRateDemos','Close Rate / Demos')}</div><div class="value" style="color:${closeRateDemos>=20?'var(--gn)':closeRateDemos>=10?'var(--yl)':'var(--rd)'}">${eodDemosHeld>0?closeRateDemos+'%':'—'}</div><div class="detail">${eodDemosHeld>0?eodClosedUnits+'/'+eodDemosHeld+' demos (EOD)':'Awaiting EOD data'}</div></div>`,
     avgDuration:`<div class="kpi"><div class="label">${kpiLabel('avgDuration','Avg Duration')}</div><div class="value" style="color:#3ea2e4">${avgDur}m</div><div class="detail">Demos >5min${trendBadge(parseFloat(avgDur),parseFloat(prevAvgDur))}</div></div>`,
     avgCS:`<div class="kpi"><div class="label">${kpiLabel('avgCS','Avg Credit Score')}</div><div class="value" style="color:${avgCS>=650?'var(--gn)':avgCS>=600?'var(--yl)':'var(--rd)'}">${avgCS||'—'}</div><div class="detail">${scores.length} scored</div></div>`,
     cs650:`<div class="kpi"><div class="label">${kpiLabel('cs650','CS 650+ Rate')}</div><div class="value" style="color:var(--gn)">${cs650Rate}%</div><div class="detail">${above650}/${scores.length}</div></div>`,
     epCall:`<div class="kpi"><div class="label">${kpiLabel('epCall','Earnings/Call')}</div><div class="value" style="color:var(--tm)">N/A</div><div class="detail">Needs payment data</div></div>`,
     cashCollected:`<div class="kpi"><div class="label">${kpiLabel('cashCollected','Cash Collected')}</div><div class="value" style="color:var(--tm)">N/A</div><div class="detail">Needs AR log</div></div>`,
-    revPerLead:`<div class="kpi"><div class="label">${kpiLabel('revPerLead','Revenue/Lead')}</div><div class="value" style="color:var(--tm)">N/A</div><div class="detail">Needs payment data</div></div>`,
+    revPerLead:`<div class="kpi"><div class="label">${kpiLabel('revPerLead','Revenue/Booked Call')}</div><div class="value" style="color:var(--tm)">N/A</div><div class="detail">Needs payment data</div></div>`,
     setRate:`<div class="kpi"><div class="label">${kpiLabel('setRate','Set Rate')}</div><div class="value" style="color:var(--tm)">N/A</div><div class="detail">Needs EOD data</div></div>`,
     avgCredit:`<div class="kpi"><div class="label">${kpiLabel('avgCredit','Avg Credit Avail')}</div><div class="value" style="color:#3ea2e4">$${avgCreditVal.toLocaleString()}</div><div class="detail">${avgCreditAvail.length} prospects</div></div>`,
     frozenRate:`<div class="kpi"><div class="label">${kpiLabel('frozenRate','Frozen Credit %')}</div><div class="value" style="color:${parseFloat(frozenRate)>10?'var(--rd)':'var(--gn)'}">${frozenRate}%</div><div class="detail">${frozenCount} frozen</div></div>`,
@@ -972,90 +1144,24 @@ function renderOverview(){
   document.getElementById('rowCount').textContent=`Showing ${filtered.length} of ${D.length} appointments`;
 }
 
-function renderDetailed(){
-  let h='<tr>';
-  H.forEach((c,i)=>h+=`<th onclick="sortBy(${i})">${i===0?'Date & Time (ET)':c}</th>`);
-  h+='</tr>';
-  document.getElementById('detailHead').innerHTML=h;
-  
-  let b='';
-  filtered.forEach(r=>{
-    b+='<tr>';
-    r.forEach((v,i)=>{
-      if(i===CI.status)b+=`<td>${pill(v,'status')}</td>`;
-      else if(i===CI.outcome)b+=`<td>${pill(v,'outcome')}</td>`;
-      else if(i===CI.confidence)b+=`<td>${pill(v,'confidence')}</td>`;
-      else if(i===CI.fathom&&v)b+=`<td><a href="${v}" target="_blank" style="color:#3ea2e4">▶ Link</a></td>`;
-      else if(i===CI.cs)b+=`<td style="color:${csColor(v)};font-weight:600">${v||'—'}</td>`;
-      else b+=`<td>${v||'—'}</td>`;
-    });
-    b+='</tr>';
-  });
-  document.getElementById('detailBody').innerHTML=b;
-  document.getElementById('detailCount').textContent=`Showing ${filtered.length} of ${D.length} appointments`;
-}
 
-function renderAnalytics(){
-  const reps=[...new Set(D.map(r=>r[CI.rep]).filter(Boolean))];
-  
-  // Show rate by rep
-  let showRateHTML='<div class="chart-card"><h3>Show Rate by Rep</h3>';
-  const repStats=reps.map(rep=>{
-    const repRows=filtered.filter(r=>r[CI.rep]===rep);
-    const showed=repRows.filter(r=>r[CI.status]==='Showed').length;
-    const total=repRows.length;
-    const rate=total>0?(showed/total*100):0;
-    return{rep,rate,showed,total};
-  }).sort((a,b)=>b.rate-a.rate);
-  
-  repStats.forEach(s=>{
-    const color=s.rate>=40?'bar-green':s.rate>=25?'bar-yellow':'bar-red';
-    showRateHTML+=`<div class="bar-row"><div class="bar-label">${s.rep.split(' ')[0]} ${s.rep.split(' ')[1]?s.rep.split(' ')[1][0]+'.':''}</div><div class="bar-track"><div class="bar-fill ${color}" style="width:${Math.max(s.rate,3)}%">${s.rate.toFixed(1)}%</div></div></div>`;
-  });
-  showRateHTML+='</div>';
-  
-  // Duration by rep
-  let durHTML='<div class="chart-card"><h3>Avg Call Duration by Rep</h3>';
-  const durStats=reps.map(rep=>{
-    const durs=filtered.filter(r=>r[CI.rep]===rep&&r[CI.duration]&&parseFloat(r[CI.duration])>0).map(r=>parseFloat(r[CI.duration]));
-    const avg=durs.length>0?(durs.reduce((a,b)=>a+b,0)/durs.length):0;
-    return{rep,avg,count:durs.length};
-  }).sort((a,b)=>b.avg-a.avg);
-  
-  const maxDur=Math.max(...durStats.map(s=>s.avg),1);
-  durStats.forEach(s=>{
-    durHTML+=`<div class="bar-row"><div class="bar-label">${s.rep.split(' ')[0]} ${s.rep.split(' ')[1]?s.rep.split(' ')[1][0]+'.':''}</div><div class="bar-track"><div class="bar-fill bar-cyan" style="width:${(s.avg/maxDur*100).toFixed(0)}%">${s.avg.toFixed(0)}m</div></div></div>`;
-  });
-  durHTML+='</div>';
-  
-  // Rep leaderboard
-  let lbHTML='<div class="chart-card" style="grid-column:1/-1"><h3>🏆 Rep Leaderboard</h3><table style="font-size:12px"><thead><tr><th>#</th><th>Rep</th><th>Calls</th><th>Demos</th><th>Show%</th><th>Avg Dur</th><th>CS 650+</th></tr></thead><tbody>';
-  repStats.forEach((s,i)=>{
-    const durs=filtered.filter(r=>r[CI.rep]===s.rep&&r[CI.duration]).map(r=>parseFloat(r[CI.duration])||0);
-    const avgD=durs.length?(durs.reduce((a,b)=>a+b,0)/durs.length).toFixed(0):0;
-    const cs650=filtered.filter(r=>r[CI.rep]===s.rep&&parseFloat(r[CI.cs])>=650).length;
-    lbHTML+=`<tr><td style="color:#3ea2e4">${i+1}</td><td style="color:var(--t);font-weight:600">${s.rep}</td><td>${s.total}</td><td>${s.showed}</td><td style="color:${s.rate>=40?'var(--gn)':s.rate>=25?'var(--yl)':'var(--rd)'}">${s.rate.toFixed(1)}%</td><td>${avgD}m</td><td>${cs650}</td></tr>`;
-  });
-  lbHTML+='</tbody></table></div>';
-  
-  document.getElementById('analyticsView').innerHTML='<div class="analytics">'+showRateHTML+durHTML+lbHTML+'</div>';
-}
 
 function showView(view){
   currentView=view;
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-  ['overviewView','detailedView','analyticsView','apptlogView','commissionsView','revenueView','eodView','eodcomplianceView','eodsubmissionsView','financingView','glossaryView','repavailView','rosterView'].forEach(id=>{
+  ['overviewView','apptlogView','apptSettingView','commissionsView','revenueView','eodView','eodcomplianceView','eodsubmissionsView','financingView','glossaryView','reservesView','repavailView','rosterView'].forEach(id=>{
     const el=document.getElementById(id);
     if(el)el.style.display='none';
   });
-  const viewMap={overview:'overviewView',detailed:'detailedView',analytics:'analyticsView',apptlog:'apptlogView',commissions:'commissionsView',revenue:'revenueView',eod:'eodView',eodcompliance:'eodcomplianceView',eodsubmissions:'eodsubmissionsView',financing:'financingView',glossary:'glossaryView',repavail:'repavailView',roster:'rosterView'};
+  const viewMap={overview:'overviewView',apptlog:'apptlogView',apptsetting:'apptSettingView',commissions:'commissionsView',revenue:'revenueView',eod:'eodView',eodcompliance:'eodcomplianceView',eodsubmissions:'eodsubmissionsView',financing:'financingView',glossary:'glossaryView',reserves:'reservesView',repavail:'repavailView',roster:'rosterView'};
   const target=document.getElementById(viewMap[view]);
   if(target)target.style.display='block';
   if(event&&event.target)event.target.classList.add('active');
   // Show/hide overview-only elements
-  const isOverview=(view==='overview'||view==='detailed'||view==='analytics'||view==='apptlog');
-  document.getElementById('kpiRow').style.display=isOverview?'grid':'none';
+  const isOverview=(view==='overview'||view==='apptlog');
+  const kpiSection=document.getElementById('kpiSection');
+  if(kpiSection)kpiSection.style.display=(view==='overview'||view==='apptlog')?'block':'none';
   document.getElementById('kpiSelector').style.display='none';
   const liveInd=document.querySelector('.live-indicator');
   if(liveInd)liveInd.style.display=isOverview?'flex':'none';
@@ -1073,6 +1179,7 @@ function showView(view){
   // Render data views on demand
   if(view==='commissions')renderCommissionsView();
   if(view==='revenue')renderCommissions();
+  if(view==='reserves')renderReserves();
   if(view==='financing')renderFinancing();
   if(view==='eod')renderEOD();
   if(view==='eodcompliance')renderEODCompliance();
@@ -1080,6 +1187,7 @@ function showView(view){
   
   if(view==='apptlog')renderApptLog();
   if(view==='overview')renderOverviewCharts();
+  if(view==='apptsetting')renderApptSetting();
   if(view==='repavail')renderRepAvail();
   if(view==='roster')renderRoster();
   // Close sidebar on mobile
@@ -1092,12 +1200,24 @@ function showView(view){
 function getGlobalDateRange(){
   const v=gv('dateFilter','30');
   const now=new Date();
+  const year=now.getFullYear();
+  const month=now.getMonth();
   if(v==='custom'){
     const from=gv('dateFrom','');const to=gv('dateTo','');
     if(from&&to)return{start:new Date(from),end:new Date(to+'T23:59:59')};
     return{start:new Date(2024,0,1),end:now};
   }
   if(v==='all')return{start:new Date(2024,0,1),end:now};
+  if(v==='today'){const s=new Date(year,month,now.getDate());return{start:s,end:now};}
+  if(v==='yesterday'){const s=new Date(year,month,now.getDate()-1);const e=new Date(year,month,now.getDate()-1,23,59,59);return{start:s,end:e};}
+  if(v==='thisWeek'){const day=now.getDay();const mon=new Date(now);mon.setDate(now.getDate()-(day===0?6:day-1));mon.setHours(0,0,0,0);return{start:mon,end:now};}
+  if(v==='lastWeek'){const day=now.getDay();const thisMon=new Date(now);thisMon.setDate(now.getDate()-(day===0?6:day-1));const lastMon=new Date(thisMon);lastMon.setDate(thisMon.getDate()-7);lastMon.setHours(0,0,0,0);const lastSun=new Date(lastMon);lastSun.setDate(lastMon.getDate()+6);lastSun.setHours(23,59,59);return{start:lastMon,end:lastSun};}
+  if(v==='thisMonth')return{start:new Date(year,month,1),end:now};
+  if(v==='lastMonth')return{start:new Date(year,month-1,1),end:new Date(year,month,0,23,59,59)};
+  if(v==='q1')return{start:new Date(2026,0,1),end:new Date(2026,2,31,23,59,59)};
+  if(v==='ytd')return{start:new Date(year,0,1),end:now};
+  if(v==='thisYear')return{start:new Date(year,0,1),end:new Date(year,11,31,23,59,59)};
+  if(v==='lastYear')return{start:new Date(year-1,0,1),end:new Date(year-1,11,31,23,59,59)};
   const days=parseInt(v);
   const start=new Date(now);start.setDate(start.getDate()-days);
   return{start,end:now};
@@ -1140,6 +1260,47 @@ function fmtDate(s){if(!s)return'—';
   return s;}
 function tip(label,explanation){return label+' <span class="info-icon">ⓘ<span class="info-tip">'+explanation+'</span></span>';}
 
+function toggleRevKPISelector(){
+  const el=document.getElementById('revKPISelector');
+  if(el)el.style.display=el.style.display==='none'?'block':'none';
+  if(el&&el.style.display==='block'){
+    const active=JSON.parse(localStorage.getItem('activeRevKPIs')||'null')||['cashCollected','netAfterFees','processingFees','avgPayment','pendingCash','collectionRate'];
+    const allOpts=['cashCollected','netAfterFees','processingFees','avgPayment','pendingCash','collectionRate','totalDeals','avgFeeRate','topCloser','topProduct','topMedium','netMargin'];
+    const labels={cashCollected:'Cash Collected',netAfterFees:'Net After Fees',processingFees:'Processing Fees',avgPayment:'Avg Payment',pendingCash:'Pending',collectionRate:'Collection Rate',totalDeals:'Total Deals',avgFeeRate:'Avg Fee Rate',topCloser:'Top Closer',topProduct:'Top Product',topMedium:'Top Medium',netMargin:'Net Margin %'};
+    const optEl=document.getElementById('revKPIOptions');
+    if(optEl)optEl.innerHTML=allOpts.map(id=>{
+      const isActive=active.includes(id);
+      return`<label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#888;cursor:pointer;padding:6px 8px;border-radius:6px;background:${isActive?'rgba(6,182,212,.1)':'rgba(255,255,255,.02)'};border:1px solid ${isActive?'rgba(6,182,212,.2)':'rgba(255,255,255,.06)'}"><input type="checkbox" value="${id}" ${isActive?'checked':''} onchange="if([...document.querySelectorAll('#revKPIOptions input:checked')].length>6)this.checked=false;" style="accent-color:#06b6d4"> ${labels[id]}</label>`;
+    }).join('');
+  }
+}
+function saveRevKPIs(){
+  const checks=[...document.querySelectorAll('#revKPIOptions input:checked')].map(c=>c.value).slice(0,6);
+  localStorage.setItem('activeRevKPIs',JSON.stringify(checks));
+  document.getElementById('revKPISelector').style.display='none';
+  renderCommissions();
+}
+function toggleRevChartSelector(){
+  const el=document.getElementById('revChartSelector');
+  if(el)el.style.display=el.style.display==='none'?'block':'none';
+  if(el&&el.style.display==='block'){
+    const active=JSON.parse(localStorage.getItem('activeRevCharts')||'null')||['cashByCloser','setterContrib','cashByMedium','cashByProduct','cashByMonth'];
+    const allOpts=['cashByCloser','setterContrib','cashByMedium','cashByProduct','cashByMonth','netByCloser','feesByMedium','dealsByCloser','dealsBySource'];
+    const labels={cashByCloser:'Cash by Closer',setterContrib:'Setter Contributions',cashByMedium:'Cash by Payment Medium',cashByProduct:'Cash by Product',cashByMonth:'Cash by Month',netByCloser:'Net Revenue by Closer',feesByMedium:'Fees by Payment Medium',dealsByCloser:'Deal Count by Closer',dealsBySource:'Deals by Source (Auto vs Setter)'};
+    const optEl=document.getElementById('revChartOptions');
+    if(optEl)optEl.innerHTML=allOpts.map(id=>{
+      const isActive=active.includes(id);
+      return`<label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#888;cursor:pointer;padding:6px 8px;border-radius:6px;background:${isActive?'rgba(6,182,212,.1)':'rgba(255,255,255,.02)'};border:1px solid ${isActive?'rgba(6,182,212,.2)':'rgba(255,255,255,.06)'}"><input type="checkbox" value="${id}" ${isActive?'checked':''} style="accent-color:#06b6d4"> ${labels[id]}</label>`;
+    }).join('');
+  }
+}
+function saveRevCharts(){
+  const checks=[...document.querySelectorAll('#revChartOptions input:checked')].map(c=>c.value);
+  localStorage.setItem('activeRevCharts',JSON.stringify(checks));
+  document.getElementById('revChartSelector').style.display='none';
+  renderCommissions();
+}
+
 function renderCommissions(){
   if(typeof COMM_D==='undefined'||!COMM_D.length){document.getElementById('commContent').innerHTML='<p style="color:var(--tm);padding:20px">No revenue data available.</p>';return;}
   const data=filterByDateAndRep(COMM_D,4,13);
@@ -1153,13 +1314,30 @@ function renderCommissions(){
   const avgPayment=collected.length>0?totalCash/collected.length:0;
   const feeRate=totalCash>0?(totalFees/totalCash*100).toFixed(1):0;
 
-  document.getElementById('commKPIs').innerHTML=`
-    <div class="kpi"><div class="label">${tip('Cash Collected','<strong>Cash Collected</strong><br>Total gross payments received.<br><code>SUM(Amount) where Collected</code>')}</div><div class="value" style="color:var(--gn)">${fmtMoney(totalCash)}</div><div class="detail">${collected.length} payments</div></div>
-    <div class="kpi"><div class="label">${tip('Net After Fees','<strong>Net After Fees</strong><br>Cash after processor fees (CC ~2.5%, Elective ~15%).<br><code>SUM(Net Amount Received)</code>')}</div><div class="value" style="color:#3ea2e4">${fmtMoney(totalNet)}</div><div class="detail">${feeRate}% avg fees</div></div>
-    <div class="kpi"><div class="label">${tip('Processing Fees','<strong>Processing Fees</strong><br>Lost to payment processors.<br><code>Cash - Net</code>')}</div><div class="value" style="color:var(--rd)">${fmtMoney(totalFees)}</div><div class="detail">Total fees paid</div></div>
-    <div class="kpi"><div class="label">${tip('Avg Payment','<strong>Avg Payment</strong><br>Average gross per collection.<br><code>Cash ÷ # Collected</code>')}</div><div class="value" style="color:#8a62ec">${fmtMoney(avgPayment)}</div><div class="detail">Per payment</div></div>
-    <div class="kpi"><div class="label">${tip('Pending','<strong>Pending</strong><br>Payments not yet collected.<br><code>SUM(Amount) where not Collected</code>')}</div><div class="value" style="color:var(--yl)">${fmtMoney(pendingCash)}</div><div class="detail">${pending.length} awaiting</div></div>
-    <div class="kpi"><div class="label">${tip('Collection Rate','<strong>Collection Rate</strong><br>% of payments collected.<br><code>Collected ÷ Total × 100</code>')}</div><div class="value" style="color:var(--gn)">${data.length>0?(collected.length/data.length*100).toFixed(0):0}%</div><div class="detail">${collected.length}/${data.length}</div></div>`;
+  // Top closer/product/medium for KPIs
+  const _closerCash={};collected.forEach(r=>{const c=r[13]||'Unknown';_closerCash[c]=(_closerCash[c]||0)+numVal(r[5]);});
+  const _topCloser=Object.entries(_closerCash).sort((a,b)=>b[1]-a[1])[0];
+  const _prodCash={};collected.forEach(r=>{const p=r[2]||'Unknown';_prodCash[p]=(_prodCash[p]||0)+numVal(r[5]);});
+  const _topProduct=Object.entries(_prodCash).sort((a,b)=>b[1]-a[1])[0];
+  const _medCash={};collected.forEach(r=>{const m=r[6]||'Unknown';_medCash[m]=(_medCash[m]||0)+numVal(r[5]);});
+  const _topMedium=Object.entries(_medCash).sort((a,b)=>b[1]-a[1])[0];
+
+  const revKPIMap={
+    cashCollected:{label:tip('Cash Collected','<strong>Cash Collected</strong><br>Total gross payments received.<br><code>SUM(Amount) where Collected</code><br>📎 <em>Source: AR/Commission Log (Payments tab)</em>'),value:fmtMoney(totalCash),color:'var(--gn)',detail:collected.length+' payments'},
+    netAfterFees:{label:tip('Net After Fees','<strong>Net After Fees</strong><br>Cash after processor fees.<br><code>SUM(Net Amount Received)</code><br>📎 <em>Source: AR/Commission Log (Payments tab)</em>'),value:fmtMoney(totalNet),color:'#3ea2e4',detail:feeRate+'% avg fees'},
+    processingFees:{label:tip('Processing Fees','<strong>Processing Fees</strong><br>Lost to payment processors.<br><code>Cash - Net</code><br>📎 <em>Source: AR/Commission Log (calculated)</em>'),value:fmtMoney(totalFees),color:'var(--rd)',detail:'Total fees paid'},
+    avgPayment:{label:tip('Avg Payment','<strong>Avg Payment</strong><br>Average gross per collection.<br><code>Cash ÷ # Collected</code><br>📎 <em>Source: AR/Commission Log (Payments tab)</em>'),value:fmtMoney(avgPayment),color:'#8a62ec',detail:'Per payment'},
+    pendingCash:{label:tip('Pending','<strong>Pending</strong><br>Payments not yet collected.<br><code>SUM(Amount) where not Collected</code><br>📎 <em>Source: AR/Commission Log (Payments tab)</em>'),value:fmtMoney(pendingCash),color:'var(--yl)',detail:pending.length+' awaiting'},
+    collectionRate:{label:tip('Collection Rate','<strong>Collection Rate</strong><br>% of payments collected.<br><code>Collected ÷ Total × 100</code><br>📎 <em>Source: AR/Commission Log (calculated)</em>'),value:(data.length>0?(collected.length/data.length*100).toFixed(0):0)+'%',color:'var(--gn)',detail:collected.length+'/'+data.length},
+    totalDeals:{label:tip('Total Deals','<strong>Total Deals</strong><br>Total payment entries in range.<br><code>COUNT(rows)</code><br>📎 <em>Source: AR/Commission Log (Payments tab)</em>'),value:data.length,color:'#3ea2e4',detail:'All entries'},
+    avgFeeRate:{label:tip('Avg Fee Rate','<strong>Avg Fee Rate</strong><br>Average processing fee percentage.<br><code>(Cash - Net) ÷ Cash × 100</code><br>📎 <em>Source: AR/Commission Log (calculated)</em>'),value:feeRate+'%',color:'var(--rd)',detail:'Across all mediums'},
+    topCloser:{label:tip('Top Closer','<strong>Top Closer</strong><br>Closer with most cash collected.<br><code>MAX(Cash by Closer)</code><br>📎 <em>Source: AR/Commission Log (Payments tab)</em>'),value:_topCloser?_topCloser[0]:'—',color:'#4ade80',detail:_topCloser?fmtMoney(_topCloser[1]):'—',fontSize:'18px'},
+    topProduct:{label:tip('Top Product','<strong>Top Product</strong><br>Product with most revenue.<br><code>MAX(Cash by Product)</code><br>📎 <em>Source: AR/Commission Log (Payments tab)</em>'),value:_topProduct?_topProduct[0]:'—',color:'#8a62ec',detail:_topProduct?fmtMoney(_topProduct[1]):'—',fontSize:'16px'},
+    topMedium:{label:tip('Top Medium','<strong>Top Medium</strong><br>Payment medium with most cash.<br><code>MAX(Cash by Medium)</code><br>📎 <em>Source: AR/Commission Log (Payments tab)</em>'),value:_topMedium?_topMedium[0]:'—',color:'#06b6d4',detail:_topMedium?fmtMoney(_topMedium[1]):'—',fontSize:'16px'},
+    netMargin:{label:tip('Net Margin %','<strong>Net Margin</strong><br>Net as % of gross cash.<br><code>Net ÷ Cash × 100</code><br>📎 <em>Source: AR/Commission Log (calculated)</em>'),value:(totalCash>0?(totalNet/totalCash*100).toFixed(1):0)+'%',color:'var(--gn)',detail:'After all fees'},
+  };
+  const activeRevKPIs=JSON.parse(localStorage.getItem('activeRevKPIs')||'null')||['cashCollected','netAfterFees','processingFees','avgPayment','pendingCash','collectionRate'];
+  document.getElementById('commKPIs').innerHTML=activeRevKPIs.filter(id=>revKPIMap[id]).map(id=>{const k=revKPIMap[id];return`<div class="kpi"><div class="label">${k.label}</div><div class="value" style="color:${k.color}${k.fontSize?';font-size:'+k.fontSize:''}">${k.value}</div><div class="detail">${k.detail}</div></div>`;}).join('');
 
   // Cash by Closer
   const closerCash={};
@@ -1192,7 +1370,7 @@ function renderCommissions(){
   const maxMedium=mediumList.length?mediumList[0][1]:1;
 
   let mediumHTML='<div class="chart-card" style="margin-bottom:16px"><h3>\ud83d\udcb3 Cash by Payment Medium</h3>';
-  mediumList.forEach(([name,cash])=>{const fees=mediumFees[name]||0;const fp=cash>0?(fees/cash*100).toFixed(1):0;mediumHTML+=`<div class="bar-row"><div class="bar-label" style="min-width:100px">${name}</div><div class="bar-track"><div class="bar-fill bar-cyan" style="width:${(cash/maxMedium*100).toFixed(0)}%">${fmtMoney(cash)} \u00b7 ${fp}% fees</div></div></div>`;});
+  mediumList.forEach(([name,cash])=>{const fees=mediumFees[name]||0;const fp=cash>0?(fees/cash*100).toFixed(1):0;mediumHTML+=`<div class="bar-row"><div class="bar-label" >${name}</div><div class="bar-track"><div class="bar-fill bar-cyan" style="width:${(cash/maxMedium*100).toFixed(0)}%">${fmtMoney(cash)} \u00b7 ${fp}% fees</div></div></div>`;});
   mediumHTML+='</div>';
 
   // Cash by Product
@@ -1202,7 +1380,7 @@ function renderCommissions(){
   const maxProd=prodList.length?prodList[0][1]:1;
 
   let prodHTML='<div class="chart-card" style="margin-bottom:16px"><h3>\ud83d\udce6 Cash by Product</h3>';
-  prodList.forEach(([name,cash])=>{const cnt=collected.filter(r=>r[2]===name).length;prodHTML+=`<div class="bar-row"><div class="bar-label" style="min-width:130px">${name}</div><div class="bar-track"><div class="bar-fill bar-green" style="width:${(cash/maxProd*100).toFixed(0)}%">${fmtMoney(cash)} \u00b7 ${cnt} sales</div></div></div>`;});
+  prodList.forEach(([name,cash])=>{const cnt=collected.filter(r=>r[2]===name).length;prodHTML+=`<div class="bar-row"><div class="bar-label" >${name}</div><div class="bar-track"><div class="bar-fill bar-green" style="width:${(cash/maxProd*100).toFixed(0)}%">${fmtMoney(cash)} \u00b7 ${cnt} sales</div></div></div>`;});
   prodHTML+='</div>';
 
   // Cash by Month
@@ -1215,28 +1393,258 @@ function renderCommissions(){
   monthList.forEach(([name,cash])=>{monthHTML+=`<div class="bar-row"><div class="bar-label">${name}</div><div class="bar-track"><div class="bar-fill bar-cyan" style="width:${(cash/maxMonth*100).toFixed(0)}%">${fmtMoney(cash)}</div></div></div>`;});
   monthHTML+='</div>';
 
+  // Build chart content map
+  const revChartMap={
+    cashByCloser:()=>closerHTML,
+    setterContrib:()=>setterHTML,
+    cashByMedium:()=>mediumHTML,
+    cashByProduct:()=>prodHTML,
+    cashByMonth:()=>monthHTML,
+    netByCloser:()=>{const netMap={};collected.forEach(r=>{const c=r[13]||'Unknown';netMap[c]=(netMap[c]||0)+numVal(r[9]);});const nl=Object.entries(netMap).sort((a,b)=>b[1]-a[1]);const mx=nl.length?nl[0][1]:1;let h='<div class="chart-card" style="margin-bottom:16px"><h3>Net Revenue by Closer</h3>';nl.forEach(([n,v])=>{h+=`<div class="bar-row"><div class="bar-label">${n}</div><div class="bar-track"><div class="bar-fill bar-cyan" style="width:${(v/mx*100).toFixed(0)}%">${fmtMoney(v)}</div></div></div>`;});return h+'</div>';},
+    feesByMedium:()=>{const fm={};collected.forEach(r=>{const m=r[6]||'Unknown';fm[m]=(fm[m]||0)+(numVal(r[5])-numVal(r[9]));});const fl=Object.entries(fm).sort((a,b)=>b[1]-a[1]);const mx=fl.length?fl[0][1]:1;let h='<div class="chart-card" style="margin-bottom:16px"><h3>Fees by Payment Medium</h3>';fl.forEach(([n,v])=>{h+=`<div class="bar-row"><div class="bar-label">${n}</div><div class="bar-track"><div class="bar-fill bar-red" style="width:${(v/mx*100).toFixed(0)}%">${fmtMoney(v)}</div></div></div>`;});return h+'</div>';},
+    dealsByCloser:()=>{const dm={};collected.forEach(r=>{const c=r[13]||'Unknown';dm[c]=(dm[c]||0)+1;});const dl=Object.entries(dm).sort((a,b)=>b[1]-a[1]);const mx=dl.length?dl[0][1]:1;let h='<div class="chart-card" style="margin-bottom:16px"><h3>Deal Count by Closer</h3>';dl.forEach(([n,v])=>{h+=`<div class="bar-row"><div class="bar-label">${n}</div><div class="bar-track"><div class="bar-fill bar-purple" style="width:${(v/mx*100).toFixed(0)}%">${v} deals</div></div></div>`;});return h+'</div>';},
+    dealsBySource:()=>{
+      const srcMap={};const srcCash={};
+      collected.forEach(r=>{
+        const st=(r[3]||'').trim();
+        const label=(!st||st==='No Setter')?'Auto-Booked':st==='Outbound'?'Outbound Setter':st==='Triaged'?'Triaged/Setter':st;
+        srcMap[label]=(srcMap[label]||0)+1;
+        srcCash[label]=(srcCash[label]||0)+numVal(r[5]);
+      });
+      const sl=Object.entries(srcMap).sort((a,b)=>b[1]-a[1]);
+      const total=sl.reduce((a,s)=>a+s[1],0);
+      const mx=sl.length?sl[0][1]:1;
+      let h='<div class="chart-card" style="margin-bottom:16px"><h3>📊 Deals by Source (Auto vs Setter)</h3>';
+      sl.forEach(([label,cnt])=>{
+        const pct=total>0?(cnt/total*100).toFixed(0):0;
+        const cash=srcCash[label]||0;
+        const color=label==='Auto-Booked'?'bar-cyan':label.includes('Outbound')?'bar-green':'bar-purple';
+        h+=`<div class="bar-row"><div class="bar-label">${label}</div><div class="bar-track"><div class="bar-fill ${color}" style="width:${(cnt/mx*100).toFixed(0)}%">${cnt} deals (${pct}%) · ${fmtMoney(cash)}</div></div></div>`;
+      });
+      h+='<div style="margin-top:12px;padding:12px;background:rgba(255,255,255,.03);border-radius:8px;font-size:12px;color:var(--tm)">Total: '+total+' deals · Auto-Booked: '+(srcMap['Auto-Booked']||0)+' · Setter-Set: '+(total-(srcMap['Auto-Booked']||0))+'</div>';
+      return h+'</div>';
+    },
+  };
+
+  // Render active charts
+  const activeRevCharts=JSON.parse(localStorage.getItem('activeRevCharts')||'null')||['cashByCloser','setterContrib','cashByMedium','cashByProduct','cashByMonth','dealsBySource'];
+  let revChartsHTML='<div class="analytics" style="grid-template-columns:1fr 1fr">';
+  activeRevCharts.forEach(id=>{if(revChartMap[id])revChartsHTML+=revChartMap[id]();});
+  revChartsHTML+='</div>';
+  const revChartsEl=document.getElementById('revChartsArea');
+  if(revChartsEl)revChartsEl.innerHTML=revChartsHTML;
+
   // Collection filter + table
   const cf=window._revCollFilter||'all';
   const tableData=cf==='collected'?data.filter(r=>(r[10]||'').includes('Collected')):cf==='pending'?data.filter(r=>!(r[10]||'').includes('Collected')):data;
   
   const collectFilter='<div style="margin-bottom:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span style="font-size:11px;color:var(--tm);text-transform:uppercase;letter-spacing:.5px">Filter:</span><button onclick="window._revCollFilter=\'all\';renderCommissions()" style="font-size:11px;padding:5px 12px;border-radius:6px;border:1px solid '+((!window._revCollFilter||window._revCollFilter==='all')?'rgba(62,162,228,.4)':'rgba(255,255,255,.08)')+';background:'+((!window._revCollFilter||window._revCollFilter==='all')?'rgba(62,162,228,.15)':'var(--card)')+';color:'+((!window._revCollFilter||window._revCollFilter==='all')?'#3ea2e4':'var(--tm)')+';cursor:pointer">All ('+data.length+')</button><button onclick="window._revCollFilter=\'collected\';renderCommissions()" style="font-size:11px;padding:5px 12px;border-radius:6px;border:1px solid '+(window._revCollFilter==='collected'?'rgba(34,197,94,.4)':'rgba(255,255,255,.08)')+';background:'+(window._revCollFilter==='collected'?'rgba(34,197,94,.15)':'var(--card)')+';color:'+(window._revCollFilter==='collected'?'#4ade80':'var(--tm)')+';cursor:pointer">Collected ('+collected.length+')</button><button onclick="window._revCollFilter=\'pending\';renderCommissions()" style="font-size:11px;padding:5px 12px;border-radius:6px;border:1px solid '+(window._revCollFilter==='pending'?'rgba(234,179,8,.4)':'rgba(255,255,255,.08)')+';background:'+(window._revCollFilter==='pending'?'rgba(234,179,8,.15)':'var(--card)')+';color:'+(window._revCollFilter==='pending'?'#facc15':'var(--tm)')+';cursor:pointer">Pending ('+pending.length+')</button></div>';
 
-  let tbl='<div class="row-count">'+tableData.length+' of '+data.length+' payments</div><div class="table-wrap"><table><thead><tr><th>Date (ET)</th><th>Client</th><th>Email</th><th>Product</th><th>Setter</th><th>Amount</th><th>Medium</th><th>Fee %</th><th>Net</th><th>Closer</th><th>Status</th></tr></thead><tbody>';
+  let tbl='<div class="row-count">'+tableData.length+' of '+data.length+' payments</div><div class="table-wrap"><table><thead><tr><th>Date (ET)</th><th>Client</th><th>Email</th><th>Product</th><th>Setter?</th><th>Setter Name</th><th>Amount</th><th>Medium</th><th>Fee %</th><th>Net</th><th>Closer</th><th>Status</th></tr></thead><tbody>';
   tableData.forEach(r=>{
     const statusPill=(r[10]||'').includes('Collected')?'<span class="pill pill-showed">Collected</span>':'<span class="pill pill-cancelled">Pending</span>';
     const setter=(r[12]||'').trim();
-    const setterDisplay=(!setter||setter==='NA'||(r[3]||'')==='No Setter')?'\u2014':setter;
+    const setterType=(r[3]||'').trim();
+    const hasSetter=setter&&setter!=='NA'&&setterType!=='No Setter';
+    const setterDisplay=hasSetter?setter:'<span style="color:var(--td)">No Setter</span>';
+    const setterBadge=hasSetter?'<span class="pill pill-showed" style="font-size:10px">Yes</span>':'<span class="pill" style="background:rgba(255,255,255,.06);color:var(--td);font-size:10px">No</span>';
     const email=r[39]||'';
-    tbl+=`<tr><td>${r[4]?fmtDate(r[4]):'<span class="pill pill-noshow">Not Collected</span>'}</td><td style="color:var(--t);font-weight:600">${r[0]||'\u2014'}</td><td style="font-size:11px;color:var(--tm)">${email||'\u2014'}</td><td>${r[2]||'\u2014'}</td><td>${setterDisplay}</td><td style="color:var(--gn);font-weight:600">${r[5]||'\u2014'}</td><td>${r[6]||'\u2014'}</td><td style="color:var(--rd)">${r[7]||'\u2014'}</td><td style="color:#3ea2e4;font-weight:600">${r[9]||'\u2014'}</td><td>${r[13]||'\u2014'}</td><td>${statusPill}</td></tr>`;
+    tbl+=`<tr><td>${r[4]?fmtDate(r[4]):'<span class="pill pill-noshow">Not Collected</span>'}</td><td style="color:var(--t);font-weight:600">${r[0]||'\u2014'}</td><td style="font-size:11px;color:var(--tm)">${email||'\u2014'}</td><td>${r[2]||'\u2014'}</td><td style="text-align:center">${setterBadge}</td><td>${setterDisplay}</td><td style="color:var(--gn);font-weight:600">${r[5]||'\u2014'}</td><td>${r[6]||'\u2014'}</td><td style="color:var(--rd)">${r[7]||'\u2014'}</td><td style="color:#3ea2e4;font-weight:600">${r[9]||'\u2014'}</td><td>${r[13]||'\u2014'}</td><td>${statusPill}</td></tr>`;
   });
   tbl+='</tbody></table></div>';
 
-  document.getElementById('commContent').innerHTML='<div class="analytics" style="grid-template-columns:1fr 1fr">'+closerHTML+setterHTML+mediumHTML+prodHTML+monthHTML+'</div>'+collectFilter+tbl;
+  // Unique Buyers Table
+  const buyerMap={};
+  data.forEach(r=>{
+    const email=(r[39]||'').toLowerCase().trim();
+    if(!email)return;
+    if(!buyerMap[email]){
+      buyerMap[email]={name:r[0]||'—',email:r[39]||'',closer:r[13]||'—',product:r[2]||'—',totalPaid:0,payments:0,firstDate:'',lastDate:'',status:'Pending'};
+    }
+    buyerMap[email].totalPaid+=numVal(r[5]);
+    buyerMap[email].payments++;
+    if((r[10]||'').includes('Collected'))buyerMap[email].status='Collected';
+    const d=r[4]||'';
+    if(!buyerMap[email].firstDate||d<buyerMap[email].firstDate)buyerMap[email].firstDate=d;
+    if(!buyerMap[email].lastDate||d>buyerMap[email].lastDate)buyerMap[email].lastDate=d;
+    if(r[13])buyerMap[email].closer=r[13];
+    if(r[2])buyerMap[email].product=r[2];
+  });
+  const buyers=Object.values(buyerMap).sort((a,b)=>b.totalPaid-a.totalPaid);
+
+  let buyerHTML='<div class="chart-card" style="margin-bottom:24px"><h3>👥 Unique Buyers ('+buyers.length+' buying units)</h3>';
+  buyerHTML+='<div class="table-wrap"><table><thead><tr><th>Name</th><th>Email</th><th>Product</th><th>Closer</th><th>Total Paid</th><th>Payments</th><th>Last Payment</th><th>Status</th></tr></thead><tbody>';
+  buyers.forEach(b=>{
+    const statusPill=b.status==='Collected'?'<span class="pill pill-showed">Collected</span>':'<span class="pill pill-cancelled">Pending</span>';
+    buyerHTML+=`<tr><td style="color:var(--t);font-weight:600">${b.name}</td><td style="font-size:11px;color:var(--tm)">${b.email}</td><td>${b.product}</td><td>${b.closer}</td><td style="color:var(--gn);font-weight:600">${fmtMoney(b.totalPaid)}</td><td style="text-align:center">${b.payments}</td><td>${b.lastDate?fmtDate(b.lastDate):'—'}</td><td>${statusPill}</td></tr>`;
+  });
+  buyerHTML+='</tbody></table></div></div>';
+
+  document.getElementById('commContent').innerHTML=buyerHTML+collectFilter+tbl;
+}
+
+// ═══════════════════════════════════════
+// RESERVES VIEW
+// ═══════════════════════════════════════
+function renderReserves(){
+  if(typeof COMM_D==='undefined'||!COMM_D.length){document.getElementById('reservesContent').innerHTML='<p style="color:var(--tm);padding:20px">No data.</p>';return;}
+  const data=filterByDateAndRep(COMM_D,4,13);
+  const today=new Date();
+  
+  // Calculate reserves
+  const closerReserves=[];const setterReserves=[];
+  data.forEach(r=>{
+    const closerRes=numVal(r[24]);
+    const setterRes=numVal(r[19]);
+    const closerRelease=r[35]||'';
+    const setterRelease=r[32]||'';
+    const closerStatus=r[36]||'';
+    const setterStatus=r[33]||'';
+    const closerPaidOut=r[37]||'';
+    const setterPaidOut=r[34]||'';
+    
+    if(closerRes>0){
+      const releaseDate=parseAnyDate(closerRelease);
+      const daysUntil=releaseDate?Math.ceil((releaseDate-today)/(1000*60*60*24)):null;
+      closerReserves.push({client:r[0],closer:r[13],amount:closerRes,releaseDate:closerRelease,status:closerStatus,paidOut:closerPaidOut,daysUntil,relDateObj:releaseDate,collDate:r[4]||''});
+    }
+    if(setterRes>0){
+      const setter=(r[12]||'').trim();
+      if(setter&&setter!=='NA'){
+        const releaseDate=parseAnyDate(setterRelease);
+        const daysUntil=releaseDate?Math.ceil((releaseDate-today)/(1000*60*60*24)):null;
+        setterReserves.push({client:r[0],setter,amount:setterRes,releaseDate:setterRelease,status:setterStatus,paidOut:setterPaidOut,daysUntil,relDateObj:releaseDate,collDate:r[4]||''});
+      }
+    }
+  });
+  
+  const allReserves=[...closerReserves,...setterReserves];
+  const totalHolding=allReserves.filter(r=>r.status.includes('Holding')).reduce((a,r)=>a+r.amount,0);
+  const totalReleased=allReserves.filter(r=>r.status.includes('Released')).reduce((a,r)=>a+r.amount,0);
+  const totalAll=allReserves.reduce((a,r)=>a+r.amount,0);
+  const dueSoon=closerReserves.filter(r=>r.daysUntil!==null&&r.daysUntil<=30&&r.daysUntil>0&&r.status.includes('Holding'));
+  const dueSoonAmt=dueSoon.reduce((a,r)=>a+r.amount,0);
+  const overdue=closerReserves.filter(r=>r.daysUntil!==null&&r.daysUntil<=0&&r.status.includes('Holding'));
+  const overdueAmt=overdue.reduce((a,r)=>a+r.amount,0);
+  
+  document.getElementById('reservesKPIs').innerHTML=`
+    <div class="kpi"><div class="label">${tip('Total Holding','<strong>Total Reserves Holding</strong><br>All reserves currently held (not yet released).<br><code>SUM(Reserve $) where Status = Holding</code><br>📎 <em>Source: AR/Commission Log (Payments tab)</em>')}</div><div class="value" style="color:var(--yl)">${fmtMoney2(totalHolding)}</div><div class="detail">On company books</div></div>
+    <div class="kpi"><div class="label">${tip('Due Within 30 Days','<strong>Due Within 30 Days</strong><br>Reserves releasing in the next 30 days.<br><code>SUM where release date within 30 days</code><br>📎 <em>Source: AR/Commission Log (Payments tab)</em>')}</div><div class="value" style="color:var(--or)">${fmtMoney2(dueSoonAmt)}</div><div class="detail">${dueSoon.length} reserves</div></div>
+    <div class="kpi"><div class="label">${tip('Overdue','<strong>Overdue / Past Release</strong><br>Reserves past their 90-day release date still marked Holding.<br><code>SUM where release date < today AND Holding</code><br>📎 <em>Source: AR/Commission Log (Payments tab)</em>')}</div><div class="value" style="color:var(--rd)">${fmtMoney2(overdueAmt)}</div><div class="detail">${overdue.length} reserves</div></div>
+    <div class="kpi"><div class="label">${tip('Released','<strong>Released</strong><br>Reserves already released (past 90 days).<br><code>SUM where Status = Released</code><br>📎 <em>Source: AR/Commission Log (Payments tab)</em>')}</div><div class="value" style="color:var(--gn)">${fmtMoney2(totalReleased)}</div><div class="detail">Available to pay</div></div>
+    <div class="kpi"><div class="label">${tip('Total Reserves','<strong>Total All Reserves</strong><br>All reserves ever created (holding + released).<br><code>SUM(all Reserve $)</code><br>📎 <em>Source: AR/Commission Log (Payments tab)</em>')}</div><div class="value" style="color:var(--tm)">${fmtMoney2(totalAll)}</div><div class="detail">${allReserves.length} entries</div></div>
+    <div class="kpi"><div class="label">${tip('Avg Reserve','<strong>Avg Reserve per Deal</strong><br>Average reserve amount per payment.<br><code>Total ÷ # Entries</code><br>📎 <em>Source: AR/Commission Log (Payments tab)</em>')}</div><div class="value" style="color:#3ea2e4">${fmtMoney2(allReserves.length>0?totalAll/allReserves.length:0)}</div><div class="detail">Per deal</div></div>`;
+
+  // Reserve by Rep
+  const repReserves={};
+  closerReserves.forEach(r=>{
+    if(!repReserves[r.closer])repReserves[r.closer]={holding:0,released:0,dueSoon:0,overdue:0,total:0,count:0};
+    repReserves[r.closer].total+=r.amount;
+    repReserves[r.closer].count++;
+    if(r.status.includes('Holding'))repReserves[r.closer].holding+=r.amount;
+    if(r.status.includes('Released'))repReserves[r.closer].released+=r.amount;
+    if(r.daysUntil!==null&&r.daysUntil<=30&&r.daysUntil>0&&r.status.includes('Holding'))repReserves[r.closer].dueSoon+=r.amount;
+    if(r.daysUntil!==null&&r.daysUntil<=0&&r.status.includes('Holding'))repReserves[r.closer].overdue+=r.amount;
+  });
+  const repList=Object.entries(repReserves).sort((a,b)=>b[1].holding-a[1].holding);
+  const maxHold=repList.length?repList[0][1].holding:1;
+
+  let repHTML='<div class="chart-card" style="margin-bottom:16px"><h3>Reserves Holding by Rep</h3>';
+  repList.forEach(([name,s])=>{
+    repHTML+=`<div class="bar-row"><div class="bar-label">${name}</div><div class="bar-track"><div class="bar-fill bar-yellow" style="width:${Math.max((s.holding/maxHold*100),5).toFixed(0)}%">${fmtMoney2(s.holding)} holding</div></div></div>`;
+  });
+  repHTML+='</div>';
+
+  // Timeline: reserves by release month
+  const byMonth={};
+  closerReserves.forEach(r=>{
+    if(!r.releaseDate)return;
+    const d=parseAnyDate(r.releaseDate);
+    if(!d)return;
+    const key=(d.getMonth()+1)+'/'+d.getFullYear();
+    if(!byMonth[key])byMonth[key]={amount:0,count:0};
+    byMonth[key].amount+=r.amount;
+    byMonth[key].count++;
+  });
+  const monthList=Object.entries(byMonth).sort((a,b)=>{const[am,ay]=a[0].split('/');const[bm,by]=b[0].split('/');return(ay*12+parseInt(am))-(by*12+parseInt(bm));});
+  const maxMonth=monthList.length?Math.max(...monthList.map(m=>m[1].amount)):1;
+
+  let timeHTML='<div class="chart-card" style="margin-bottom:16px"><h3>Reserve Release Timeline</h3>';
+  monthList.forEach(([month,s])=>{
+    const parts=month.split('/');
+    const releaseMonth=new Date(parseInt(parts[1]),parseInt(parts[0])-1,1);
+    const isPast=releaseMonth<today;
+    timeHTML+=`<div class="bar-row"><div class="bar-label">${month}</div><div class="bar-track"><div class="bar-fill ${isPast?'bar-red':'bar-yellow'}" style="width:${Math.max((s.amount/maxMonth*100),5).toFixed(0)}%">${fmtMoney2(s.amount)} · ${s.count} reserves${isPast?' (past due)':''}</div></div></div>`;
+  });
+  timeHTML+='</div>';
+
+  // Rep summary table
+  let repTbl='<div class="chart-card" style="margin-bottom:16px;grid-column:1/-1"><h3>Reserve Summary by Rep</h3><table style="font-size:12px;width:100%"><thead><tr><th>Rep</th><th>Holding</th><th>Due ≤30 Days</th><th>Overdue</th><th>Released</th><th>Total</th><th># Deals</th></tr></thead><tbody>';
+  repList.forEach(([name,s])=>{
+    repTbl+=`<tr><td style="color:var(--t);font-weight:600">${name}</td><td style="color:var(--yl);font-weight:600">${fmtMoney2(s.holding)}</td><td style="color:var(--or)">${s.dueSoon>0?fmtMoney2(s.dueSoon):'—'}</td><td style="color:var(--rd)">${s.overdue>0?fmtMoney2(s.overdue):'—'}</td><td style="color:var(--gn)">${s.released>0?fmtMoney2(s.released):'—'}</td><td>${fmtMoney2(s.total)}</td><td>${s.count}</td></tr>`;
+  });
+  const totals=repList.reduce((a,[,s])=>({h:a.h+s.holding,ds:a.ds+s.dueSoon,od:a.od+s.overdue,rel:a.rel+s.released,t:a.t+s.total,c:a.c+s.count}),{h:0,ds:0,od:0,rel:0,t:0,c:0});
+  repTbl+=`<tr style="border-top:2px solid rgba(62,162,228,.2)"><td style="color:var(--t);font-weight:800">TOTAL</td><td style="color:var(--yl);font-weight:800">${fmtMoney2(totals.h)}</td><td style="color:var(--or);font-weight:700">${fmtMoney2(totals.ds)}</td><td style="color:var(--rd);font-weight:700">${fmtMoney2(totals.od)}</td><td style="color:var(--gn);font-weight:700">${fmtMoney2(totals.rel)}</td><td style="font-weight:700">${fmtMoney2(totals.t)}</td><td style="font-weight:700">${totals.c}</td></tr>`;
+  repTbl+='</tbody></table></div>';
+
+  // Detailed reserve log
+  let tbl=`<div class="row-count">${closerReserves.length} closer reserves</div><div class="table-wrap"><table><thead><tr><th>Client</th><th>Closer</th><th>Collection Date (ET)</th><th>Reserve $</th><th>Release Date</th><th>Days Until</th><th>Status</th><th>Paid Out?</th></tr></thead><tbody>`;
+  closerReserves.sort((a,b)=>(a.daysUntil||999)-(b.daysUntil||999)).forEach(r=>{
+    const daysColor=r.daysUntil===null?'var(--td)':r.daysUntil<=0?'var(--rd)':r.daysUntil<=30?'var(--or)':'var(--gn)';
+    const statusPill=r.status.includes('Holding')?'<span class="pill pill-cancelled">Holding</span>':r.status.includes('Released')?'<span class="pill pill-showed">Released</span>':'—';
+    const paidPill=r.paidOut.includes('Not Paid')?'<span class="pill pill-noshow">Not Paid</span>':r.paidOut.includes('Paid')?'<span class="pill pill-showed">Paid</span>':'—';
+    tbl+=`<tr><td style="color:var(--t);font-weight:600">${r.client}</td><td>${r.closer}</td><td>${r.collDate?fmtDate(r.collDate):'—'}</td><td style="color:var(--yl);font-weight:600">${fmtMoney2(r.amount)}</td><td>${r.releaseDate||'—'}</td><td style="color:${daysColor};font-weight:600">${r.daysUntil!==null?r.daysUntil+' days':'—'}</td><td>${statusPill}</td><td>${paidPill}</td></tr>`;
+  });
+  tbl+='</tbody></table></div>';
+
+  document.getElementById('reservesContent').innerHTML='<div class="analytics" style="grid-template-columns:1fr 1fr">'+repHTML+timeHTML+repTbl+'</div>'+tbl;
 }
 
 // ═══════════════════════════════════════
 // FINANCING VIEW
 // ═══════════════════════════════════════
+function toggleFinChartSelector(){
+  const el=document.getElementById('finChartSelector');
+  if(el)el.style.display=el.style.display==='none'?'block':'none';
+  if(el&&el.style.display==='block'){
+    const active=JSON.parse(localStorage.getItem('activeFinCharts')||'null')||['approvalByPartner','appsByRep','amtByPartner'];
+    const allOpts=['approvalByPartner','appsByRep','amtByPartner','approvalByRep','statusBreakdown','partnerVolume'];
+    const labels={approvalByPartner:'Approval Rate by Partner',appsByRep:'Applications by Rep',amtByPartner:'Amount: Requested vs Approved by Partner',approvalByRep:'Approval Rate by Rep',statusBreakdown:'Status Breakdown by Partner',partnerVolume:'Partner Volume (App Count)'};
+    const optEl=document.getElementById('finChartOptions');
+    if(optEl)optEl.innerHTML=allOpts.map(id=>{
+      const isActive=active.includes(id);
+      return`<label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#888;cursor:pointer;padding:6px 8px;border-radius:6px;background:${isActive?'rgba(6,182,212,.1)':'rgba(255,255,255,.02)'};border:1px solid ${isActive?'rgba(6,182,212,.2)':'rgba(255,255,255,.06)'}"><input type="checkbox" value="${id}" ${isActive?'checked':''} style="accent-color:#06b6d4"> ${labels[id]}</label>`;
+    }).join('');
+  }
+}
+function saveFinCharts(){
+  const checks=[...document.querySelectorAll('#finChartOptions input:checked')].map(c=>c.value);
+  localStorage.setItem('activeFinCharts',JSON.stringify(checks));
+  document.getElementById('finChartSelector').style.display='none';
+  renderFinancing();
+}
+
+function toggleFinKPISelector(){
+  const el=document.getElementById('finKPISelector');
+  if(el)el.style.display=el.style.display==='none'?'block':'none';
+  if(el&&el.style.display==='block'){
+    const active=JSON.parse(localStorage.getItem('activeFinKPIs')||'null')||['applications','approvalRate','denied','pending','avgAmount','topPartner'];
+    const allOpts=['applications','approvalRate','denied','pending','avgAmount','topPartner','totalRequested','totalApproved','avgCreditScore','purchaseRate','topRep','denialRate'];
+    const labels={applications:'Applications',approvalRate:'Approval Rate',denied:'Denied',pending:'Pending',avgAmount:'Avg Amount',topPartner:'Top Partner',totalRequested:'Total Requested',totalApproved:'Total Approved $',avgCreditScore:'Avg Credit Score',purchaseRate:'Purchase Rate',topRep:'Top Rep',denialRate:'Denial Rate'};
+    const optEl=document.getElementById('finKPIOptions');
+    if(optEl)optEl.innerHTML=allOpts.map(id=>{
+      const isActive=active.includes(id);
+      return`<label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#888;cursor:pointer;padding:6px 8px;border-radius:6px;background:${isActive?'rgba(6,182,212,.1)':'rgba(255,255,255,.02)'};border:1px solid ${isActive?'rgba(6,182,212,.2)':'rgba(255,255,255,.06)'}"><input type="checkbox" value="${id}" ${isActive?'checked':''} onchange="if([...document.querySelectorAll('#finKPIOptions input:checked')].length>6)this.checked=false;" style="accent-color:#06b6d4"> ${labels[id]}</label>`;
+    }).join('');
+  }
+}
+function saveFinKPIs(){
+  const checks=[...document.querySelectorAll('#finKPIOptions input:checked')].map(c=>c.value).slice(0,6);
+  localStorage.setItem('activeFinKPIs',JSON.stringify(checks));
+  document.getElementById('finKPISelector').style.display='none';
+  renderFinancing();
+}
+
 function renderFinancing(){
   if(typeof FIN_D==='undefined'||!FIN_D.length){document.getElementById('finContent').innerHTML='<p style="color:var(--tm);padding:20px">No financing data available.</p>';return;}
   const data=filterByDateAndRep(FIN_D,0,13);
@@ -1251,56 +1659,138 @@ function renderFinancing(){
   const partnerCounts={};
   data.forEach(r=>{const p=r[3]||'';if(p)partnerCounts[p]=(partnerCounts[p]||0)+1;});
   const topPartner=Object.entries(partnerCounts).sort((a,b)=>b[1]-a[1])[0];
+  const totalRequested=data.reduce((a,r)=>a+numVal(r[4]),0);
+  const totalApprovedAmt=data.filter(r=>(r[5]||'').toLowerCase().includes('approved')).reduce((a,r)=>a+numVal(r[4]),0);
+  const purchased=data.filter(r=>(r[6]||'').toLowerCase()==='yes'||(r[6]||'').toLowerCase()==='purchased').length;
+  const avgCS2=data.filter(r=>numVal(r[7])>0);
+  const avgCSVal=avgCS2.length>0?Math.round(avgCS2.reduce((a,r)=>a+numVal(r[7]),0)/avgCS2.length):0;
+  const repCounts={};data.forEach(r=>{const rep=r[13]||'';if(rep)repCounts[rep]=(repCounts[rep]||0)+1;});
+  const topRep=Object.entries(repCounts).sort((a,b)=>b[1]-a[1])[0];
 
-  document.getElementById('finKPIs').innerHTML=`
-    <div class="kpi"><div class="label">${tip("Applications","<strong>Applications</strong><br>Total financing applications submitted in the selected period.<br><code>COUNT(all financing rows)</code>")}</div><div class="value" style="color:#3ea2e4">${total}</div><div class="detail">Total submitted</div></div>
-    <div class="kpi"><div class="label">${tip("Approval Rate","<strong>Approval Rate</strong><br>Percentage of applications approved by financing partners.<br><code>Approved ÷ Total × 100</code>")}</div><div class="value" style="color:var(--gn)">${approvalRate}%</div><div class="detail">${approved} approved</div></div>
-    <div class="kpi"><div class="label">${tip("Denied","<strong>Denied</strong><br>Applications rejected by the financing partner.<br><code>COUNT(Status = Denied)</code>")}</div><div class="value" style="color:var(--rd)">${denied}</div><div class="detail">${total>0?(denied/total*100).toFixed(1):0}%</div></div>
-    <div class="kpi"><div class="label">${tip("Pending","<strong>Pending</strong><br>Applications still awaiting a decision from the financing partner.<br><code>COUNT(Status = Pending)</code>")}</div><div class="value" style="color:var(--yl)">${pending}</div><div class="detail">Awaiting decision</div></div>
-    <div class="kpi"><div class="label">${tip("Avg Amount","<strong>Avg Amount Requested</strong><br>Mean funding amount requested across all applications.<br><code>SUM(Amount) ÷ Total Apps</code>")}</div><div class="value" style="color:#3ea2e4">${fmtMoney(avgAmt)}</div><div class="detail">Requested</div></div>
-    <div class="kpi"><div class="label">${tip("Top Partner","<strong>Top Partner</strong><br>Financing partner with the most applications submitted.<br><code>MODE(Funding Partner)</code>")}</div><div class="value" style="color:#8a62ec;font-size:18px">${topPartner?topPartner[0]:'—'}</div><div class="detail">${topPartner?topPartner[1]+' apps':'—'}</div></div>`;
+  const finKPIMap={
+    applications:{label:tip("Applications","<strong>Applications</strong><br>Total financing applications submitted.<br><code>COUNT(all rows)</code><br>📎 <em>Source: AIC Financing Log (CB tab)</em>"),value:total,color:'#3ea2e4',detail:'Total submitted'},
+    approvalRate:{label:tip("Approval Rate","<strong>Approval Rate</strong><br>% of applications approved.<br><code>Approved ÷ Total × 100</code><br>📎 <em>Source: AIC Financing Log (CB tab)</em>"),value:approvalRate+'%',color:'var(--gn)',detail:approved+' approved'},
+    denied:{label:tip("Denied","<strong>Denied</strong><br>Applications rejected.<br><code>COUNT(Status = Denied)</code><br>📎 <em>Source: AIC Financing Log (CB tab)</em>"),value:denied,color:'var(--rd)',detail:(total>0?(denied/total*100).toFixed(1):0)+'%'},
+    pending:{label:tip("Pending","<strong>Pending</strong><br>Applications awaiting decision.<br><code>COUNT(Status = Pending)</code><br>📎 <em>Source: AIC Financing Log (CB tab)</em>"),value:pending,color:'var(--yl)',detail:'Awaiting decision'},
+    avgAmount:{label:tip("Avg Amount","<strong>Avg Amount Requested</strong><br>Mean funding amount requested.<br><code>SUM(Amount) ÷ Total Apps</code><br>📎 <em>Source: AIC Financing Log (CB tab)</em>"),value:fmtMoney(avgAmt),color:'#3ea2e4',detail:'Requested'},
+    topPartner:{label:tip("Top Partner","<strong>Top Partner</strong><br>Partner with most applications.<br><code>MODE(Funding Partner)</code><br>📎 <em>Source: AIC Financing Log (CB tab)</em>"),value:topPartner?topPartner[0]:'—',color:'#8a62ec',detail:topPartner?topPartner[1]+' apps':'—',fontSize:'18px'},
+    totalRequested:{label:tip("Total Requested","<strong>Total Requested</strong><br>Sum of all funding amounts requested.<br><code>SUM(Funding Amount)</code><br>📎 <em>Source: AIC Financing Log (CB tab)</em>"),value:fmtMoney(totalRequested),color:'#06b6d4',detail:'All applications'},
+    totalApproved:{label:tip("Total Approved $","<strong>Total Approved Amount</strong><br>Sum of funding amounts for approved apps.<br><code>SUM(Amount) where Status = Approved</code><br>📎 <em>Source: AIC Financing Log (CB tab)</em>"),value:fmtMoney(totalApprovedAmt),color:'var(--gn)',detail:'Approved only'},
+    avgCreditScore:{label:tip("Avg Credit Score","<strong>Avg Credit Score</strong><br>Mean credit score of applicants.<br><code>AVG(Credit Score)</code><br>📎 <em>Source: AIC Financing Log (CB tab)</em>"),value:avgCSVal||'—',color:'#f59e0b',detail:avgCS2.length+' with scores'},
+    purchaseRate:{label:tip("Purchase Rate","<strong>Purchase Rate</strong><br>% of approved applicants who purchased.<br><code>Purchased ÷ Approved × 100</code><br>📎 <em>Source: AIC Financing Log (CB tab)</em>"),value:(approved>0?(purchased/approved*100).toFixed(1):0)+'%',color:'var(--gn)',detail:purchased+' purchased'},
+    topRep:{label:tip("Top Rep","<strong>Top Rep</strong><br>Rep who submitted the most financing applications.<br><code>MODE(Sales Rep)</code><br>📎 <em>Source: AIC Financing Log (CB tab)</em>"),value:topRep?topRep[0]:'—',color:'#f10cf6',detail:topRep?topRep[1]+' apps':'—',fontSize:'18px'},
+    denialRate:{label:tip("Denial Rate","<strong>Denial Rate</strong><br>% of applications denied.<br><code>Denied ÷ Total × 100</code><br>📎 <em>Source: AIC Financing Log (CB tab)</em>"),value:(total>0?(denied/total*100).toFixed(1):0)+'%',color:'var(--rd)',detail:denied+' denied'},
+  };
+  const activeFinKPIs=JSON.parse(localStorage.getItem('activeFinKPIs')||'null')||['applications','approvalRate','denied','pending','avgAmount','topPartner'];
+  document.getElementById('finKPIs').innerHTML=activeFinKPIs.filter(id=>finKPIMap[id]).map(id=>{const k=finKPIMap[id];return`<div class="kpi"><div class="label">${k.label}</div><div class="value" style="color:${k.color}${k.fontSize?';font-size:'+k.fontSize:''}">${k.value}</div><div class="detail">${k.detail}</div></div>`;}).join('');
 
-  // Partner approval rates
+  // Partner stats with dollar amounts
   const partnerStats={};
   data.forEach(r=>{
     const p=r[3]||'Unknown';
-    if(!partnerStats[p])partnerStats[p]={approved:0,denied:0,pending:0,total:0};
+    if(!partnerStats[p])partnerStats[p]={approved:0,denied:0,pending:0,total:0,reqAmt:0,appAmt:0};
     partnerStats[p].total++;
+    const amt=numVal(r[4]);
+    partnerStats[p].reqAmt+=amt;
     const s=(r[5]||'').toLowerCase();
-    if(s.includes('approved'))partnerStats[p].approved++;
+    if(s.includes('approved')){partnerStats[p].approved++;partnerStats[p].appAmt+=amt;}
     else if(s.includes('denied'))partnerStats[p].denied++;
     else if(s.includes('pending'))partnerStats[p].pending++;
   });
   const partners=Object.entries(partnerStats).filter(([k])=>k!=='Unknown'&&k).sort((a,b)=>b[1].total-a[1].total);
 
-  let partnerHTML='<div class="chart-card"><h3>📊 Approval Rate by Partner</h3>';
-  partners.forEach(([name,s])=>{
-    const rate=s.total>0?(s.approved/s.total*100):0;
-    const color=rate>=50?'bar-green':rate>=25?'bar-yellow':'bar-red';
-    partnerHTML+=`<div class="bar-row"><div class="bar-label" style="min-width:100px;font-size:11px">${name}</div><div class="bar-track"><div class="bar-fill ${color}" style="width:${Math.max(rate,5)}%">${rate.toFixed(0)}% (${s.approved}/${s.total})</div></div></div>`;
-  });
-  partnerHTML+='</div>';
-
-  // Rep approval rates
+  // Rep stats
   const repStats={};
   data.forEach(r=>{
     const rep=r[13]||r[12]||'';
     if(!rep)return;
-    if(!repStats[rep])repStats[rep]={approved:0,denied:0,total:0};
+    if(!repStats[rep])repStats[rep]={approved:0,denied:0,total:0,reqAmt:0,appAmt:0};
     repStats[rep].total++;
-    if((r[5]||'').toLowerCase().includes('approved'))repStats[rep].approved++;
+    repStats[rep].reqAmt+=numVal(r[4]);
+    if((r[5]||'').toLowerCase().includes('approved')){repStats[rep].approved++;repStats[rep].appAmt+=numVal(r[4]);}
     if((r[5]||'').toLowerCase().includes('denied'))repStats[rep].denied++;
   });
   const reps=Object.entries(repStats).sort((a,b)=>b[1].total-a[1].total);
 
-  let repHTML='<div class="chart-card"><h3>👤 Applications by Rep</h3>';
-  const maxRep=reps.length?reps[0][1].total:1;
-  reps.forEach(([name,s])=>{
-    const rate=s.total>0?(s.approved/s.total*100):0;
-    repHTML+=`<div class="bar-row"><div class="bar-label">${name}</div><div class="bar-track"><div class="bar-fill bar-cyan" style="width:${(s.total/maxRep*100).toFixed(0)}%">${s.total} apps · ${rate.toFixed(0)}% approved</div></div></div>`;
-  });
-  repHTML+='</div>';
+  // Build chart functions
+  const finChartContent={};
 
+  // Approval Rate by Partner
+  finChartContent.approvalByPartner=()=>{
+    let h='<div class="chart-card"><h3>Approval Rate by Partner</h3>';
+    partners.forEach(([name,s])=>{
+      const rate=s.total>0?(s.approved/s.total*100):0;
+      const color=rate>=50?'bar-green':rate>=25?'bar-yellow':'bar-red';
+      h+=`<div class="bar-row"><div class="bar-label">${name}</div><div class="bar-track"><div class="bar-fill ${color}" style="width:${Math.max(rate,5)}%">${rate.toFixed(0)}% (${s.approved}/${s.total})</div></div></div>`;
+    });
+    return h+'</div>';
+  };
+
+  // Applications by Rep
+  finChartContent.appsByRep=()=>{
+    let h='<div class="chart-card"><h3>Applications by Rep</h3>';
+    const maxR=reps.length?reps[0][1].total:1;
+    reps.forEach(([name,s])=>{
+      const rate=s.total>0?(s.approved/s.total*100):0;
+      h+=`<div class="bar-row"><div class="bar-label">${name}</div><div class="bar-track"><div class="bar-fill bar-cyan" style="width:${(s.total/maxR*100).toFixed(0)}%">${s.total} apps · ${rate.toFixed(0)}% approved</div></div></div>`;
+    });
+    return h+'</div>';
+  };
+
+  // Amount Requested vs Approved by Partner (the new one Chris wants)
+  finChartContent.amtByPartner=()=>{
+    let h='<div class="chart-card" style="grid-column:1/-1"><h3>Amount: Requested vs Approved by Partner</h3>';
+    const maxAmt=Math.max(...partners.map(([,s])=>s.reqAmt),1);
+    partners.forEach(([name,s])=>{
+      const reqPct=Math.max((s.reqAmt/maxAmt*100),3);
+      const appPct=s.reqAmt>0?(s.appAmt/s.reqAmt*100):0;
+      h+=`<div style="margin-bottom:12px"><div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><span class="bar-label">${name}</span><span style="font-size:10px;color:var(--td)">${s.total} apps</span></div>`;
+      h+=`<div style="position:relative;height:24px;background:rgba(255,255,255,.04);border-radius:6px;overflow:hidden">`;
+      h+=`<div style="position:absolute;top:0;left:0;height:100%;width:${reqPct.toFixed(1)}%;background:rgba(62,162,228,.25);border-radius:6px"></div>`;
+      h+=`<div style="position:absolute;top:0;left:0;height:100%;width:${(appPct*reqPct/100).toFixed(1)}%;background:rgba(74,222,128,.5);border-radius:6px"></div>`;
+      h+=`<div style="position:absolute;top:50%;left:8px;transform:translateY(-50%);font-size:11px;font-weight:600;color:var(--t);white-space:nowrap">Req: ${fmtMoney(s.reqAmt)} → Appr: ${fmtMoney(s.appAmt)} (${appPct.toFixed(0)}%)</div>`;
+      h+=`</div></div>`;
+    });
+    h+=`<div style="font-size:10px;color:var(--td);margin-top:8px"><span style="color:#3ea2e4">■</span> Requested &nbsp; <span style="color:#4ade80">■</span> Approved</div>`;
+    return h+'</div>';
+  };
+
+  // Approval Rate by Rep
+  finChartContent.approvalByRep=()=>{
+    let h='<div class="chart-card"><h3>Approval Rate by Rep</h3>';
+    reps.forEach(([name,s])=>{
+      const rate=s.total>0?(s.approved/s.total*100):0;
+      const color=rate>=50?'bar-green':rate>=25?'bar-yellow':'bar-red';
+      h+=`<div class="bar-row"><div class="bar-label">${name}</div><div class="bar-track"><div class="bar-fill ${color}" style="width:${Math.max(rate,5)}%">${rate.toFixed(0)}% (${s.approved}/${s.total})</div></div></div>`;
+    });
+    return h+'</div>';
+  };
+
+  // Status Breakdown by Partner (stacked-ish)
+  finChartContent.statusBreakdown=()=>{
+    let h='<div class="chart-card"><h3>Status Breakdown by Partner</h3>';
+    partners.forEach(([name,s])=>{
+      h+=`<div class="bar-row"><div class="bar-label">${name}</div><div style="display:flex;gap:4px;flex:1"><span style="background:var(--gn);padding:2px 8px;border-radius:4px;font-size:10px;color:#000;font-weight:600;min-width:${s.total>0?(s.approved/s.total*100):0}%">${s.approved}✓</span><span style="background:var(--rd);padding:2px 8px;border-radius:4px;font-size:10px;color:#fff;font-weight:600">${s.denied}✗</span>${s.pending>0?`<span style="background:var(--yl);padding:2px 8px;border-radius:4px;font-size:10px;color:#000;font-weight:600">${s.pending}⏳</span>`:''}</div></div>`;
+    });
+    return h+'</div>';
+  };
+
+  // Partner Volume
+  finChartContent.partnerVolume=()=>{
+    let h='<div class="chart-card"><h3>Partner Volume</h3>';
+    const maxP=partners.length?partners[0][1].total:1;
+    partners.forEach(([name,s])=>{
+      h+=`<div class="bar-row"><div class="bar-label">${name}</div><div class="bar-track"><div class="bar-fill bar-purple" style="width:${(s.total/maxP*100).toFixed(0)}%">${s.total} applications</div></div></div>`;
+    });
+    return h+'</div>';
+  };
+
+  // Render active charts
+  const activeFinCharts=JSON.parse(localStorage.getItem('activeFinCharts')||'null')||['approvalByPartner','appsByRep','amtByPartner'];
+  let chartsHTML='<div class="analytics" style="grid-template-columns:1fr 1fr">';
+  activeFinCharts.forEach(id=>{if(finChartContent[id])chartsHTML+=finChartContent[id]();});
+  chartsHTML+='</div>';
+  document.getElementById('finChartsArea').innerHTML=chartsHTML;
   // Application table
   let tbl=`<div class="row-count">${total} applications</div><div class="table-wrap"><table><thead><tr><th>Date (ET)</th><th>Name</th><th>Email</th><th>Partner</th><th>Amount</th><th>Status</th><th>CS</th><th>Rep</th></tr></thead><tbody>`;
   data.forEach(r=>{
@@ -1311,7 +1801,7 @@ function renderFinancing(){
   });
   tbl+='</tbody></table></div>';
 
-  document.getElementById('finContent').innerHTML='<div class="analytics" style="grid-template-columns:1fr 1fr">'+partnerHTML+repHTML+'</div>'+tbl;
+  document.getElementById('finContent').innerHTML=tbl;
 }
 
 // ═══════════════════════════════════════
@@ -1372,7 +1862,7 @@ function renderEOD(){
   ];
   const maxStage=stages[0].val||1;
   stages.forEach(s=>{
-    funHTML+=`<div class="bar-row"><div class="bar-label" style="min-width:90px">${s.label}</div><div class="bar-track"><div class="bar-fill ${s.color}" style="width:${Math.max((s.val/maxStage*100),3).toFixed(0)}%">${s.val.toLocaleString()}</div></div></div>`;
+    funHTML+=`<div class="bar-row"><div class="bar-label" >${s.label}</div><div class="bar-track"><div class="bar-fill ${s.color}" style="width:${Math.max((s.val/maxStage*100),3).toFixed(0)}%">${s.val.toLocaleString()}</div></div></div>`;
   });
   funHTML+='</div>';
 
@@ -1390,6 +1880,27 @@ function renderEOD(){
 // ═══════════════════════════════════════
 // COMMISSIONS VIEW (Payouts & Reserves)
 // ═══════════════════════════════════════
+function toggleCommKPISelector(){
+  const el=document.getElementById('commKPISelector');
+  if(el)el.style.display=el.style.display==='none'?'block':'none';
+  if(el&&el.style.display==='block'){
+    const active=JSON.parse(localStorage.getItem('activeCommKPIs')||'null')||['outstanding','alreadyPaid','totalReserves','totalComm','closerOutstanding','numDeals'];
+    const allOpts=['outstanding','alreadyPaid','totalReserves','totalComm','closerOutstanding','numDeals','setterOutstanding','setterPaid','closerPaid','avgCommPerDeal','reserveRatio','paidVsOwedRatio'];
+    const labels={outstanding:'Outstanding',alreadyPaid:'Already Paid',totalReserves:'Total Reserves',totalComm:'Total Commission',closerOutstanding:'Closer Outstanding',numDeals:'# Deals',setterOutstanding:'Setter Outstanding',setterPaid:'Setter Already Paid',closerPaid:'Closer Already Paid',avgCommPerDeal:'Avg Comm/Deal',reserveRatio:'Reserve Ratio',paidVsOwedRatio:'Paid vs Owed %'};
+    const optEl=document.getElementById('commKPIOptions');
+    if(optEl)optEl.innerHTML=allOpts.map(id=>{
+      const isActive=active.includes(id);
+      return`<label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#888;cursor:pointer;padding:6px 8px;border-radius:6px;background:${isActive?'rgba(6,182,212,.1)':'rgba(255,255,255,.02)'};border:1px solid ${isActive?'rgba(6,182,212,.2)':'rgba(255,255,255,.06)'}"><input type="checkbox" value="${id}" ${isActive?'checked':''} onchange="if([...document.querySelectorAll('#commKPIOptions input:checked')].length>6)this.checked=false;" style="accent-color:#06b6d4"> ${labels[id]}</label>`;
+    }).join('');
+  }
+}
+function saveCommKPIs(){
+  const checks=[...document.querySelectorAll('#commKPIOptions input:checked')].map(c=>c.value).slice(0,6);
+  localStorage.setItem('activeCommKPIs',JSON.stringify(checks));
+  document.getElementById('commKPISelector').style.display='none';
+  renderCommissionsView();
+}
+
 function renderCommissionsView(){
   if(typeof COMM_D==='undefined'||!COMM_D.length){document.getElementById('commContent2').innerHTML='<p style="color:var(--tm);padding:20px">No commission data available.</p>';return;}
   const data=filterByDateAndRep(COMM_D,4,13);
@@ -1405,13 +1916,22 @@ function renderCommissionsView(){
   const totalReserves=data.reduce((a,r)=>a+numVal(r[24])+numVal(r[19]),0);
   const totalComm=data.reduce((a,r)=>a+numVal(r[22])+numVal(r[17]),0);
 
-  document.getElementById('commKPIs2').innerHTML=`
-    <div class="kpi"><div class="label">${tip('Outstanding','<strong>Outstanding</strong><br>Commissions marked Outstanding - Not Paid, still owed to reps.<br><code>SUM(Payable) where Comm Status = Outstanding</code>')}</div><div class="value" style="color:var(--rd)">${fmtMoney2(totalOutstanding)}</div><div class="detail">Needs to be paid</div></div>
-    <div class="kpi"><div class="label">${tip('Already Paid','<strong>Already Paid</strong><br>Commissions already paid out to reps.<br><code>SUM(Payable) where Comm Status = Paid</code>')}</div><div class="value" style="color:var(--gn)">${fmtMoney2(totalAlreadyPaid)}</div><div class="detail">${closerPaid.length} entries paid</div></div>
-    <div class="kpi"><div class="label">${tip('Total Reserves','<strong>Total Reserves</strong><br>All reserves held 90 days (closer + setter).<br><code>SUM(All Reserve $)</code>')}</div><div class="value" style="color:var(--yl)">${fmtMoney2(totalReserves)}</div><div class="detail">Held 90 days</div></div>
-    <div class="kpi"><div class="label">${tip('Total Commission','<strong>Total Commission</strong><br>Gross commission before reserves.<br><code>SUM(Closer Total + Setter Comm)</code>')}</div><div class="value" style="color:var(--tm)">${fmtMoney2(totalComm)}</div><div class="detail">Before reserves</div></div>
-    <div class="kpi"><div class="label">${tip('Closer Outstanding','<strong>Closer Outstanding</strong><br>Closer payable commissions not yet paid.<br><code>SUM(Closer Payable) where status != Paid</code>')}</div><div class="value" style="color:#3ea2e4">${fmtMoney2(outstandingCloserPay)}</div><div class="detail">${closerOutstanding.length} entries</div></div>
-    <div class="kpi"><div class="label">${tip('# Deals','<strong># Deals</strong><br>Total payments in selected range.<br><code>COUNT(rows)</code>')}</div><div class="value" style="color:#3ea2e4">${data.length}</div><div class="detail">Commission-bearing</div></div>`;
+  const commKPIMap={
+    outstanding:{label:tip('Outstanding','<strong>Outstanding</strong><br>Commissions marked Outstanding - Not Paid, still owed to reps.<br><code>SUM(Payable) where Comm Status = Outstanding</code><br>📎 <em>Source: AR/Commission Log (Payments tab)</em>'),value:fmtMoney2(totalOutstanding),color:'var(--rd)',detail:'Needs to be paid'},
+    alreadyPaid:{label:tip('Already Paid','<strong>Already Paid</strong><br>Commissions already paid out to reps.<br><code>SUM(Payable) where Comm Status = Paid</code><br>📎 <em>Source: AR/Commission Log (Payments tab)</em>'),value:fmtMoney2(totalAlreadyPaid),color:'var(--gn)',detail:closerPaid.length+' entries paid'},
+    totalReserves:{label:tip('Total Reserves','<strong>Total Reserves</strong><br>All reserves held 90 days (closer + setter).<br><code>SUM(All Reserve $)</code><br>📎 <em>Source: AR/Commission Log (Payments tab)</em>'),value:fmtMoney2(totalReserves),color:'var(--yl)',detail:'Held 90 days'},
+    totalComm:{label:tip('Total Commission','<strong>Total Commission</strong><br>Gross commission before reserves.<br><code>SUM(Closer Total + Setter Comm)</code><br>📎 <em>Source: AR/Commission Log (Payments tab)</em>'),value:fmtMoney2(totalComm),color:'var(--tm)',detail:'Before reserves'},
+    closerOutstanding:{label:tip('Closer Outstanding','<strong>Closer Outstanding</strong><br>Closer payable commissions not yet paid.<br><code>SUM(Closer Payable) where status != Paid</code><br>📎 <em>Source: AR/Commission Log (Payments tab)</em>'),value:fmtMoney2(outstandingCloserPay),color:'#3ea2e4',detail:closerOutstanding.length+' entries'},
+    numDeals:{label:tip('# Deals','<strong># Deals</strong><br>Total payments in selected range.<br><code>COUNT(rows)</code><br>📎 <em>Source: AR/Commission Log (Payments tab)</em>'),value:data.length,color:'#3ea2e4',detail:'Commission-bearing'},
+    setterOutstanding:{label:tip('Setter Outstanding','<strong>Setter Outstanding</strong><br>Setter payable commissions not yet paid.<br><code>SUM(Setter Payable) where status = Outstanding</code><br>📎 <em>Source: AR/Commission Log (Payments tab)</em>'),value:fmtMoney2(outstandingSetterPay),color:'#f10cf6',detail:'Owed to setters'},
+    setterPaid:{label:tip('Setter Paid','<strong>Setter Paid</strong><br>Setter commissions already paid out.<br><code>SUM(Setter Payable) where status = Paid</code><br>📎 <em>Source: AR/Commission Log (Payments tab)</em>'),value:fmtMoney2(paidSetterPay),color:'var(--gn)',detail:'Setter entries'},
+    closerPaid:{label:tip('Closer Paid','<strong>Closer Paid</strong><br>Closer commissions already paid out.<br><code>SUM(Closer Payable) where status = Paid</code><br>📎 <em>Source: AR/Commission Log (Payments tab)</em>'),value:fmtMoney2(paidCloserPay),color:'var(--gn)',detail:closerPaid.length+' entries'},
+    avgCommPerDeal:{label:tip('Avg Comm/Deal','<strong>Avg Commission per Deal</strong><br>Average total commission per payment.<br><code>Total Commission ÷ # Deals</code><br>📎 <em>Source: AR/Commission Log (Payments tab)</em>'),value:fmtMoney2(data.length>0?totalComm/data.length:0),color:'#06b6d4',detail:'Per deal avg'},
+    reserveRatio:{label:tip('Reserve Ratio','<strong>Reserve Ratio</strong><br>Reserves as % of total commissions.<br><code>Total Reserves ÷ Total Commission × 100</code><br>📎 <em>Source: AR/Commission Log (Payments tab)</em>'),value:(totalComm>0?(totalReserves/totalComm*100).toFixed(1):0)+'%',color:'var(--yl)',detail:'Of total comm'},
+    paidVsOwedRatio:{label:tip('Paid vs Owed %','<strong>Paid vs Owed</strong><br>% of payable commissions already paid.<br><code>Paid ÷ (Paid + Outstanding) × 100</code><br>📎 <em>Source: AR/Commission Log (Payments tab)</em>'),value:((totalAlreadyPaid+totalOutstanding)>0?(totalAlreadyPaid/(totalAlreadyPaid+totalOutstanding)*100).toFixed(1):0)+'%',color:'var(--gn)',detail:'Payout progress'},
+  };
+  const activeCommKPIs=JSON.parse(localStorage.getItem('activeCommKPIs')||'null')||['outstanding','alreadyPaid','totalReserves','totalComm','closerOutstanding','numDeals'];
+  document.getElementById('commKPIs2').innerHTML=activeCommKPIs.filter(id=>commKPIMap[id]).map(id=>{const k=commKPIMap[id];return`<div class="kpi"><div class="label">${k.label}</div><div class="value" style="color:${k.color}">${k.value}</div><div class="detail">${k.detail}</div></div>`;}).join('');
 
   const closerMap={};
   data.forEach(r=>{const c=r[13]||'Unknown';const isPaid=(r[28]||'').includes('Paid')&&!(r[28]||'').includes('Not Paid');if(!closerMap[c])closerMap[c]={total:0,reserve:0,paid:0,outstanding:0,deals:0};closerMap[c].total+=numVal(r[22]);closerMap[c].reserve+=numVal(r[24]);closerMap[c].deals++;if(isPaid)closerMap[c].paid+=numVal(r[25]);else closerMap[c].outstanding+=numVal(r[25]);});
@@ -1469,12 +1989,12 @@ function renderEODCompliance(){
   const missingToday=allReps.filter(rep=>{const today=new Date().toLocaleDateString('en-US');return!subMap[rep].has(today);});
   
   document.getElementById('complianceKPIs').innerHTML=`
-    <div class="kpi"><div class="label">${tip('Compliance Rate','<strong>Compliance Rate</strong><br>Percentage of expected submissions received.<br><code>Submissions ÷ (Reps × Days) × 100</code>')}</div><div class="value" style="color:${parseFloat(complianceRate)>=80?'var(--gn)':parseFloat(complianceRate)>=50?'var(--yl)':'var(--rd)'}">${complianceRate}%</div><div class="detail">${totalSubmitted}/${totalPossible} expected</div></div>
-    <div class="kpi"><div class="label">${tip('Active Reps','<strong>Active Reps</strong><br>Reps with at least one submission in period.<br><code>COUNT(DISTINCT Rep)</code>')}</div><div class="value" style="color:#3ea2e4">${allReps.length}</div><div class="detail">Tracked reps</div></div>
-    <div class="kpi"><div class="label">${tip('Days Tracked','<strong>Days Tracked</strong><br>Unique dates with at least one submission.<br><code>COUNT(DISTINCT Date)</code>')}</div><div class="value" style="color:#8a62ec">${allDates.length}</div><div class="detail">In range</div></div>
-    <div class="kpi"><div class="label">${tip('Perfect Compliance','<strong>Perfect Compliance</strong><br>Reps who submitted every single day in the period.<br><code>COUNT(reps where days = total days)</code>')}</div><div class="value" style="color:var(--gn)">${perfectReps}</div><div class="detail">of ${allReps.length} reps</div></div>
-    <div class="kpi"><div class="label">${tip('Total Submissions','<strong>Total Submissions</strong><br>Total EOD forms received.<br><code>COUNT(rows)</code>')}</div><div class="value" style="color:#3ea2e4">${totalSubmitted}</div><div class="detail">Forms received</div></div>
-    <div class="kpi"><div class="label">${tip('Avg Submissions','<strong>Avg Submissions/Rep</strong><br>Average days submitted per rep.<br><code>Submissions ÷ Reps</code>')}</div><div class="value" style="color:#3ea2e4">${allReps.length>0?(totalSubmitted/allReps.length).toFixed(1):0}</div><div class="detail">Per rep</div></div>`;
+    <div class="kpi"><div class="label">${tip('Compliance Rate','<strong>Compliance Rate</strong><br>Percentage of expected submissions received.<br><code>Submissions ÷ (Reps × Days) × 100</code><br>📎 <em>Source: Master EOD Log</em>')}</div><div class="value" style="color:${parseFloat(complianceRate)>=80?'var(--gn)':parseFloat(complianceRate)>=50?'var(--yl)':'var(--rd)'}">${complianceRate}%</div><div class="detail">${totalSubmitted}/${totalPossible} expected</div></div>
+    <div class="kpi"><div class="label">${tip('Active Reps','<strong>Active Reps</strong><br>Reps with at least one submission in period.<br><code>COUNT(DISTINCT Rep)</code><br>📎 <em>Source: Master EOD Log</em>')}</div><div class="value" style="color:#3ea2e4">${allReps.length}</div><div class="detail">Tracked reps</div></div>
+    <div class="kpi"><div class="label">${tip('Days Tracked','<strong>Days Tracked</strong><br>Unique dates with at least one submission.<br><code>COUNT(DISTINCT Date)</code><br>📎 <em>Source: Master EOD Log</em>')}</div><div class="value" style="color:#8a62ec">${allDates.length}</div><div class="detail">In range</div></div>
+    <div class="kpi"><div class="label">${tip('Perfect Compliance','<strong>Perfect Compliance</strong><br>Reps who submitted every single day in the period.<br><code>COUNT(reps where days = total days)</code><br>📎 <em>Source: Master EOD Log</em>')}</div><div class="value" style="color:var(--gn)">${perfectReps}</div><div class="detail">of ${allReps.length} reps</div></div>
+    <div class="kpi"><div class="label">${tip('Total Submissions','<strong>Total Submissions</strong><br>Total EOD forms received.<br><code>COUNT(rows)</code><br>📎 <em>Source: Master EOD Log</em>')}</div><div class="value" style="color:#3ea2e4">${totalSubmitted}</div><div class="detail">Forms received</div></div>
+    <div class="kpi"><div class="label">${tip('Avg Submissions','<strong>Avg Submissions/Rep</strong><br>Average days submitted per rep.<br><code>Submissions ÷ Reps</code><br>📎 <em>Source: Master EOD Log</em>')}</div><div class="value" style="color:#3ea2e4">${allReps.length>0?(totalSubmitted/allReps.length).toFixed(1):0}</div><div class="detail">Per rep</div></div>`;
 
   // Rep compliance table
   let repTbl='<div class="chart-card" style="margin-bottom:16px"><h3>✅ Rep Compliance Breakdown</h3><table style="font-size:12px;width:100%"><thead><tr><th>Rep</th><th>Days Submitted</th><th>Days Expected</th><th>Compliance %</th><th>Missed Days</th><th>Status</th></tr></thead><tbody>';
@@ -1490,7 +2010,7 @@ function renderEODCompliance(){
 
   // Compliance heatmap (reps × recent dates)
   const recentDates=allDates.slice(-14);
-  let heatHTML='<div class="chart-card"><h3>📅 Submission Heatmap (Last 14 Days in Range)</h3><div style="overflow-x:auto"><table style="font-size:10px"><thead><tr><th style="min-width:100px">Rep</th>';
+  let heatHTML='<div class="chart-card"><h3>📅 Submission Heatmap (Last 14 Days in Range)</h3><div style="overflow-x:auto"><table style="font-size:10px"><thead><tr><th >Rep</th>';
   recentDates.forEach(d=>{const parts=d.split('/');heatHTML+=`<th style="min-width:32px;text-align:center;padding:4px">${parts[0]}/${parts[1]}</th>`;});
   heatHTML+='</tr></thead><tbody>';
   allReps.forEach(rep=>{
@@ -1529,6 +2049,88 @@ function renderEODSubmissions(){
 const SETTERS=ACTIVE_TEAM.filter(t=>t.role==='Setter').map(t=>t.name);
 const MAX_DEMOS_PER_DAY=6;
 
+// ═══════════════════════════════════════
+// APPOINTMENT SETTING VIEW
+// ═══════════════════════════════════════
+function toggleASKPISelector(){const el=document.getElementById('asKPISelector');if(el)el.style.display=el.style.display==='none'?'block':'none';}
+function saveASKPIs(){const checks=[...document.querySelectorAll('#asKPISelector input:checked')].map(c=>c.value).slice(0,6);localStorage.setItem('activeASKPIs',JSON.stringify(checks));document.getElementById('asKPISelector').style.display='none';renderApptSetting();}
+
+function renderApptSetting(){
+  const selectedReps=getSelectedReps();
+  const range=getGlobalDateRange();
+  const activeNames=ACTIVE_NAMES;
+  const SETTER_SOURCE='Manual / Salesperson';
+  const apptData=D.filter(r=>{
+    if(!r[CI.apptSource]||r[CI.apptSource].trim()!==SETTER_SOURCE)return false;
+    const d=parseDate(r[CI.date]);
+    if(d&&(d<range.start||d>range.end))return false;
+    if(selectedReps!=='all'&&!selectedReps.includes(r[CI.rep]))return false;
+    return true;
+  });
+  const repStats={};
+  activeNames.forEach(n=>{repStats[n]={calls:0,connects:0,sets:0,shownFromSets:0,days:0,appts:0,showed:0};});
+  apptData.forEach(r=>{
+    const rep=r[CI.rep];if(!rep||!activeNames.includes(rep))return;
+    repStats[rep].appts++;
+    if(r[CI.status]==='Showed')repStats[rep].showed++;
+  });
+  const totalAppts=Object.values(repStats).reduce((a,s)=>a+s.appts,0);
+  const totalShowed=Object.values(repStats).reduce((a,s)=>a+s.showed,0);
+  const showRate=totalAppts>0?(totalShowed/totalAppts*100).toFixed(1):0;
+  let totalCalls=0,totalConnects=0,totalSets=0,totalShownFromSets=0;
+  if(typeof EOD_D!=='undefined'&&EOD_D.length){
+    EOD_D.forEach(r=>{
+      const rep=(r[2]||'').trim();if(!rep||!activeNames.includes(rep))return;
+      const d=parseAnyDate(r[1]);if(d&&(d<range.start||d>range.end))return;
+      if(selectedReps!=='all'&&!selectedReps.includes(rep))return;
+      if(!repStats[rep])repStats[rep]={calls:0,connects:0,sets:0,shownFromSets:0,days:0,appts:0,showed:0};
+      repStats[rep].calls+=parseInt(r[3])||0;
+      repStats[rep].connects+=parseInt(r[4])||0;
+      repStats[rep].sets+=parseFloat(r[5])||0;
+      repStats[rep].shownFromSets+=parseInt(r[6])||0;
+      repStats[rep].days++;
+    });
+    totalCalls=Object.values(repStats).reduce((a,s)=>a+s.calls,0);
+    totalConnects=Object.values(repStats).reduce((a,s)=>a+s.connects,0);
+    totalSets=Object.values(repStats).reduce((a,s)=>a+s.sets,0);
+    totalShownFromSets=Object.values(repStats).reduce((a,s)=>a+s.shownFromSets,0);
+  }
+  const connectRate=totalCalls>0?(totalConnects/totalCalls*100).toFixed(1):0;
+  const setRate=totalConnects>0?(totalSets/totalConnects*100).toFixed(1):0;
+  const callsPerSet=totalSets>0?(totalCalls/totalSets).toFixed(1):0;
+  const setShowRate=totalSets>0?(totalShownFromSets/totalSets*100).toFixed(1):0;
+  const kpiMap={
+    totalAppts:{label:tip('Setter Appts','Appointments where Source = Manual / Salesperson.'),value:totalAppts,color:'#3ea2e4',detail:'From appt log (col Z)'},
+    demosHeld:{label:tip('Demos Held','Setter-booked appts where prospect showed.'),value:totalShowed,color:'#8a62ec',detail:'Showed up'},
+    showRate:{label:tip('Show Rate','% of setter-booked appts where prospect showed.'),value:showRate+'%',color:showRate>=40?'var(--gn)':showRate>=25?'var(--yl)':'var(--rd)',detail:totalShowed+'/'+totalAppts},
+    totalCalls:{label:tip('Total Calls','Outbound phone calls (EOD col: Phone Calls).'),value:totalCalls>0?totalCalls.toLocaleString():'0',color:'#06b6d4',detail:'From EOD logs'},
+    connects:{label:tip('Connects','Outbound connects (EOD col: Outbound Connects).'),value:totalConnects.toLocaleString(),color:'var(--gn)',detail:totalCalls>0?connectRate+'% connect rate':'—'},
+    connectRate:{label:tip('Connect Rate','Connects ÷ Calls × 100.'),value:totalCalls>0?connectRate+'%':'—',color:connectRate>=15?'var(--gn)':connectRate>=10?'var(--yl)':'var(--rd)',detail:totalConnects+'/'+totalCalls+' calls'},
+    sets:{label:tip('Outbound Sets','Appts set from outbound (EOD col: Outbound Sets).'),value:totalSets,color:'#4ade80',detail:totalConnects>0?setRate+'% set rate':'—'},
+    setRate:{label:tip('Set Rate','Connects → Sets.'),value:totalConnects>0?setRate+'%':'—',color:setRate>=20?'var(--gn)':setRate>=10?'var(--yl)':'var(--rd)',detail:Math.round(totalSets)+'/'+totalConnects+' connects'},
+    callsPerSet:{label:tip('Calls/Set','Avg dials to book one appointment.'),value:totalSets>0?callsPerSet:'—',color:'#06b6d4',detail:'Efficiency'},
+    setShowRate:{label:tip('Set Show Rate','% of outbound sets that showed (EOD).'),value:totalSets>0?setShowRate+'%':'—',color:setShowRate>=40?'var(--gn)':setShowRate>=25?'var(--yl)':'var(--rd)',detail:totalShownFromSets+'/'+Math.round(totalSets)+' sets'},
+  };
+  const activeASKPIs=JSON.parse(localStorage.getItem('activeASKPIs')||'null')||['totalAppts','demosHeld','showRate','totalCalls','connects','setRate'];
+  document.getElementById('apptSettingKPIs').innerHTML=activeASKPIs.filter(id=>kpiMap[id]).map(id=>{const k=kpiMap[id];return'<div class="kpi"><div class="label">'+k.label+'</div><div class="value" style="color:'+k.color+'">'+k.value+'</div><div class="detail">'+k.detail+'</div></div>';}).join('');
+  const repList=Object.entries(repStats).filter(([n,s])=>s.appts>0||s.calls>0).sort((a,b)=>(b[1].calls+b[1].appts)-(a[1].calls+a[1].appts));
+  let lbHTML='<div class="chart-card" style="margin-bottom:16px"><h3>\ud83c\udfc6 Rep Performance</h3><div class="table-wrap"><table><thead><tr><th>Rep</th><th>Calls</th><th>Connects</th><th>Connect %</th><th>Sets</th><th>Set %</th><th>Calls/Set</th><th>Setter Appts</th><th>Showed</th><th>Show Rate</th></tr></thead><tbody>';
+  repList.forEach(([rep,s])=>{
+    const sr=s.appts>0?(s.showed/s.appts*100).toFixed(1):0;
+    const cr=s.calls>0?(s.connects/s.calls*100).toFixed(1):0;
+    const str=s.connects>0?(s.sets/s.connects*100).toFixed(1):0;
+    const cps=s.sets>0?(s.calls/s.sets).toFixed(1):'\u2014';
+    lbHTML+='<tr><td style="color:var(--t);font-weight:600">'+rep+'</td><td>'+(s.calls||'\u2014')+'</td><td>'+(s.connects||'\u2014')+'</td><td style="color:'+(cr>=15?'var(--gn)':'var(--tm)')+'">'+(s.calls>0?cr+'%':'\u2014')+'</td><td style="color:var(--gn);font-weight:700">'+(s.sets||'\u2014')+'</td><td>'+(s.connects>0?str+'%':'\u2014')+'</td><td>'+cps+'</td><td>'+s.appts+'</td><td>'+s.showed+'</td><td style="color:'+(sr>=40?'var(--gn)':sr>=25?'var(--yl)':'var(--rd)')+';font-weight:700">'+(s.appts>0?sr+'%':'\u2014')+'</td></tr>';
+  });
+  lbHTML+='</tbody></table></div></div>';
+  const maxCalls=Math.max(...Object.values(repStats).map(s=>s.calls),1);
+  let barHTML='<div class="chart-card" style="margin-bottom:16px"><h3>\ud83d\udcca Outbound Activity by Rep</h3>';
+  if(totalCalls>0){repList.forEach(([rep,s])=>{if(s.calls>0)barHTML+='<div class="bar-row"><div class="bar-label">'+rep+'</div><div class="bar-track"><div class="bar-fill bar-cyan" style="width:'+(s.calls/maxCalls*100).toFixed(0)+'%">'+s.calls+' calls \u00b7 '+s.connects+' connects \u00b7 '+s.sets+' sets</div></div></div>';});}
+  else{barHTML+='<p style="color:var(--tm);font-size:12px;padding:8px 0">Call data populated from EOD logs.</p>';}
+  barHTML+='</div>';
+  const selectorHTML='<div id="asKPISelector" style="display:none;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:16px 20px;margin-bottom:16px"><div style="font-size:12px;font-weight:600;color:#a78bfa;margin-bottom:10px">Choose KPIs (up to 6):</div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px">'+Object.entries({totalAppts:'Setter Appts',demosHeld:'Demos Held',showRate:'Show Rate',totalCalls:'Total Calls',connects:'Connects',connectRate:'Connect Rate',sets:'Outbound Sets',setRate:'Set Rate',callsPerSet:'Calls/Set',setShowRate:'Set Show Rate'}).map(function(e){return'<label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--tm);cursor:pointer"><input type="checkbox" value="'+e[0]+'" '+(activeASKPIs.includes(e[0])?'checked':'')+' style="accent-color:#a78bfa"> '+e[1]+'</label>';}).join('')+'</div><div style="margin-top:10px;text-align:right"><button onclick="saveASKPIs()" style="background:rgba(6,182,212,.15);color:#06b6d4;border:1px solid rgba(6,182,212,.3);padding:6px 16px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer">Apply</button></div></div>';
+  document.getElementById('apptSettingContent').innerHTML=selectorHTML+lbHTML+'<div class="analytics" style="grid-template-columns:1fr">'+barHTML+'</div>';
+}
 function renderRepAvail(){
   if(!D||!D.length){document.getElementById('repavailContent').innerHTML='<p style="color:var(--tm);padding:20px">No data.</p>';return;}
   
@@ -1565,12 +2167,12 @@ function renderRepAvail(){
   const repsFullToday=allReps.filter(rep=>(bookings[rep][todayKey]||0)>=MAX_DEMOS_PER_DAY).length;
 
   document.getElementById('repavailKPIs').innerHTML=`
-    <div class="kpi"><div class="label">${tip('Today Available','<strong>Today Available</strong><br>Open demo slots across all closers today.<br><code>(Closers × 6) - Booked Today</code>')}</div><div class="value" style="color:var(--gn)">${todayAvail}</div><div class="detail">of ${totalSlots} slots</div></div>
-    <div class="kpi"><div class="label">${tip('Today Booked','<strong>Today Booked</strong><br>Demos already on calendar for today.<br><code>COUNT(appointments today)</code>')}</div><div class="value" style="color:#3ea2e4">${todayBooked}</div><div class="detail">${utilizationToday}% utilized</div></div>
-    <div class="kpi"><div class="label">${tip('Reps Full','<strong>Reps at Capacity</strong><br>Closers with 6+ demos booked today.<br><code>COUNT(reps with ≥6 today)</code>')}</div><div class="value" style="color:${repsFullToday>0?'var(--rd)':'var(--gn)'}">${repsFullToday}</div><div class="detail">at 6/6 today</div></div>
-    <div class="kpi"><div class="label">${tip('Week Available','<strong>Week Available</strong><br>Open slots across next 7 days.<br><code>(Closers × 6 × 7) - Booked</code>')}</div><div class="value" style="color:var(--gn)">${weekAvail}</div><div class="detail">next 7 days</div></div>
+    <div class="kpi"><div class="label">${tip('Today Available','<strong>Today Available</strong><br>Open demo slots across all closers today.<br><code>(Closers × 6) - Booked Today</code><br>📎 <em>Source: Appointment Log</em>')}</div><div class="value" style="color:var(--gn)">${todayAvail}</div><div class="detail">of ${totalSlots} slots</div></div>
+    <div class="kpi"><div class="label">${tip('Today Booked','<strong>Today Booked</strong><br>Demos already on calendar for today.<br><code>COUNT(appointments today)</code><br>📎 <em>Source: Appointment Log</em>')}</div><div class="value" style="color:#3ea2e4">${todayBooked}</div><div class="detail">${utilizationToday}% utilized</div></div>
+    <div class="kpi"><div class="label">${tip('Reps Full','<strong>Reps at Capacity</strong><br>Closers with 6+ demos booked today.<br><code>COUNT(reps with ≥6 today)</code><br>📎 <em>Source: Appointment Log</em>')}</div><div class="value" style="color:${repsFullToday>0?'var(--rd)':'var(--gn)'}">${repsFullToday}</div><div class="detail">at 6/6 today</div></div>
+    <div class="kpi"><div class="label">${tip('Week Available','<strong>Week Available</strong><br>Open slots across next 7 days.<br><code>(Closers × 6 × 7) - Booked</code><br>📎 <em>Source: Appointment Log</em>')}</div><div class="value" style="color:var(--gn)">${weekAvail}</div><div class="detail">next 7 days</div></div>
     <div class="kpi"><div class="label">${tip('Active Closers','<strong>Active Closers</strong><br>Number of closers tracked (excludes setters).')}</div><div class="value" style="color:#8a62ec">${allReps.length}</div><div class="detail">Max ${MAX_DEMOS_PER_DAY}/day each</div></div>
-    <div class="kpi"><div class="label">${tip('Week Utilization','<strong>Week Utilization</strong><br>% of available slots filled this week.<br><code>Booked ÷ Total Slots × 100</code>')}</div><div class="value" style="color:${weekBooked/weekSlots*100>80?'var(--rd)':weekBooked/weekSlots*100>50?'var(--yl)':'var(--gn)'}">${weekSlots>0?(weekBooked/weekSlots*100).toFixed(0):0}%</div><div class="detail">${weekBooked} of ${weekSlots}</div></div>`;
+    <div class="kpi"><div class="label">${tip('Week Utilization','<strong>Week Utilization</strong><br>% of available slots filled this week.<br><code>Booked ÷ Total Slots × 100</code><br>📎 <em>Source: Appointment Log</em>')}</div><div class="value" style="color:${weekBooked/weekSlots*100>80?'var(--rd)':weekBooked/weekSlots*100>50?'var(--yl)':'var(--gn)'}">${weekSlots>0?(weekBooked/weekSlots*100).toFixed(0):0}%</div><div class="detail">${weekBooked} of ${weekSlots}</div></div>`;
 
   // Availability grid: reps × days
   const dayLabels=days.map(d=>{const opts={weekday:'short',month:'numeric',day:'numeric'};return d.toLocaleDateString('en-US',opts);});
@@ -1678,6 +2280,8 @@ function apptSortBy(col){
   else{apptSortCol=col;apptSortAsc=true;}
   renderApptLog();
 }
+function toggleApptWrap(){window._apptWrap=!window._apptWrap;renderApptLog();}
+
 function renderApptLog(){
   if(!D||!D.length){document.getElementById('apptlogContent').innerHTML='<p style="color:var(--tm);padding:20px">No data.</p>';return;}
   const selectedReps=getSelectedReps();
@@ -1696,8 +2300,9 @@ function renderApptLog(){
       return apptSortAsc?String(va).localeCompare(String(vb)):String(vb).localeCompare(String(va));
     });
   }
-  let linkBar='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><div class="row-count">'+data.length+' of '+D.length+' appointments</div><a href="https://docs.google.com/spreadsheets/d/1dHVNK3-YdnyBNoiVMcSuWJKy5oyWbIx6UdIa_w4XX_o" target="_blank" style="font-size:12px;color:#3ea2e4;text-decoration:none;padding:6px 12px;border:1px solid rgba(62,162,228,.2);border-radius:6px;background:rgba(62,162,228,.08)">Open in Sheets →</a></div>';
-  let tbl='<div class="table-wrap"><table><thead><tr>';
+  let linkBar='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><div class="row-count">'+data.length+' of '+D.length+' appointments</div><div style="display:flex;gap:8px;align-items:center"><button onclick="toggleApptWrap()" id="apptWrapBtn" style="font-size:12px;padding:6px 12px;border-radius:6px;border:1px solid rgba(139,92,246,.2);background:rgba(139,92,246,.08);color:#a78bfa;cursor:pointer">'+(window._apptWrap?'📐 Compact View':'📝 Expand Text')+'</button><a href="https://docs.google.com/spreadsheets/d/1dHVNK3-YdnyBNoiVMcSuWJKy5oyWbIx6UdIa_w4XX_o" target="_blank" style="font-size:12px;color:#3ea2e4;text-decoration:none;padding:6px 12px;border:1px solid rgba(62,162,228,.2);border-radius:6px;background:rgba(62,162,228,.08)">Open in Sheets →</a><button onclick="refreshView(\'appointments\')" style="font-size:12px;color:#4ade80;padding:6px 12px;border:1px solid rgba(34,197,94,.2);border-radius:6px;background:rgba(34,197,94,.08);cursor:pointer">🔄 Refresh This View</button></div></div>';
+  const wrapClass=window._apptWrap?'appt-wrap':'appt-truncate';
+  let tbl='<div class="table-wrap '+wrapClass+'"><table><thead><tr>';
   H.forEach((h,i)=>tbl+=`<th onclick="apptSortBy(${i})">${i===0?'Date & Time (ET)':h} ${apptSortCol===i?(apptSortAsc?'↑':'↓'):''}</th>`);
   tbl+='</tr></thead><tbody>';
   data.forEach(r=>{
@@ -1745,15 +2350,18 @@ function svgLine(data,w,h,color,label){
 const ALL_CHARTS=[
   {id:'showRate',label:'Show Rate Trend',default:true},
   {id:'apptVsDemos',label:'Appointments vs Demos',default:true},
-  {id:'avgDuration',label:'Avg Call Duration',default:true},
-  {id:'cs650',label:'CS 650+ Rate',default:true},
-  {id:'avgCS',label:'Avg Credit Score',default:false},
-  {id:'noShows',label:'No-Show Trend',default:false},
+  {id:'cashCollectedTrend',label:'Cash Collected Trend',default:true},
+  {id:'dealsClosed',label:'Deals Closed Trend',default:true},
+  {id:'earningsPerDemo',label:'Earnings/Demo Held',default:false},
+  {id:'avgDuration',label:'Avg Call Duration',default:false},
+  {id:'cs650',label:'CS 650+ Rate',default:false},
   {id:'closeRate',label:'Close Rate Trend',default:false},
+  {id:'totalAppts',label:'Total Appointments Booked',default:false},
+  {id:'demosHeld',label:'Demos Held Trend',default:false},
+  {id:'noShows',label:'No-Show Trend',default:false},
+  {id:'avgCS',label:'Avg Credit Score',default:false},
   {id:'triageRate',label:'Triage Rate Trend',default:false},
   {id:'frozenRate',label:'Frozen Credit Trend',default:false},
-  {id:'totalAppts',label:'Total Appointments',default:false},
-  {id:'demosHeld',label:'Demos Held Trend',default:false},
 ];
 
 function getActiveCharts(){
@@ -1803,6 +2411,56 @@ function saveCharts(){
   renderOverviewCharts();
 }
 
+
+async function refreshView(source){
+  const btn=event.target;
+  const origText=btn.textContent;
+  btn.textContent='⏳ Refreshing...';
+  btn.disabled=true;
+  try{
+    const resp=await fetch('/.netlify/functions/refresh-all');
+    const data=await resp.json();
+    if(data.error)throw new Error(data.error);
+    
+    if(source==='appointments'&&data.appointments){H=data.appointments.headers;D=data.appointments.rows;}
+    if(source==='commissions'&&data.commissions){COMM_H=data.commissions.headers;COMM_D=data.commissions.rows;}
+    if(source==='financing'&&data.financing){FIN_H=data.financing.headers;FIN_D=data.financing.rows;}
+    if(source==='eod'&&data.eod){EOD_H=data.eod.headers;EOD_D=data.eod.rows;}
+    
+    // Re-render current view
+    if(source==='appointments'){applyFilters();}
+    if(source==='commissions'){if(currentView==='commissions')renderCommissionsView();if(currentView==='revenue')renderCommissions();if(currentView==='reserves')renderReserves();}
+    if(source==='financing')renderFinancing();
+    if(source==='eod'){if(currentView==='eod')renderEOD();if(currentView==='eodcompliance')renderEODCompliance();if(currentView==='eodsubmissions')renderEODSubmissions();}
+    
+    btn.textContent='✅ Updated!';
+    setTimeout(()=>{btn.textContent=origText;btn.disabled=false;},2000);
+  }catch(e){
+    btn.textContent='❌ Error';
+    setTimeout(()=>{btn.textContent=origText;btn.disabled=false;},3000);
+  }
+}
+function toggleLBKPISelector(){
+  const el=document.getElementById('lbKPISelector');
+  if(el)el.style.display=el.style.display==='none'?'block':'none';
+  if(el&&el.style.display==='block'){
+    const active=JSON.parse(localStorage.getItem('activeLBKPIs')||'null')||['cashCollected','netRevenue','revPerDemo','revPerCall'];
+    const allOpts=['cashCollected','netRevenue','revPerDemo','revPerCall','processingFees','closeRateKPI','avgDealSizeKPI','totalDeals'];
+    const labels={cashCollected:'Cash Collected',netRevenue:'Net Revenue',revPerDemo:'Revenue/Demo',revPerCall:'Revenue/Booked Call',processingFees:'Processing Fees',closeRateKPI:'Close Rate',avgDealSizeKPI:'Avg Deal Size',totalDeals:'Total Deals'};
+    const optEl=document.getElementById('lbKPIOptions');
+    if(optEl)optEl.innerHTML=allOpts.map(id=>{
+      const isActive=active.includes(id);
+      return`<label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#888;cursor:pointer;padding:6px 8px;border-radius:6px;background:${isActive?'rgba(6,182,212,.1)':'rgba(255,255,255,.02)'};border:1px solid ${isActive?'rgba(6,182,212,.2)':'rgba(255,255,255,.06)'}"><input type="checkbox" value="${id}" ${isActive?'checked':''} onchange="if([...document.querySelectorAll('#lbKPIOptions input:checked')].length>4)this.checked=false;" style="accent-color:#06b6d4"> ${labels[id]}</label>`;
+    }).join('');
+  }
+}
+function saveLBKPIs(){
+  const checks=[...document.querySelectorAll('#lbKPIOptions input:checked')].map(c=>c.value).slice(0,4);
+  localStorage.setItem('activeLBKPIs',JSON.stringify(checks));
+  document.getElementById('lbKPISelector').style.display='none';
+  renderOverviewCharts();
+}
+
 function renderOverviewCharts(){
   // Compute chart data - use weekly buckets for ≤90 days, monthly for longer
   const range=getGlobalDateRange();
@@ -1825,27 +2483,61 @@ function renderOverviewCharts(){
     bucketData[key].total++;
     if(r[CI.status]==='Showed')bucketData[key].showed++;
     if(r[CI.status]==='No Show')bucketData[key].noshow++;
-    if(r[CI.outcome]&&r[CI.outcome].toLowerCase().includes('closed'))bucketData[key].closed++;
+    // closed count populated after bucket loop via COMM_D cross-reference
     if(r[CI.duration]&&parseFloat(r[CI.duration])>0)bucketData[key].durations.push(parseFloat(r[CI.duration]));
     if(r[CI.cs]&&parseFloat(r[CI.cs])>0)bucketData[key].scores.push(parseFloat(r[CI.cs]));
     if(!bucketData[key].sortKey||d.getTime()<bucketData[key].sortKey)bucketData[key].sortKey=d.getTime();
   });
+  // Cross-reference COMM_D to populate closed counts in buckets
+  if(typeof COMM_D!=='undefined'&&COMM_D.length){
+    const closedEmailSet=new Set(COMM_D.filter(r=>r[10]==='Collected').map(r=>(r[39]||'').toLowerCase().trim()).filter(Boolean));
+    filtered.forEach(r=>{
+      if(r[CI.status]!=='Showed'||!r[CI.email]||!closedEmailSet.has(r[CI.email].toLowerCase().trim()))return;
+      const d=parseDate(r[CI.date]);if(!d)return;
+      let key;
+      if(useWeekly){const day=d.getDay();const mon=new Date(d);mon.setDate(d.getDate()-(day===0?6:day-1));key=(mon.getMonth()+1)+'/'+mon.getDate();}
+      else{key=(d.getMonth()+1)+'/'+d.getFullYear();}
+      if(bucketData[key])bucketData[key].closed++;
+    });
+  }
   const months=Object.keys(bucketData).sort((a,b)=>bucketData[a].sortKey-bucketData[b].sortKey);
   const monthData=bucketData;
   const ml=m=>useWeekly?'Wk '+m:m.split('/')[0]+'/'+m.split('/')[1].slice(2);
 
+  // Also bucket AR/Commission data by same periods
+  const cashBuckets={};
+  if(typeof COMM_D!=='undefined'){
+    const filteredComm=filterByDateAndRep(COMM_D,4,13).filter(r=>(r[10]||'').includes('Collected')&&r[4]);
+    filteredComm.forEach(r=>{
+      const d=parseAnyDate(r[4]||'');
+      if(!d)return;
+      let key;
+      if(useWeekly){const day=d.getDay();const mon=new Date(d);mon.setDate(d.getDate()-(day===0?6:day-1));key=(mon.getMonth()+1)+'/'+mon.getDate();}
+      else{key=(d.getMonth()+1)+'/'+d.getFullYear();}
+      if(!cashBuckets[key])cashBuckets[key]={cash:0,net:0,deals:0,sortKey:d.getTime()};
+      cashBuckets[key].cash+=numVal(r[5]);
+      cashBuckets[key].net+=numVal(r[9]);
+      cashBuckets[key].deals++;
+      if(!cashBuckets[key].sortKey||d.getTime()<cashBuckets[key].sortKey)cashBuckets[key].sortKey=d.getTime();
+    });
+  }
+  const cashMonths=Object.keys(cashBuckets).sort((a,b)=>cashBuckets[a].sortKey-cashBuckets[b].sortKey);
+
   const chartContent={
     showRate:()=>'<div class="chart-card"><h3>Show Rate Trend</h3>'+svgLine(months.map(m=>({l:ml(m),v:monthData[m].total>0?(monthData[m].showed/monthData[m].total*100):0})),400,180,'#4ade80','sr')+'</div>',
     apptVsDemos:()=>'<div class="chart-card"><h3>Appointments vs Demos</h3>'+svgLine(months.map(m=>({l:ml(m),v:monthData[m].total})),400,140,'#3ea2e4','appt')+'<div style="margin-top:-5px">'+svgLine(months.map(m=>({l:ml(m),v:monthData[m].showed})),400,140,'#8a62ec','demo')+'</div><div style="font-size:10px;color:var(--td);margin-top:4px"><span style="color:#3ea2e4">● Appointments</span> &nbsp; <span style="color:#8a62ec">● Demos</span></div></div>',
+    cashCollectedTrend:()=>'<div class="chart-card"><h3>Cash Collected Trend</h3>'+svgLine(cashMonths.map(m=>({l:useWeekly?'Wk '+m:m.split('/')[0]+'/'+m.split('/')[1].slice(2),v:cashBuckets[m].cash})),400,180,'#4ade80','cash')+'</div>',
+    dealsClosed:()=>'<div class="chart-card"><h3>Deals Closed Trend</h3>'+svgLine(cashMonths.map(m=>({l:useWeekly?'Wk '+m:m.split('/')[0]+'/'+m.split('/')[1].slice(2),v:cashBuckets[m].deals})),400,180,'#3ea2e4','deals')+'</div>',
+    earningsPerDemo:()=>{const totalShowed2=filtered.filter(r=>r[CI.status]==='Showed').length;return'<div class="chart-card"><h3>Earnings/Demo Held Trend</h3>'+svgLine(months.map(m=>{const showed=monthData[m].showed;const cb=cashBuckets[m]||{cash:0};return{l:ml(m),v:showed>0?(cb.cash/showed):0};}),400,180,'#8a62ec','epd')+'</div>';},
     avgDuration:()=>'<div class="chart-card"><h3>Avg Call Duration</h3>'+svgLine(months.map(m=>({l:ml(m),v:monthData[m].durations.length>0?(monthData[m].durations.reduce((a,b)=>a+b,0)/monthData[m].durations.length):0})),400,180,'#f59e0b','dur')+'</div>',
     cs650:()=>'<div class="chart-card"><h3>CS 650+ Rate</h3>'+svgLine(months.map(m=>({l:ml(m),v:monthData[m].scores.length>0?(monthData[m].scores.filter(s=>s>=650).length/monthData[m].scores.length*100):0})),400,180,'#06b6d4','cs')+'</div>',
     avgCS:()=>'<div class="chart-card"><h3>Avg Credit Score</h3>'+svgLine(months.map(m=>({l:ml(m),v:monthData[m].scores.length>0?Math.round(monthData[m].scores.reduce((a,b)=>a+b,0)/monthData[m].scores.length):0})),400,180,'#f10cf6','avcs')+'</div>',
     noShows:()=>'<div class="chart-card"><h3>No-Show Trend</h3>'+svgLine(months.map(m=>({l:ml(m),v:monthData[m].noshow})),400,180,'#ef4444','ns')+'</div>',
     closeRate:()=>'<div class="chart-card"><h3>Close Rate Trend</h3>'+svgLine(months.map(m=>({l:ml(m),v:monthData[m].showed>0?(monthData[m].closed/monthData[m].showed*100):0})),400,180,'#8a62ec','cr')+'</div>',
-    triageRate:()=>'<div class="chart-card"><h3>Triage Rate Trend</h3>'+svgLine(months.map(m=>({l:ml(m),v:monthData[m].total>0?(monthData[m].total>0?0:0):0})),400,180,'#06b6d4','tr')+'</div>',
-    frozenRate:()=>'<div class="chart-card"><h3>Frozen Credit Trend</h3>'+svgLine(months.map(m=>{const sc=monthData[m].scores;return{l:ml(m),v:0};}),400,180,'#ef4444','fr')+'</div>',
-    totalAppts:()=>'<div class="chart-card"><h3>Total Appointments</h3>'+svgLine(months.map(m=>({l:ml(m),v:monthData[m].total})),400,180,'#3ea2e4','ta')+'</div>',
-    demosHeld:()=>'<div class="chart-card"><h3>Demos Held</h3>'+svgLine(months.map(m=>({l:ml(m),v:monthData[m].showed})),400,180,'#4ade80','dh')+'</div>',
+    triageRate:()=>'<div class="chart-card"><h3>Triage Rate Trend</h3>'+svgLine(months.map(m=>({l:ml(m),v:0})),400,180,'#06b6d4','tr')+'</div>',
+    frozenRate:()=>'<div class="chart-card"><h3>Frozen Credit Trend</h3>'+svgLine(months.map(m=>({l:ml(m),v:0})),400,180,'#ef4444','fr')+'</div>',
+    totalAppts:()=>'<div class="chart-card"><h3>Total Appointments Booked</h3>'+svgLine(months.map(m=>({l:ml(m),v:monthData[m].total})),400,180,'#3ea2e4','ta')+'</div>',
+    demosHeld:()=>'<div class="chart-card"><h3>Demos Held Trend</h3>'+svgLine(months.map(m=>({l:ml(m),v:monthData[m].showed})),400,180,'#4ade80','dh')+'</div>',
     repLeaderboard:()=>{
       const reps=[...new Set(filtered.map(r=>r[CI.rep]).filter(Boolean))];
       const stats=reps.map(rep=>{const rows=filtered.filter(r=>r[CI.rep]===rep);const showed=rows.filter(r=>r[CI.status]==='Showed').length;return{rep,total:rows.length,showed,rate:rows.length>0?(showed/rows.length*100):0};}).sort((a,b)=>b.rate-a.rate);
@@ -1857,13 +2549,86 @@ function renderOverviewCharts(){
 
   const active=getActiveCharts().filter(id=>id!=='repLeaderboard');
   const chartsHTML=active.map(id=>chartContent[id]?chartContent[id]():'').join('');
-  // Render leaderboard separately
+  // Render leaderboard with cross-referenced data (Appts + Cash from AR)
   const lbDiv=document.getElementById('overviewLeaderboard');
   if(lbDiv){
+    // Build cash lookup from COMM_D (Payments tab)
+    const cashByCloser={};
+    if(typeof COMM_D!=='undefined'){
+      const filteredComm=filterByDateAndRep(COMM_D,4,13).filter(r=>(r[10]||'').includes('Collected')&&r[4]);
+      filteredComm.forEach(r=>{
+        const closer=r[13]||'';
+        if(!closer)return;
+        const amt=parseFloat(String(r[5]||'0').replace(/[^0-9.\-]/g,''))||0;
+        const net=parseFloat(String(r[9]||'0').replace(/[^0-9.\-]/g,''))||0;
+        if(!cashByCloser[closer])cashByCloser[closer]={cash:0,net:0,deals:0};
+        cashByCloser[closer].cash+=amt;
+        cashByCloser[closer].net+=net;
+        cashByCloser[closer].deals++;
+      });
+    }
+    
     const reps2=[...new Set(filtered.map(r=>r[CI.rep]).filter(Boolean))];
-    const stats2=reps2.map(rep=>{const rows=filtered.filter(r=>r[CI.rep]===rep);const showed=rows.filter(r=>r[CI.status]==='Showed').length;const closed=rows.filter(r=>r[CI.outcome]&&r[CI.outcome].toLowerCase().includes('closed')).length;const durs=rows.filter(r=>r[CI.duration]&&parseFloat(r[CI.duration])>0).map(r=>parseFloat(r[CI.duration]));const avgD=durs.length?(durs.reduce((a,b)=>a+b,0)/durs.length).toFixed(0):0;return{rep,total:rows.length,showed,rate:rows.length>0?(showed/rows.length*100):0,closed,avgD};}).sort((a,b)=>b.rate-a.rate);
-    let lbT='<div style="margin-bottom:24px"><h3 style="font-size:16px;font-weight:700;color:var(--t);margin-bottom:12px">\ud83c\udfc6 Leaderboard</h3><div class="chart-card"><table style="font-size:12px;width:100%"><thead><tr><th>#</th><th>Rep</th><th>Appts</th><th>Demos</th><th>Show %</th><th>Closed</th><th>Avg Duration</th></tr></thead><tbody>';
-    stats2.forEach((s,i)=>{lbT+=`<tr><td style="color:#3ea2e4;font-weight:700">${i+1}</td><td style="color:var(--t);font-weight:600">${s.rep}</td><td>${s.total}</td><td>${s.showed}</td><td style="color:${s.rate>=40?'var(--gn)':s.rate>=25?'var(--yl)':'var(--rd)'};font-weight:600">${s.rate.toFixed(1)}%</td><td style="color:var(--gn);font-weight:600">${s.closed}</td><td>${s.avgD}m</td></tr>`;});
+    const stats2=reps2.map(rep=>{
+      const rows=filtered.filter(r=>r[CI.rep]===rep);
+      const showed=rows.filter(r=>r[CI.status]==='Showed').length;
+      let closed=0;
+      if(typeof COMM_D!=='undefined'&&COMM_D.length){
+        const closedEmails=new Set(COMM_D.filter(r=>r[10]==='Collected').map(r=>(r[39]||'').toLowerCase().trim()).filter(Boolean));
+        closed=rows.filter(r=>r[CI.status]==='Showed'&&r[CI.email]&&closedEmails.has(r[CI.email].toLowerCase().trim())).length;
+      } else {
+        closed=rows.filter(r=>r[CI.outcome]&&r[CI.outcome].toLowerCase().includes('closed')).length;
+      }
+      const offers=rows.filter(r=>r[CI.outcome]&&r[CI.outcome].trim()!=='').length;
+      const durs=rows.filter(r=>r[CI.duration]&&parseFloat(r[CI.duration])>0).map(r=>parseFloat(r[CI.duration]));
+      const avgD=durs.length?(durs.reduce((a,b)=>a+b,0)/durs.length).toFixed(0):0;
+      const cashData=cashByCloser[rep]||{cash:0,net:0,deals:0};
+      const epCall=showed>0?(cashData.cash/showed):0;
+      return{rep,total:rows.length,showed,rate:rows.length>0?(showed/rows.length*100):0,closed:cashData.deals||closed,offers,avgD,cash:cashData.cash,deals:cashData.deals,epCall};
+    }).sort((a,b)=>b.cash-a.cash);
+    
+    // Total cash KPI
+    const totalCashAll=Object.values(cashByCloser).reduce((a,v)=>a+v.cash,0);
+    const totalNetAll=Object.values(cashByCloser).reduce((a,v)=>a+v.net,0);
+    const totalDealsAll=Object.values(cashByCloser).reduce((a,v)=>a+v.deals,0);
+    
+    let lbT='<div style="margin-bottom:24px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><span style="font-size:18px;font-weight:800;color:var(--t)">Leaderboard</span><button onclick="toggleLBKPISelector()" style="background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.2);color:#a78bfa;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer">⚙️ Metrics</button></div>';
+    
+    // LB KPI Selector panel
+    lbT+='<div id="lbKPISelector" style="display:none;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:16px 20px;margin-bottom:16px"><div style="font-size:12px;font-weight:600;color:#a78bfa;margin-bottom:10px">Choose up to 4 metrics:</div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px" id="lbKPIOptions"></div><div style="margin-top:10px;text-align:right"><button onclick="saveLBKPIs()" style="background:rgba(6,182,212,.15);color:#06b6d4;border:1px solid rgba(6,182,212,.3);padding:6px 16px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer">Apply</button></div></div>';
+    
+    // Build all available LB KPI values
+    const totalShowed=filtered.filter(r=>r[CI.status]==='Showed').length;
+    const totalFees=totalCashAll-totalNetAll;
+    const feeRate=totalCashAll>0?(totalFees/totalCashAll*100).toFixed(1):0;
+    const closeRate=totalShowed>0?(totalDealsAll/totalShowed*100).toFixed(1):0;
+    const avgDealSize=totalDealsAll>0?(totalCashAll/totalDealsAll):0;
+    
+    const lbKPIMap={
+      cashCollected:{label:'Cash Collected',value:fmtMoney(totalCashAll),color:'var(--gn)',detail:totalDealsAll+' deals closed',tip:'<strong>Cash Collected</strong><br>Total gross cash from AR Log.<br><code>SUM(Payment Amount) where Collected</code>'},
+      netRevenue:{label:'Net Revenue',value:fmtMoney(totalNetAll),color:'#3ea2e4',detail:'After fees',tip:'<strong>Net Revenue</strong><br>After processing fees.<br><code>SUM(Net Amount)</code>'},
+      revPerDemo:{label:'Revenue/Demo',value:totalShowed>0?fmtMoney(totalCashAll/totalShowed):'—',color:'#8a62ec',detail:'Per demo held',tip:'<strong>Revenue per Demo</strong><br><code>Cash ÷ Demos Held</code>'},
+      revPerCall:{label:'Revenue/Booked Call',value:filtered.length>0?fmtMoney(totalCashAll/filtered.length):'—',color:'#f10cf6',detail:'Per appointment',tip:'<strong>Revenue per Booked Call</strong><br><code>Cash ÷ Total Booked Calls</code>'},
+      processingFees:{label:'Processing Fees',value:fmtMoney(totalFees),color:'var(--rd)',detail:feeRate+'% of gross',tip:'<strong>Processing Fees</strong><br>Lost to processors.<br><code>Cash - Net</code>'},
+      closeRateKPI:{label:'Close Rate',value:closeRate+'%',color:'#8a62ec',detail:totalDealsAll+'/'+totalShowed+' demos',tip:'<strong>Close Rate</strong><br>Deals closed ÷ demos held.<br><code>Closed ÷ Showed × 100</code>'},
+      avgDealSizeKPI:{label:'Avg Deal Size',value:fmtMoney(avgDealSize),color:'#3ea2e4',detail:'Per closed deal',tip:'<strong>Avg Deal Size</strong><br><code>Cash ÷ # Deals</code>'},
+      totalDeals:{label:'Total Deals',value:totalDealsAll,color:'var(--gn)',detail:'Closed & collected',tip:'<strong>Total Deals</strong><br>Payments collected from AR Log.'},
+    };
+    
+    const activeLBKPIs=JSON.parse(localStorage.getItem('activeLBKPIs')||'null')||['cashCollected','netRevenue','revPerDemo','revPerCall'];
+    
+    lbT+='<div class="kpi-row" style="grid-template-columns:repeat('+Math.min(activeLBKPIs.length,4)+',1fr);margin-bottom:16px">';
+    activeLBKPIs.slice(0,4).forEach(id=>{
+      const k=lbKPIMap[id];
+      if(!k)return;
+      lbT+=`<div class="kpi"><div class="label">${tip(k.label,k.tip)}</div><div class="value" style="color:${k.color}">${k.value}</div><div class="detail">${k.detail}</div></div>`;
+    });
+    lbT+='</div>';
+    
+    lbT+='<div class="chart-card"><table style="font-size:12px;width:100%"><thead><tr><th>#</th><th>Rep</th><th>Cash Collected</th><th>Appts on Calendar</th><th>Demos Held</th><th>Offers Presented</th><th>Deals Closed</th><th>Show %</th><th>Earnings/Demo Held</th><th>Avg Duration</th></tr></thead><tbody>';
+    stats2.forEach((s,i)=>{
+      lbT+=`<tr><td style="color:#3ea2e4;font-weight:700">${i+1}</td><td style="color:var(--t);font-weight:600">${s.rep}</td><td style="color:var(--gn);font-weight:700">${s.cash>0?fmtMoney(s.cash):'—'}</td><td>${s.total}</td><td>${s.showed}</td><td>${s.offers||'—'}</td><td style="color:var(--gn);font-weight:600">${s.closed||'—'}</td><td style="color:${s.rate>=40?'var(--gn)':s.rate>=25?'var(--yl)':'var(--rd)'};font-weight:600">${s.rate.toFixed(1)}%</td><td style="color:#8a62ec">${s.showed>0?fmtMoney(s.cash/s.showed):'—'}</td><td>${s.avgD}m</td></tr>`;
+    });
     lbT+='</tbody></table></div></div>';
     lbDiv.innerHTML=lbT;
   }
@@ -1877,8 +2642,7 @@ function renderOverviewCharts(){
 }
 
 
-init();
-renderOverviewCharts();
+try{init();renderOverviewCharts();}catch(e){console.error('INIT ERROR:',e);document.querySelector('.main').innerHTML='<div style="padding:40px;color:#f87171"><h2>Dashboard Error</h2><p>'+e.message+'</p><p>Line: '+(e.stack||'')+'</p><button onclick="location.reload(true)" style="margin-top:16px;padding:10px 20px;background:#3ea2e4;color:#fff;border:none;border-radius:8px;cursor:pointer">Reload</button></div>';}
 </script>
 </body>
 </html>
